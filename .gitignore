@@ -1,0 +1,10 @@
+.idea
+.history 
+node_modules
+temp
+# 忽略所有 vendor 内容
+vendor/*
+# 但保留 modules.txt
+!vendor/modules.txt
+
+*.exe*

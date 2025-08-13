@@ -1,0 +1,96 @@
+[中文](readme-zh.md) | [English](readme.md)
+## 项目介绍
+  #### 基本信息
+  一个基于beego的web系统，目标实现基础功能，方便快速项目二次开发。
+  1. 登录、权限管理
+  2. 菜单管理
+  3. 用户管理
+  4. 角色管理
+  5. 日志管理
+  6. 文件管理
+  7. 配置管理
+  8. 定时任务管理
+  9. 代码生成
+
+  #### 目录结构
+  ```
+  ├─apps                    # 应用
+  │  ├─admin                # 应用:管理后台
+  │  │  ├─controllers       # 控制器
+  │  │  ├─models            # 模型  
+  │  │  ├─services          # 业务逻辑    
+  │  │  └─views             # 视图    
+  │  ├─common               # 公共模块    
+  │  │  ├─controller        # base controller
+  │  │  ├─global            # 全局变量
+  │  │  ├─helper            # 助手函数
+  │  │  ├─middleware        # 中间件
+  │  │  └─models            # 公共模型    
+  │  └─index                # 应用:其他自定义应用
+  │      ├─controllers
+  │      ├─models
+  │      ├─services
+  │      └─views
+  ├─beego-docker            # 容器配置文件
+  ├─conf                    # 配置文件
+  ├─doc                     # 文档
+  ├─routers                 # 路由
+  ├─static                  # 静态资源
+  ├─temp                    # 临时文件
+  │  └─logs 
+  ├─tests                   # 测试
+  ```
+
+## 安装&运行
+  #### 环境
+  go 1.24.4
+  postgresql 17.5
+  redis 7.0.10
+
+  #### 克隆代码
+  ```
+  git clone https://github.com/wenzhizhong/wen-beego.git
+  ```
+
+  #### 安装bee 命令行工具
+  ```
+  go install github.com/beego/bee/v2@latest
+  ```
+
+  #### 设置环境变量
+  conf/app.yaml 默认配置就是开发环境，开发环境跳过这步骤。
+  测试环境，可以设置环境变量`BEEGO_RUNMODE`为 `test` ，正式环境设置变量`BEEGO_RUNMODE`为 `prod`
+  ```
+  # Linux/macOS
+  export BEEGO_RUNMODE=test
+  
+  # Windows
+  set BEEGO_RUNMODE=test
+  ```
+
+  #### 运行
+  启动postgresql, redis。
+
+  我这里是使用dockers，直接在终端启动，即可自动构建`postgresql``redis`容器服务：
+  ```
+  cd beego-docker
+  docker-compose up -d
+  ```
+
+  1. 开发环境，可以直接运行。
+  如果使用vender 模式，`bee run`命令可以再添加参数 `-vendor=true`。
+  ```
+  go mod tidy
+  bee run 
+  ```
+  2. 测试环境，`bee run`命令可以添加`-runmode=test`再运行
+  ```
+  go mod tidy
+  go mod vendor
+  bee run -runmode=test
+  ```
+  3. 生成环境，[生产环境部署](doc/生产环境部署.md)
+
+
+# 系统手册 
+  [系统手册](doc/系统手册.md)

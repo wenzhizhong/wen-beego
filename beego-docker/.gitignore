@@ -1,0 +1,15 @@
+# 忽略所有内容
+*
+
+# 保留目录结构（关键：允许 Git 进入目录）
+!*/
+
+# 保留根目录的指定文件
+!.gitignore
+!Dockerfile
+!docker-compose.yml
+
+# 保留嵌套文件（需确保父目录未被忽略）
+!redis/
+!redis/config/
+!redis/config/redis.conf

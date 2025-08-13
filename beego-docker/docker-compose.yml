@@ -1,0 +1,82 @@
+version: '3.8'
+
+networks:
+  nextcloud_network:
+    external: true
+
+volumes:
+  postgres_data2:  
+    name: postgres_data2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\postgres\data
+      
+  postgres_config2: 
+    name: postgres_config2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\postgres\config
+      
+  redis-data2:
+    name: redis-data2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\redis\data
+  redis-config2:
+    name: redis-config2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\redis\config
+  redis-log2:
+    name: redis-log2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\redis\log
+
+
+services:
+  c_postgresql:
+    image: bitnami/postgresql  # 使用轻量级的Alpine版本
+    container_name: c_dev_postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: public
+      TZ: Asia/Shanghai            # 时区设置
+    volumes:
+      - postgres_data2:/bitnami/postgresql/data:rw # 手动修改宿主机postgres_data2读写权限
+      - postgres_config2:/opt/bitnami/postgresql/conf
+    ports:
+      - "5432:5432"               # 端口映射
+    networks:
+      - nextcloud_network
+    restart: unless-stopped        # 自动重启策略
+
+
+  redis:
+    image: 'redis:7.0'
+    container_name: c_dev_redis70
+    init: true
+    environment:
+      CONTAINER_NAME: "c_dev_redis70"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - redis-data2:/data
+      # 注意这里需要先  /usr/local/app/redis/conf  新建redis.conf文件  redis.conf文件可从http://www.redis.cn/下载
+      - redis-config2:/usr/local/etc/redis
+      - redis-log2:/logs
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6379:6379'
+    networks:
+      - nextcloud_network

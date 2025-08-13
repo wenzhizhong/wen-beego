@@ -1,0 +1,45 @@
+default:
+  appname: WenBeego
+  httpport: 8013
+  runmode: dev
+  version: 1.0.0
+
+pgsql:
+  host: localhost
+  user: postgres
+  password: postgres
+  dbname: public
+  port: 5432
+  sslmode: disable
+  timezone: Asia/Shanghai
+pgsql_read:
+  read_1:
+    host: localhost
+    user: postgres
+    password: postgres
+    dbname: public
+    port: 5432
+    sslmode: disable
+    timezone: Asia/Shanghai
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  maxIdle: ""
+  timeout: 
+  dbNum: 0
+  key: ""
+  skipEmptyPrefix: ""
+
+log:
+  level: debug
+  path: temp/logs
+  maxlines: ""
+  maxsize: ""
+  daily: true
+  maxdays: 15
+  rotate: true
+  separate: emergency,alert,critical,error,warning,notice,info,debug
+branca:
+  key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
