@@ -2,11 +2,10 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"errors"
 
 	"github.com/hako/branca"
 )
-
-const defKey = "DdJPX4TcgGBhliONFebwjQu9Y2v1fpxs"
 
 // encode
 func BrancaEncode(needEncodeString string) (string, error) {
@@ -38,8 +37,8 @@ func getBranceKey() (string, error) {
 	}
 	key, ok := mapConfig["key"].(string)
 	if !ok {
-		key = defKey
-		global.Log.Error("获取密钥错误, 使用默认key")
+		global.Log.Error("请配置branca key")
+		return "", errors.New("请配置branca key")
 	}
 	return key, nil
 }
