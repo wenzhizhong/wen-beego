@@ -24,3 +24,11 @@ func GetConfig(section string) (map[string]interface{}, error) {
 	}
 	return tmpMapConfig, nil
 }
+
+func GetConfigDiy(section string) (interface{}, error) {
+	interfaceConfig, err := web.AppConfig.DIY(section)
+	if err != nil {
+		return nil, err
+	}
+	return interfaceConfig, nil
+}

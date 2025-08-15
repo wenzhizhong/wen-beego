@@ -31,10 +31,10 @@ func Output_ASCII_ArtisticCharacters() {
 	fmt.Println(logo + fmt.Sprintf("\nAppVersion: %s\n\n", version))
 }
 func AppVersion() (string, error) {
-	mapConfig, err := global.GetConfig("default")
+	tmpVersion, err := global.GetConfigDiy("version")
 	if err != nil {
 		return "", errors.New("获取版本号错误")
 	}
-	version := mapConfig["version"].(string)
+	version := tmpVersion.(string)
 	return version, nil
 }

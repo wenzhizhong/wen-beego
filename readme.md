@@ -93,5 +93,17 @@
   3. Build environment，[production environment deployment](doc/生产环境部署.md)
 
 
+## bee command adds instructions
+  #### 1. Generate API documentation
+  Tests have found that the bee generate docs command doesn't work with the current project's routing(),
+  so use swaggo/swag instead of generate documentation:routers/xxx_router.go
+  ```
+  go install github.com/swaggo/swag/cmd/swag@latest
+
+  swag init --output apps/swagger
+  ```
+  After the command is successfully executed, the swagger.json and swagger.yaml files are generated in the apps/swagger directory, and
+  the document access address is http://127.0.0.1:8031/swagger/index.html
+
 # System manual 
   [System manual](doc/系统手册.md)

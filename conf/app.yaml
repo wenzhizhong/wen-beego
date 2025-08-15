@@ -1,8 +1,8 @@
-default:
-  appname: WenBeego
-  httpport: 8013
-  runmode: dev
-  version: 1.0.0
+appname: WenBeego
+httpport: 8013
+runmode: dev
+version: 1.0.0
+EnableDocs: false
 
 pgsql:
   host: localhost

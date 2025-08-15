@@ -5,6 +5,8 @@ import (
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware"
 	_ "WenBeego/routers"
+	"fmt"
+	"strconv"
 
 	_ "github.com/beego/beego/v2/core/config/yaml"
 	beego "github.com/beego/beego/v2/server/web"
@@ -16,12 +18,18 @@ func main() {
 	beego.InsertFilter("/*", beego.BeforeRouter, new(middleware.AccessMiddleware).LimitTimes())
 	beego.AddViewPath("apps/index/views")
 	beego.AddViewPath("apps/admin/views")
+	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
+	if beego.BConfig.RunMode == "dev" {
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/swagger"] = "apps/swagger"
+	}
 
 	// 注册自己资源服务
 	initSourceService()
 
 	// 启动服务
-	beego.Run()
+	httpport, _ := beego.AppConfig.DIY("httpport")
+	beego.Run(":" + strconv.Itoa(httpport.(int)))
 }
 
 func initSourceService() {

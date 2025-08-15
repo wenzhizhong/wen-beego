@@ -91,6 +91,17 @@
   ```
   3. 生成环境，[生产环境部署](doc/生产环境部署.md)
 
+## bee命令补充说明
+  #### 1. 生成api文档
+  测试发现bee generate docs 命令不适用当前项目的路由（`routers/xxx_router.go`）的代码写法，
+  所以使用swaggo/swag代替生成文档：
+  ```
+  go install github.com/swaggo/swag/cmd/swag@latest
+
+  swag init --output apps/swagger
+  ```
+  命令运行成功后，会在apps/swagger目录下生成swagger.json和swagger.yaml文件，
+  文档访问地址：http://127.0.0.1:8031/swagger/index.html
 
 # 系统手册 
   [系统手册](doc/系统手册.md)
