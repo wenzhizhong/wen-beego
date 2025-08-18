@@ -2,31 +2,57 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"encoding/json"
 	"errors"
 
 	"github.com/hako/branca"
 )
 
+type BrancaData struct {
+	Sub   string `json:"sub" `  // 用户ID（Subject用户主体）
+	Exp   int64  `json:"exp"`   // 过期时间（Unix 时间戳）
+	Iat   int64  `json:"iat"`   // 签发时间（可省略，Header 中已包含时间戳）
+	Iss   string `json:"iss"`   // 签发者 (Issuer)
+	Aud   string `json:"aud"`   // 接收者 (Audience)
+	Role  string `json:"role"`  // 自定义字段（用户角色）
+	Scope string `json:"scope"` // 自定义字段（权限范围）
+}
+
 // encode
-func BrancaEncode(needEncodeString string) (string, error) {
+func BrancaEncode(data BrancaData) (string, error) {
 	key, err := getBranceKey()
 	if err != nil {
 		return "", err
 	}
 
+	needEncodeString, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
 	brancaObj := branca.NewBranca(key)
-	return brancaObj.EncodeToString(needEncodeString)
+	return brancaObj.EncodeToString(string(needEncodeString))
 }
 
 // decode
-func BrancaDecode(needDecodeString string) (string, error) {
+func BrancaDecode(needDecodeString string) (BrancaData, error) {
 	key, err := getBranceKey()
 	if err != nil {
-		return "", err
+		return BrancaData{}, err
 	}
 
 	brancaObj := branca.NewBranca(key)
-	return brancaObj.DecodeToString(needDecodeString)
+	dataStr, err := brancaObj.DecodeToString(needDecodeString)
+	if err != nil {
+		return BrancaData{}, err
+	}
+
+	data := BrancaData{}
+	err = json.Unmarshal([]byte(dataStr), &data)
+	if err != nil {
+		return BrancaData{}, err
+	}
+	return data, nil
 }
 
 // Brance key

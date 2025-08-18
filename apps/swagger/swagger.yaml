@@ -1,4 +1,24 @@
 definitions:
+  dto.LoginDto:
+    properties:
+      authCode:
+        example: "1234"
+        type: string
+      authCodeType:
+        example: captcha
+        type: string
+      password:
+        example: "123456"
+        maxLength: 20
+        minLength: 6
+        type: string
+      phone:
+        example: "15912345678"
+        type: string
+    required:
+    - password
+    - phone
+    type: object
   helper.Response:
     properties:
       code:
@@ -10,25 +30,51 @@ definitions:
 info:
   contact: {}
 paths:
-  /accounts/{id}:
-    get:
+  /admin/auth/login:
+    post:
       consumes:
       - application/json
-      description: get string by ID
+      description: admin用户登录
       parameters:
-      - description: Account ID
-        in: path
-        name: id
+      - description: 登录参数
+        in: body
+        name: data
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/dto.LoginDto'
       produces:
       - application/json
       responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/helper.Response'
         "200":
           description: OK
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Show an account
+      summary: 登录
       tags:
-      - accounts
+      - admin
+  /admin/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: admin退出登录
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 退出登录
+      tags:
+      - admin
 swagger: "2.0"

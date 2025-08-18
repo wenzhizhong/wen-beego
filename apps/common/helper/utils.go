@@ -3,6 +3,7 @@ package helper
 import (
 	"errors"
 	"fmt"
+	"regexp"
 )
 
 // interface{} 转 map[string]interface{}
@@ -28,4 +29,8 @@ func MapInterface2MapString(i map[string]interface{}) (map[string]string, error)
 		}
 	}
 	return returnMap, nil
+}
+
+func CheckCellPhone(phone string) bool {
+	return regexp.MustCompile(`^1[3-9]\d{8}$`).MatchString(phone)
 }

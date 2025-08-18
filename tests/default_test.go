@@ -1,8 +1,9 @@
-package test
+package tests
 
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -11,6 +12,7 @@ import (
 
 	_ "WenBeego/routers"
 
+	_ "github.com/beego/beego/v2/core/config/yaml"
 	beego "github.com/beego/beego/v2/server/web"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -19,6 +21,12 @@ func init() {
 	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
 	beego.TestBeegoInit(apppath)
+
+	_ = beego.LoadAppConfig("yaml", "conf/app.yaml")
+	// beego.TestBeegoInit(apppath)
+	path := filepath.Join(apppath, "conf", "app.yaml")
+	os.Chdir(apppath)
+	beego.InitBeegoBeforeTest(path)
 }
 
 // TestBeego is a sample to run an endpoint test

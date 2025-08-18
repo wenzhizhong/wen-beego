@@ -11,11 +11,14 @@
   7. Configuration management
   8. Scheduled task management
   9. Code generation
+  If the business model is B2C (pure self support: enterprise ->consumer), use the admin_org module,
+  If the business model is B2B2C (platform mode: platform ->(merchant ->consumer)), use the admin_sys module
 
   #### Directory structure
   ```
   ├─apps                    # Applications
-  │  ├─admin                # Applications: Admin
+  │  ├─admin_org            # Application: merchant management
+  │  ├─admin_sys            # Application: platform management
   │  │  ├─controllers       # Controllers
   │  │  ├─models            # Models   
   │  │  ├─services          # Business logic    
@@ -83,6 +86,7 @@
   ```
   go mod tidy
   bee run 
+  # bee dlv -port 8013 # vscode debug
   ```
   2. test environment, commands can be added and then runbee run-runmode=test
   ```

@@ -3,6 +3,7 @@ httpport: 8013
 runmode: prod
 version: 1.0.0
 EnableDocs: false
+copyrequestbody: true
 
 pgsql:
   host: localhost

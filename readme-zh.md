@@ -11,11 +11,14 @@
   7. 配置管理
   8. 定时任务管理
   9. 代码生成
+  如果经营模式是B2C (纯自营:企业->消费者)，使用admin_org模块即可，
+  如果经营模式是B2B2C (平台模式:平台->(商户->消费者))，使用admin_sys模块即可
 
   #### 目录结构
   ```
   ├─apps                    # 应用
-  │  ├─admin                # 应用:管理后台
+  │  ├─admin_org            # 应用:商户管理后台
+  │  ├─admin_sys            # 应用:平台管理后台
   │  │  ├─controllers       # 控制器
   │  │  ├─models            # 模型  
   │  │  ├─services          # 业务逻辑    
@@ -82,6 +85,7 @@
   ```
   go mod tidy
   bee run 
+  # bee dlv -port 8013 # vscode debug
   ```
   2. 测试环境，`bee run`命令可以添加`-runmode=test`再运行
   ```

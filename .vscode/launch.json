@@ -26,16 +26,17 @@
       "processName": "wen-beego.exe"  // Windows
       // "processName": "wen-beego"   // Linux/macOS
     },
-    // {
-    //   "name": "Remote Debug Beego App",
-    //   "type": "go",
-    //   "request": "attach",
-    //   "mode": "remote",
-    //   "remotePath": "/home/user/projects/wen-beego",
-    //   "port": 2345,
-    //   "host": "192.168.1.100",
-    //   "showLog": true,
-    //   "trace": "verbose"
-    // }
+    {
+      //终端运行 bee dlv -port 8013
+      "name": "Bee dlv Debug Beego App",
+      "type": "go",
+      "request": "attach",
+      "mode": "remote",
+      "remotePath": "${workspaceFolder}",
+      "port": 8013,
+      "host": "127.0.0.1",
+      "showLog": true,
+      "trace": "verbose"
+    }
   ]
 }

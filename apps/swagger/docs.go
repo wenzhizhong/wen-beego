@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/accounts/{id}": {
-            "get": {
-                "description": "get string by ID",
+        "/admin/auth/login": {
+            "post": {
+                "description": "admin用户登录",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,19 +25,61 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "accounts"
+                    "admin"
                 ],
-                "summary": "Show an account",
+                "summary": "登录",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Account ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "登录参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginDto"
+                        }
                     }
                 ],
                 "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "admin退出登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "退出登录",
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    },
                     "200": {
                         "description": "OK",
                         "schema": {
@@ -49,6 +91,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.LoginDto": {
+            "type": "object",
+            "required": [
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "authCode": {
+                    "type": "string",
+                    "example": "1234"
+                },
+                "authCodeType": {
+                    "type": "string",
+                    "example": "captcha"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 6,
+                    "example": "123456"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "15912345678"
+                }
+            }
+        },
         "helper.Response": {
             "type": "object",
             "properties": {

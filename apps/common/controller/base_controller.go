@@ -19,6 +19,7 @@ func (c *BaseController) Prepare() {
 		c.ModuleName = "index"
 	}
 	// 设置视图路径
+	c.TplExt = "html"
 	c.ViewPath = "apps/" + c.ModuleName + "/views"
 }
 
