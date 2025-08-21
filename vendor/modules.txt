@@ -41,6 +41,11 @@ github.com/go-openapi/spec
 # github.com/go-openapi/swag v0.23.1
 ## explicit; go 1.20
 github.com/go-openapi/swag
+# github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+## explicit
+github.com/golang/freetype
+github.com/golang/freetype/raster
+github.com/golang/freetype/truetype
 # github.com/gomodule/redigo v2.0.0+incompatible
 ## explicit
 github.com/gomodule/redigo/internal
@@ -99,6 +104,9 @@ github.com/mailru/easyjson/jwriter
 # github.com/mitchellh/mapstructure v1.5.0
 ## explicit; go 1.14
 github.com/mitchellh/mapstructure
+# github.com/mojocn/base64Captcha v1.3.8
+## explicit; go 1.16
+github.com/mojocn/base64Captcha
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 ## explicit
 github.com/munnerz/goautoneg
@@ -155,6 +163,10 @@ golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/pbkdf2
+# golang.org/x/image v0.30.0
+## explicit; go 1.23.0
+golang.org/x/image/font
+golang.org/x/image/math/fixed
 # golang.org/x/mod v0.27.0
 ## explicit; go 1.23.0
 golang.org/x/mod/internal/lazyregexp

@@ -33,7 +33,7 @@ func (s *Auth) checkLoginDto(data *dto.LoginDto) error {
 	data.Phone = strings.TrimSpace(data.Phone)
 	data.Password = strings.TrimSpace(data.Password)
 
-	if !helper.CheckCellPhone(data.Phone) {
+	if !helper.IsCellPhone(data.Phone) {
 		return errors.New("手机号码格式错误")
 	}
 
@@ -52,7 +52,7 @@ func (s *Auth) checkRegisterDto(data dto.RegisterDto) error {
 		return err
 	}
 
-	if !helper.CheckCellPhone(data.Phone) {
+	if !helper.IsCellPhone(data.Phone) {
 		return errors.New("手机号码格式错误")
 	}
 

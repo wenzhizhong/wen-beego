@@ -25,3 +25,12 @@ func TestValidatePassword(t *testing.T) {
 	fmt.Println("123cDEFGHI< 输出", helper.ValidatePassword("123cDEFGHI<"))
 
 }
+
+func TestGetCapture(t *testing.T) {
+	id, b64s, answer, err := helper.GetCaptcha("string")
+	fmt.Printf("id:%s\nb64s:%s\nanswer:%s\nerr:%v\n", id, b64s, answer, err)
+}
+
+func TestVeriryCapture(t *testing.T) {
+	fmt.Println(helper.VerifyCaptcha("string", "htDcENyykTRc1NH6x23y", "7650"))
+}

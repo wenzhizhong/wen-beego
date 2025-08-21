@@ -3,6 +3,7 @@ package auth
 import (
 	// beego "github.com/beego/beego/v2/server/web"
 
+	"WenBeego/apps/admin_sys/services"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/helper"
 
@@ -12,6 +13,7 @@ import (
 type AuthController struct {
 	// beego.Controller
 	commonControllers.AdminBaseController
+	AuthService services.Auth
 }
 
 // 登录
@@ -31,9 +33,15 @@ func (c *AuthController) Login() {
 		c.ServeJSON()
 		return
 	}
-	// TODO
 
-	c.Data["json"] = helper.Response{Code: 200, Message: "登录成功"}
+	data, err := c.AuthService.Login(loginDto)
+	if err != nil {
+		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.ServeJSON()
+		return
+	}
+
+	c.Data["json"] = helper.Response{Code: 200, Message: "登录成功", Data: data}
 	c.ServeJSON()
 }
 
