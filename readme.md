@@ -12,13 +12,13 @@
   8. Scheduled task management
   9. Code generation
   If the business model is B2C (pure self support: enterprise ->consumer), use the admin_org module,
-  If the business model is B2B2C (platform mode: platform ->(merchant ->consumer)), use the admin_sys module
+  If the business model is B2B2C (platform mode: platform ->(merchant ->consumer)), use the admin_plat module
 
   #### Directory structure
   ```
   ├─apps                    # Applications
   │  ├─admin_org            # Application: merchant management
-  │  ├─admin_sys            # Application: platform management
+  │  ├─admin_plat            # Application: platform management
   │  │  ├─controllers       # Controllers
   │  │  ├─models            # Models   
   │  │  ├─services          # Business logic    

@@ -48,13 +48,16 @@ services:
   c_postgresql:
     image: bitnami/postgresql  # 使用轻量级的Alpine版本
     container_name: c_dev_postgresql
+    user: "0:0" 
+    privileged: true
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: public
       TZ: Asia/Shanghai            # 时区设置
+      TZ1: Asia/Shanghai
     volumes:
-      - postgres_data2:/bitnami/postgresql/data:rw # 手动修改宿主机postgres_data2读写权限
+      - postgres_data2:/bitnami/postgresql/data
       - postgres_config2:/opt/bitnami/postgresql/conf
     ports:
       - "5432:5432"               # 端口映射

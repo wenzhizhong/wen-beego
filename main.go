@@ -17,7 +17,7 @@ func main() {
 	_ = beego.LoadAppConfig("yaml", "conf/app.yaml")
 	beego.InsertFilter("/*", beego.BeforeRouter, new(middleware.AccessMiddleware).LimitTimes())
 	beego.AddViewPath("apps/index/views")
-	beego.AddViewPath("apps/admin_sys/views")
+	beego.AddViewPath("apps/admin_plat/views")
 	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
 	if beego.BConfig.RunMode == "dev" {
 		beego.BConfig.WebConfig.DirectoryIndex = true

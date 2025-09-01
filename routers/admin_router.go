@@ -1,7 +1,7 @@
 package routers
 
 import (
-	adminSysAuth "WenBeego/apps/admin_sys/controllers/auth"
+	adminSysAuth "WenBeego/apps/admin_plat/controllers/auth"
 	"WenBeego/apps/common/middleware"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -10,18 +10,18 @@ import (
 
 // 白名单api
 var WhiteApiList = []string{
-	"/admin_sys/auth/login",
+	"/admin_plat/auth/login",
 }
 
 // 登录后基础api
 var AuthApiList = []string{
-	"/admin_sys/auth/logout",
-	"/admin_sys/auth/getUserInfo",
-	"/admin_sys/auth/getPermissionList",
+	"/admin_plat/auth/logout",
+	"/admin_plat/auth/getUserInfo",
+	"/admin_plat/auth/getPermissionList",
 }
 
 func init() {
-	ns := beego.NewNamespace("/admin_sys",
+	ns := beego.NewNamespace("/admin_plat",
 		beego.NSCtrlPost("/auth/login", (*adminSysAuth.AuthController).Login),
 	)
 
@@ -33,7 +33,7 @@ func init() {
 	// ns.Filter("after", func(ctx *context.Context) {
 	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/admin_sys/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/admin_plat/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }

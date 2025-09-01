@@ -3,7 +3,7 @@ package auth
 import (
 	// beego "github.com/beego/beego/v2/server/web"
 
-	"WenBeego/apps/admin_sys/services"
+	"WenBeego/apps/admin_plat/services"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/helper"
 
