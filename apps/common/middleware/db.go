@@ -52,24 +52,24 @@ func initPgSql() error {
 	fmt.Println("init db done！")
 	return nil
 }
-func doInitPgSql(config map[string]string) (*sql.DB, error) {
+func doInitPgSql(config map[string]string) (*gorm.DB, error) {
 	database := &sql.DB{}
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s", config["host"], config["user"], config["password"], config["dbname"], config["port"], config["sslmode"], config["timezone"])
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return database, err
+		return db, err
 	}
 
 	database, err = db.DB()
 	if err != nil {
-		return database, err
+		return db, err
 	}
 	pingErr := database.Ping()
 	if pingErr != nil {
-		return database, err
+		return db, err
 	}
 
-	return database, nil
+	return db, nil
 }
 func initMySql() {
 }

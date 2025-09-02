@@ -15,7 +15,41 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/auth/login": {
+        "/admin_plat/auth/get-captcha": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取验证码",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "获取验证码",
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/auth/login": {
             "post": {
                 "description": "admin用户登录",
                 "consumes": [
@@ -55,7 +89,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/auth/logout": {
+        "/admin_plat/auth/logout": {
             "post": {
                 "security": [
                     {
@@ -101,6 +135,10 @@ const docTemplate = `{
                 "authCode": {
                     "type": "string",
                     "example": "1234"
+                },
+                "authCodeId": {
+                    "type": "string",
+                    "example": "J4HGcl1gCLIdPm6T"
                 },
                 "authCodeType": {
                     "type": "string",

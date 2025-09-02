@@ -4,6 +4,7 @@ runmode: dev
 version: 1.0.0
 EnableDocs: false
 copyrequestbody: true
+timezone: Asia/Shanghai
 
 pgsql:
   host: localhost
@@ -44,3 +45,5 @@ log:
   separate: emergency,alert,critical,error,warning,notice,info,debug
 branca:
   key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
+  exp: 604800
+  expRemark: 7*24*60*60

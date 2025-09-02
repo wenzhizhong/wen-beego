@@ -25,7 +25,7 @@ type AuthController struct {
 // @Param data body dto.LoginDto true "登录参数"
 // @Success      200  {object}  helper.Response
 // @Failure      0  {object}  helper.Response
-// @Router       /admin/auth/login [post]
+// @Router       /admin_plat/auth/login [post]
 func (c *AuthController) Login() {
 	loginDto, err := helper.GetReqBody[dto.LoginDto](c.Ctx)
 	if err != nil {
@@ -34,7 +34,7 @@ func (c *AuthController) Login() {
 		return
 	}
 
-	data, err := c.AuthService.Login(loginDto)
+	data, err := c.AuthService.Login(loginDto, c.ModuleName)
 	if err != nil {
 		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
 		c.ServeJSON()
@@ -53,8 +53,43 @@ func (c *AuthController) Login() {
 // @Produce      json
 // @Success      200  {object}  helper.Response
 // @Failure      0  {object}  helper.Response
-// @Router       /admin/auth/logout [post]
+// @Router       /admin_plat/auth/logout [post]
 // @Security     ApiKeyAuth
 func (c *AuthController) Logout() {
 
+}
+
+func (c *AuthController) Register() {
+}
+
+func (c *AuthController) ForgetPassword() {
+}
+func (c *AuthController) ResetPassword() {
+}
+
+func (c *AuthController) GetUserInfo() {
+}
+func (c *AuthController) UpdateUserInfo() {
+}
+
+// 获取验证码
+// @Summary      获取验证码
+// @Description  获取验证码
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  helper.Response
+// @Failure      0  {object}  helper.Response
+// @Router       /admin_plat/auth/get-captcha [get]
+// @Security     ApiKeyAuth
+func (c *AuthController) GetCatpcha() {
+	data, err := c.AuthService.GetCatpcha()
+	if err != nil {
+		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.ServeJSON()
+		return
+	}
+
+	c.Data["json"] = helper.Response{Code: 200, Message: "获取验证码成功", Data: data}
+	c.ServeJSON()
 }
