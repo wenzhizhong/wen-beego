@@ -35,5 +35,5 @@ type RegisterDto struct {
 type UserInfoDto struct {
 	models.User
 	models.UserProfile
-	Token string
+	Token string `json:"token"`
 }

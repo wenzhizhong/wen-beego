@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var minPwdLen = 8
@@ -53,7 +55,9 @@ func GetRandomPassword(length int) (string, error) {
 	})
 	return strings.Join(str, ""), nil
 }
-func ValidatePassword(password string) error {
+
+// 校验密码规则
+func CheckPasswordRule(password string) error {
 	// 校验长度
 	length := len(password)
 	if length < minPwdLen {
@@ -88,7 +92,7 @@ func ValidatePassword(password string) error {
 		return errors.New(errMsg + "！")
 	}
 	// 密码强度校验
-	err := validatePasswordSafe(password)
+	err := CheckPasswordRuleSafe(password)
 	if err != nil {
 		return err
 	}
@@ -97,7 +101,7 @@ func ValidatePassword(password string) error {
 }
 
 // 密码强度校验，顺序字符(相邻字符ascii相差1)超过5个，则返回弱密码错误
-func validatePasswordSafe(password string) error {
+func CheckPasswordRuleSafe(password string) error {
 	passwordByte := []byte(password)
 	passwordLen := len(passwordByte)
 
@@ -137,4 +141,19 @@ func validatePasswordSafe(password string) error {
 	}
 	return nil
 
+}
+
+// 生成加密密码
+func GenerateCryptPassword(password string) (cryptPassword string, err error) {
+	tmpCryptPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err == nil {
+		cryptPassword = string(tmpCryptPassword)
+	}
+	return
+}
+
+// 验证密码
+func CompareCryptPassword(password string, cryptPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(cryptPassword), []byte(password))
+	return err == nil
 }

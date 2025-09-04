@@ -11,6 +11,9 @@ import (
 // 白名单api
 var WhiteApiList = []string{
 	"/admin_plat/auth/login",
+	"/admin_plat/auth/register",
+	"/admin_plat/auth/forget-password",
+	"/admin_plat/auth/get-captcha",
 }
 
 // 登录后基础api
@@ -23,6 +26,7 @@ var AuthApiList = []string{
 func init() {
 	ns := beego.NewNamespace("/admin_plat",
 		beego.NSCtrlPost("/auth/login", (*adminSysAuth.AuthController).Login),
+		beego.NSCtrlGet("/auth/get-captcha", (*adminSysAuth.AuthController).GetCatpcha),
 	)
 
 	// 请求前、后处理

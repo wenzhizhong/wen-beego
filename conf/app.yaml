@@ -10,7 +10,7 @@ pgsql:
   host: localhost
   user: postgres
   password: postgres
-  dbname: public
+  dbname: postgres
   port: 5432
   sslmode: disable
   timezone: Asia/Shanghai
@@ -19,7 +19,7 @@ pgsql_read:
     host: localhost
     user: postgres
     password: postgres
-    dbname: public
+    dbname: postgres
     port: 5432
     sslmode: disable
     timezone: Asia/Shanghai

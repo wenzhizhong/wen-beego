@@ -27,7 +27,7 @@ func (s *CommonAuth) Login(data dto.LoginDto, moduleName string) (userInfo *dto.
 	}
 	userInfo, err2 := s.doLogin(data, moduleName)
 	if err2 != nil {
-		return nil, err
+		return nil, err2
 	}
 
 	return userInfo, nil
@@ -62,8 +62,12 @@ func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserInf
 		return nil, errors.New("获取用户异常")
 	}
 
-	if err := helper.ValidatePassword(data.Password); err != nil {
+	if err := helper.CheckPasswordRule(data.Password); err != nil {
 		return nil, err
+	}
+
+	if !helper.CompareCryptPassword(data.Password, user.Password) {
+		return nil, errors.New("账号或者密码错误")
 	}
 
 	userProfile, err := s.userProfile.GetById(user.Id)
@@ -85,7 +89,7 @@ func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserInf
 	brancaData.Sub = user.Id
 	brancaData.Role = moduleName
 	brancaData.Scope = moduleName
-	brancaData.Exp = helper.GetTimestamp() + exp.(int64)
+	brancaData.Exp = helper.GetTimestamp() + int64(exp.(int))
 	token, _ := helper.BrancaEncode(brancaData)
 
 	// userInfo := dto.UserInfoDto{User: user, UserProfile: userProfile}
@@ -136,7 +140,7 @@ func (s *CommonAuth) checkRegisterDto(data dto.RegisterDto) error {
 		return errors.New("手机号码格式错误")
 	}
 
-	if err := helper.ValidatePassword(data.Password); err != nil {
+	if err := helper.CheckPasswordRule(data.Password); err != nil {
 		return err
 	}
 	return nil
@@ -152,7 +156,12 @@ func (s *CommonAuth) checkAuthCode(authCode string, authCodeId string, authCodeT
 	}
 
 	switch authCodeType {
-	case "captcha":
+	case
+		dto.AuthCodeTypeDigit,
+		dto.AuthCodeTypeString,
+		dto.AuthCodeTypeChinese,
+		dto.AuthCodeTypeMath:
+
 		if authCode == "" {
 			return errors.New("验证码不能为空")
 		}
@@ -174,11 +183,14 @@ func (s *CommonAuth) checkAuthCode(authCode string, authCodeId string, authCodeT
 
 // 获取验证码
 func (s *CommonAuth) GetCatpcha(cpatchaType string) (data interface{}, err error) {
-	id, b64s, answer, err := helper.GetCaptcha(cpatchaType)
+	id, b64s, _, err := helper.GetCaptcha(cpatchaType)
 	data = map[string]interface{}{
-		"id":     id,
-		"b64s":   b64s,
-		"answer": answer,
+		"id":   id,
+		"b64s": b64s,
 	}
+	if err != nil {
+		return
+	}
+
 	return
 }

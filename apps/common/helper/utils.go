@@ -3,6 +3,7 @@ package helper
 import (
 	"WenBeego/apps/common/dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/middleware/captcha_store"
 	"errors"
 	"fmt"
 	"regexp"
@@ -38,7 +39,7 @@ func MapInterface2MapString(i map[string]interface{}) (map[string]string, error)
 
 // 判断手机号
 func IsCellPhone(phone string) bool {
-	return regexp.MustCompile(`^1[3-9]\d{8}$`).MatchString(phone)
+	return regexp.MustCompile(`^1[3-9]\d{9}$`).MatchString(phone)
 }
 
 // 判断邮箱
@@ -58,7 +59,9 @@ func GetCaptcha(cpatchaType string) (id string, b64s string, answer string, err 
 		return
 	}
 
-	catpcha := base64Captcha.NewCaptcha(driver, base64Captcha.DefaultMemStore)
+	store := captcha_store.Base64CaptchaRedisStore{}
+	store.Expiration = 300 * time.Second
+	catpcha := base64Captcha.NewCaptcha(driver, &store)
 	id, b64s, answer, err = catpcha.Generate()
 	return
 }
@@ -129,7 +132,8 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 
 // 校验验证码
 func VerifyCaptcha(cpatchaType string, id string, answer string) bool {
-	return base64Captcha.DefaultMemStore.Verify(id, answer, true)
+	store := captcha_store.Base64CaptchaRedisStore{}
+	return store.Verify(id, answer, true)
 }
 
 // 获取时间戳

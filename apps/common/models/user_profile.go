@@ -38,8 +38,8 @@ type UserProfile struct {
 	Deleted           bool           `json:"deleted" gorm:"not null;default:0;comment:是否删除"`
 }
 
-func (m *UserProfile) UserProfile() string {
-	return "user_profile"
+func (m *UserProfile) TableName() string {
+	return `user_profile`
 }
 
 func (m *UserProfile) GetById(id string) (UserProfile, error) {
