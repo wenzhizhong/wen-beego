@@ -2,13 +2,16 @@ package helper
 
 import (
 	"encoding/json"
+	"strings"
 
 	beecontext "github.com/beego/beego/v2/server/web/context"
 )
 
 // 获取请求的token
 func GetReqToken(ctx beecontext.Context) string {
-	return ctx.Request.Header.Get("Authorization")
+	token := ctx.Request.Header.Get("Authorization")
+	token = strings.TrimPrefix(token, "Bearer ")
+	return token
 }
 
 // 获取请求接口

@@ -3,7 +3,6 @@ package middleware
 import (
 	"WenBeego/apps/common/helper"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/beego/beego/v2/server/web"
@@ -16,10 +15,7 @@ func Auth(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		tmpAuthApiListMap := listToMap(*authApiList)
 
 		// 验证:白名单api
-		isWriteApi, err := inWhiteApiList(ctx, tmpWhiteApiListMap)
-		if err != nil {
-			return
-		}
+		isWriteApi := inWhiteApiList(ctx, tmpWhiteApiListMap)
 		if isWriteApi {
 			return
 		}
@@ -61,25 +57,15 @@ func listToMap(listData []string) map[string]bool {
 }
 
 // 验证:白名单api
-func inWhiteApiList(ctx *beecontext.Context, writeApiListMap map[string]bool) (bool, error) {
+func inWhiteApiList(ctx *beecontext.Context, writeApiListMap map[string]bool) bool {
 	url := helper.GetReqUrl(*ctx)
-	if writeApiListMap[url] {
-		return true, nil
-	}
-
-	jsonString := resposeStr(http.StatusUnauthorized, "请登录！", nil)
-	ctx.ResponseWriter.ResponseWriter.WriteHeader(http.StatusUnauthorized)
-	ctx.ResponseWriter.Write([]byte(jsonString))
-	return false, errors.New("请登录！")
+	return writeApiListMap[url]
 }
 
 // 验证:登录后基本api
 func inAuthApiList(ctx *beecontext.Context, authApiListMap map[string]bool) bool {
 	url := helper.GetReqUrl(*ctx)
-	if authApiListMap[url] {
-		return true
-	}
-	return false
+	return authApiListMap[url]
 }
 
 // 校验token
@@ -98,10 +84,7 @@ func checkToken(ctx *beecontext.Context) (helper.BrancaData, error) {
 // 校验登录后基本路由，通过则不校验权限
 func checkAuth(ctx *beecontext.Context, userId string, authApiListMap map[string]bool) bool {
 	hasBaseAuthApi := inAuthApiList(ctx, authApiListMap)
-	if hasBaseAuthApi {
-		return true
-	}
-	return false
+	return hasBaseAuthApi
 }
 
 // 检测用户是否有api权限

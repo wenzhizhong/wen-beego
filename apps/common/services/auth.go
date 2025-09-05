@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 )
 
@@ -90,7 +91,16 @@ func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserInf
 	brancaData.Role = moduleName
 	brancaData.Scope = moduleName
 	brancaData.Exp = helper.GetTimestamp() + int64(exp.(int))
-	token, _ := helper.BrancaEncode(brancaData)
+	token, err := helper.BrancaEncode(brancaData)
+	if err != nil {
+		global.Log.Error("生成token异常: %v", err)
+		return nil, errors.New("生成token异常")
+	}
+	refreshToken, err := uuid.NewV7()
+	if err != nil {
+		global.Log.Error("生成refreshToken异常: %v", err)
+		return nil, errors.New("生成refreshToken异常")
+	}
 
 	// userInfo := dto.UserInfoDto{User: user, UserProfile: userProfile}
 	// userInfo.Password = ""
@@ -102,7 +112,10 @@ func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserInf
 	userInfo.Phone = user.Phone[0:3] + "****" + user.Phone[7:11]
 	userInfo.Email = user.Email
 	userInfo.Avatar = userProfile.Avatar
-	userInfo.Token = token
+	userInfo.Expires = brancaData.Exp * 1000
+	userInfo.AccessToken = token
+	userInfo.RefreshToken = refreshToken.String()
+	userInfo.DefaultUnitId = user.DefaultUnitId
 
 	return &userInfo, nil
 }

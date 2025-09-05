@@ -3,7 +3,7 @@ package auth
 import (
 	// beego "github.com/beego/beego/v2/server/web"
 
-	"WenBeego/apps/admin_plat/services"
+	serviceAuth "WenBeego/apps/admin_plat/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/helper"
 
@@ -13,7 +13,7 @@ import (
 type AuthController struct {
 	// beego.Controller
 	commonControllers.AdminBaseController
-	AuthService services.Auth
+	AuthService serviceAuth.Auth
 }
 
 // 登录

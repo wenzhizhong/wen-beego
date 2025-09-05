@@ -35,5 +35,7 @@ type RegisterDto struct {
 type UserInfoDto struct {
 	models.User
 	models.UserProfile
-	Token string `json:"token"`
+	Expires      int64  `json:"expires"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }

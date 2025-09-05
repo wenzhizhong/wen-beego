@@ -41,6 +41,9 @@ github.com/go-openapi/spec
 # github.com/go-openapi/swag v0.23.1
 ## explicit; go 1.20
 github.com/go-openapi/swag
+# github.com/gofrs/uuid v4.4.0+incompatible
+## explicit
+github.com/gofrs/uuid
 # github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 ## explicit
 github.com/golang/freetype
@@ -50,6 +53,9 @@ github.com/golang/freetype/truetype
 ## explicit
 github.com/gomodule/redigo/internal
 github.com/gomodule/redigo/redis
+# github.com/google/uuid v1.6.0
+## explicit
+github.com/google/uuid
 # github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1
 ## explicit
 github.com/gopherjs/gopherjs/js

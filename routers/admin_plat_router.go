@@ -1,7 +1,8 @@
 package routers
 
 import (
-	adminSysAuth "WenBeego/apps/admin_plat/controllers/auth"
+	adminAuth "WenBeego/apps/admin_plat/controllers/auth"
+	adminPlat "WenBeego/apps/admin_plat/controllers/plat"
 	"WenBeego/apps/common/middleware"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -21,12 +22,17 @@ var AuthApiList = []string{
 	"/admin_plat/auth/logout",
 	"/admin_plat/auth/getUserInfo",
 	"/admin_plat/auth/getPermissionList",
+	"/admin_plat/auth/getPermissionList",
+	"/admin_plat/plat/change-unit",
+	"/admin_plat/plat/get-user-unit",
 }
 
 func init() {
 	ns := beego.NewNamespace("/admin_plat",
-		beego.NSCtrlPost("/auth/login", (*adminSysAuth.AuthController).Login),
-		beego.NSCtrlGet("/auth/get-captcha", (*adminSysAuth.AuthController).GetCatpcha),
+		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
+		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
+		beego.NSCtrlGet("/plat/change-unit", (*adminPlat.PlatController).ChangeUnit),
+		beego.NSCtrlGet("/plat/get-user-unit", (*adminPlat.PlatController).GetUserUnit),
 	)
 
 	// 请求前、后处理

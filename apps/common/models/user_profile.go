@@ -14,7 +14,7 @@ type UserProfile struct {
 	CardType          int            `json:"card_type" gorm:"type:int2;comment:1大陆身份证2港澳台身份证3护照4军官证5其它"`
 	CardNum           string         `json:"card_num" gorm:"size:100;comment:证件号码"`
 	CardImages        string         `json:"card_images" gorm:"size:1000;comment:证件照片"`
-	Sex               string         `json:"sex" gorm:"size:2;comment:性别:男，女"`
+	Gender            int            `json:"gender" gorm:"comment:性别:1男，2女"`
 	BirthDate         time.Time      `json:"birth_date" gorm:"type:date;comment:出生日期"`
 	Constellation     string         `json:"constellation" gorm:"size:50;comment:星座"`
 	Occupation        string         `json:"occupation" gorm:"size:50;comment:职业"`
