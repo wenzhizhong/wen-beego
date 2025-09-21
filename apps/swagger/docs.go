@@ -69,7 +69,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginDto"
+                            "$ref": "#/definitions/dtoAuth.LoginDto"
                         }
                     }
                 ],
@@ -125,7 +125,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.LoginDto": {
+        "dtoAuth.LoginDto": {
             "type": "object",
             "required": [
                 "password",

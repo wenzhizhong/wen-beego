@@ -1,8 +1,6 @@
 package models
 
 import (
-	"WenBeego/apps/common/global"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -40,13 +38,4 @@ type UserProfile struct {
 
 func (m *UserProfile) TableName() string {
 	return `user_profile`
-}
-
-func (m *UserProfile) GetById(id string) (UserProfile, error) {
-	user := UserProfile{}
-	if id == "" {
-		return user, errors.New("id不能为空")
-	}
-	result := global.GetReadDb().Where("id = ?", id).Take(&user)
-	return user, result.Error
 }

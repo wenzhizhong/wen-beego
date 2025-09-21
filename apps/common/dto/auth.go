@@ -1,8 +1,6 @@
 package dto
 
-import (
-	"WenBeego/apps/common/models"
-)
+import "WenBeego/apps/common/models"
 
 var AuthCodeTypeDigit = "captcha-digit"     // "数字验证码"
 var AuthCodeTypeString = "captcha-string"   // "字符验证码"
@@ -32,10 +30,16 @@ type RegisterDto struct {
 }
 
 // 用户信息
-type UserInfoDto struct {
-	models.User
-	models.UserProfile
-	Expires      int64  `json:"expires"`
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+type UserLoginInfoDto struct {
+	UserInfo struct {
+		models.User
+		models.UserProfile
+		Expires       int64    `json:"expires"`
+		AccessToken   string   `json:"accessToken"`
+		RefreshToken  string   `json:"refreshToken"`
+		DefaultUnitId string   `json:"default_unit_id"`
+		Roles         []string `json:"roles"`
+		Permissions   []string `json:"permissions"`
+	} `json:"userInfo"`
+	UnitInfo interface{} `json:"unitInfo"`
 }

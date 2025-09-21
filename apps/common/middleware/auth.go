@@ -9,7 +9,7 @@ import (
 	beecontext "github.com/beego/beego/v2/server/web/context"
 )
 
-func Auth(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
+func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 	return func(ctx *beecontext.Context) {
 		tmpWhiteApiListMap := listToMap(*whiteApiList)
 		tmpAuthApiListMap := listToMap(*authApiList)
@@ -21,14 +21,22 @@ func Auth(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		}
 
 		// 验证:认证token是否有效
-		brancaData, err := checkToken(ctx)
+		moduleName := helper.ParseModuleFromRoute(ctx)
+		brancaData, err := checkToken(ctx, moduleName)
 		if err != nil {
 			return
 		}
+
+		// 验证：用户状态
+		// TODO: 用户状态
+		// 验证：组织状态
+		// TODO: 组织状态
+
 		ctx.Input.SetData("userId", brancaData.Sub)
+		ctx.Input.SetData("unitId", brancaData.SubUnit)
 
 		// 验证:认证后基础api,通过则不校验权限
-		isValid := checkAuth(ctx, brancaData.Sub, tmpAuthApiListMap)
+		isValid := checkAuth(ctx, tmpAuthApiListMap)
 		if isValid {
 			return
 		}
@@ -69,9 +77,9 @@ func inAuthApiList(ctx *beecontext.Context, authApiListMap map[string]bool) bool
 }
 
 // 校验token
-func checkToken(ctx *beecontext.Context) (helper.BrancaData, error) {
+func checkToken(ctx *beecontext.Context, moduleName string) (helper.BrancaData, error) {
 	token := helper.GetReqToken(*ctx)
-	brancaData, err := helper.BrancaDecode(token)
+	brancaData, err := helper.BrancaDecode(token, moduleName)
 	if err != nil {
 		jsonString := resposeStr(http.StatusUnauthorized, err.Error(), nil)
 		ctx.ResponseWriter.ResponseWriter.WriteHeader(http.StatusUnauthorized)
@@ -82,7 +90,7 @@ func checkToken(ctx *beecontext.Context) (helper.BrancaData, error) {
 }
 
 // 校验登录后基本路由，通过则不校验权限
-func checkAuth(ctx *beecontext.Context, userId string, authApiListMap map[string]bool) bool {
+func checkAuth(ctx *beecontext.Context, authApiListMap map[string]bool) bool {
 	hasBaseAuthApi := inAuthApiList(ctx, authApiListMap)
 	return hasBaseAuthApi
 }

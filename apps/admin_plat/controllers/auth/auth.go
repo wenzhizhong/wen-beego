@@ -5,9 +5,8 @@ import (
 
 	serviceAuth "WenBeego/apps/admin_plat/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/helper"
-
 	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/helper"
 )
 
 type AuthController struct {

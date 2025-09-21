@@ -2,6 +2,7 @@ package routers
 
 import (
 	adminAuth "WenBeego/apps/admin_plat/controllers/auth"
+	adminMenu "WenBeego/apps/admin_plat/controllers/menu"
 	adminPlat "WenBeego/apps/admin_plat/controllers/plat"
 	"WenBeego/apps/common/middleware"
 
@@ -25,20 +26,22 @@ var AuthApiList = []string{
 	"/admin_plat/auth/getPermissionList",
 	"/admin_plat/plat/change-unit",
 	"/admin_plat/plat/get-user-unit",
+	"/admin_plat/menu/get-async-routes",
 }
 
 func init() {
 	ns := beego.NewNamespace("/admin_plat",
 		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
 		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
-		beego.NSCtrlGet("/plat/change-unit", (*adminPlat.PlatController).ChangeUnit),
-		beego.NSCtrlGet("/plat/get-user-unit", (*adminPlat.PlatController).GetUserUnit),
+		beego.NSCtrlPost("/plat/change-unit", (*adminPlat.PlatController).ChangeUnit),
+		beego.NSCtrlGet("/plat/get-user-unit-list", (*adminPlat.PlatController).GetUserUnitList),
+		beego.NSCtrlGet("/menu/get-async-routes", (*adminMenu.MenuController).GetAsyncRoutes),
 	)
 
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
 		(new(middleware.AccessMiddleware).RouterBefore())(ctx)
-		middleware.Auth(&WhiteApiList, &AuthApiList)(ctx)
+		middleware.AuthAdmin(&WhiteApiList, &AuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
 	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug

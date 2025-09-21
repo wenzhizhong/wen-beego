@@ -3,6 +3,7 @@ package plat
 import (
 	servicePlat "WenBeego/apps/admin_plat/services/plat"
 	commonControllers "WenBeego/apps/common/controller"
+	"WenBeego/apps/common/dto"
 	"WenBeego/apps/common/helper"
 	"fmt"
 )
@@ -21,17 +22,16 @@ type PlatController struct {
 // @Success 200 {object} helper.Response "返回结果"
 // @Router /admin_plat/plat/get-user-unit [get]
 // @Security ApiKeyAuth
-func (c *PlatController) GetUserUnit() {
-	fmt.Println("GetUserUnit", c.Ctx)
+func (c *PlatController) GetUserUnitList() {
 	userId := c.Ctx.Input.GetData("userId")
-	data, err := c.PlatService.GetUserUnit(userId.(string))
+	data, err := c.PlatService.GetUserUnitList(userId.(string))
 	if err != nil {
 		c.Data["json"] = helper.Response{Code: 500, Message: err.Error()}
 		c.ServeJSON()
 		return
 	}
 
-	c.Data["json"] = helper.Response{Code: 200, Message: "登录成功", Data: data}
+	c.Data["json"] = helper.Response{Code: 200, Message: "获取组织单位成功", Data: data}
 	c.ServeJSON()
 }
 
@@ -46,7 +46,20 @@ func (c *PlatController) GetUserUnit() {
 // @Security ApiKeyAuth
 func (c *PlatController) ChangeUnit() {
 	fmt.Println("ChangeUnit", c.Ctx)
+	userId := c.Ctx.Input.GetData("userId")
+	ChangeUnitDto, err := helper.GetReqBody[dto.ChangeUnitDto](c.Ctx)
+	if err != nil {
+		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.ServeJSON()
+		return
+	}
+	data, err := c.PlatService.ChangeUnit("admin_plat", userId.(string), ChangeUnitDto.Id)
+	if err != nil {
+		c.Data["json"] = helper.Response{Code: 500, Message: err.Error()}
+		c.ServeJSON()
+		return
+	}
 
-	c.Data["json"] = helper.Response{Code: 200, Message: "登录成功"}
+	c.Data["json"] = helper.Response{Code: 200, Message: "切换组织单位成功", Data: data}
 	c.ServeJSON()
 }

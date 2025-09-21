@@ -1,5 +1,5 @@
 definitions:
-  dto.LoginDto:
+  dtoAuth.LoginDto:
     properties:
       authCode:
         example: "1234"
@@ -65,7 +65,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dto.LoginDto'
+          $ref: '#/definitions/dtoAuth.LoginDto'
       produces:
       - application/json
       responses:

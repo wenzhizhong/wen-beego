@@ -11,8 +11,8 @@ type Mchnt struct {
 	Corporation string    `json:"corporation" gorm:"type:varchar(100);not null;comment:法人"`
 	License     string    `json:"license" gorm:"type:varchar(512);not null;default:'';comment:营业执照"`
 	Address     string    `json:"address" gorm:"type:varchar(255);default:'';comment:地址"`
-	Status      int32     `json:"status" gorm:"type:int4;not null;default:0;comment:0未审核，1审核通过，2审核不通过，3禁用"`
-	Deleted     *int32    `json:"deleted" gorm:"type:int4;default:0;comment:是否删除：0否1是"`
+	Status      int       `json:"status" gorm:"type:int4;not null;default:0;comment:0未审核，1审核通过，2审核不通过，3禁用"`
+	Deleted     int       `json:"deleted" gorm:"type:int4;default:0;comment:是否删除：0否1是"`
 	CreatedAt   time.Time `json:"created_at" gorm:"type:timestamp;default:CURRENT_TIMESTAMP;comment:创建时间"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间"`
 }

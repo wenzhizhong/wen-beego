@@ -1,8 +1,6 @@
 package models
 
 import (
-	"WenBeego/apps/common/global"
-	"errors"
 	"time"
 )
 
@@ -24,13 +22,4 @@ type MchntMenu struct {
 
 func (m *MchntMenu) TableName() string {
 	return `mchnt_menu`
-}
-
-func (m *MchntMenu) GetById(id string) (MchntMenu, error) {
-	menu := MchntMenu{}
-	if id == "" {
-		return menu, errors.New("id不能为空")
-	}
-	result := global.GetReadDb().Where("id = ?", id).Take(&menu)
-	return menu, result.Error
 }

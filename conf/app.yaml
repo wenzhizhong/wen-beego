@@ -44,6 +44,10 @@ log:
   rotate: true
   separate: emergency,alert,critical,error,warning,notice,info,debug
 branca:
-  key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
-  exp: 604800
-  expRemark: 7*24*60*60
+  admin_plat:
+    iss: wenBeegoAdminPlat
+    aud: wenBeegoAdminPlatUi
+    key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
+    exp: 604800
+    expRemark: 7*24*60*60
+  

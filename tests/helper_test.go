@@ -40,3 +40,21 @@ func TestIsPhone(t *testing.T) {
 	fmt.Printf("is phone No. %s:\n", phomeNo)
 	fmt.Println(helper.IsCellPhone(phomeNo))
 }
+
+func TestGetMapKeys(t *testing.T) {
+	m := map[string]string{"a": "1", "b": "2", "c": "3"}
+	fmt.Println(m)
+	fmt.Println(helper.GetMapKeys(m))
+
+	m1 := map[int]string{1: "1", 2: "2", 3: "3"}
+	fmt.Println(m1)
+	fmt.Println(helper.GetMapKeys(m1))
+
+	m2 := map[string]interface{}{"a": "1", "b": "2", "c": "3"}
+	fmt.Println(m2)
+	fmt.Println(helper.GetMapKeys(m2))
+
+	m3 := map[string]map[string]interface{}{"a": {"aa": "1", "bb": "2", "cc": "3"}, "b": {"aa": "1", "bb": "2", "cc": "3"}, "c": {"aa": "1", "bb": "2", "cc": "3"}}
+	fmt.Println(m3)
+	fmt.Println(helper.GetMapKeys(m3))
+}

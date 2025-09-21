@@ -58,7 +58,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginDto"
+                            "$ref": "#/definitions/dtoAuth.LoginDto"
                         }
                     }
                 ],
@@ -114,7 +114,7 @@
         }
     },
     "definitions": {
-        "dto.LoginDto": {
+        "dtoAuth.LoginDto": {
             "type": "object",
             "required": [
                 "password",

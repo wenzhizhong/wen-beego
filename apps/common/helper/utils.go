@@ -1,14 +1,19 @@
 package helper
 
 import (
-	"WenBeego/apps/common/dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/middleware/captcha_store"
+	"WenBeego/apps/common/models"
 	"errors"
 	"fmt"
+	"html/template"
 	"regexp"
+	"strings"
 	"time"
 
+	"WenBeego/apps/common/dto"
+
+	googleUuid "github.com/google/uuid"
 	"github.com/mojocn/base64Captcha"
 )
 
@@ -141,4 +146,69 @@ func GetTimestamp() int64 {
 	timezone, _ := global.GetConfigDiy("timezone")
 	loc, _ := time.LoadLocation(timezone.(string))
 	return time.Now().In(loc).Unix()
+}
+
+// 获取时间
+func GetTime() time.Time {
+	timezone, _ := global.GetConfigDiy("timezone")
+	loc, _ := time.LoadLocation(timezone.(string))
+	return time.Now().In(loc)
+}
+
+// 解析字符串模板
+func ParseStringTpl(tpl string, data any) (str string, err error) {
+	tmpl, err := template.New("").Parse(tpl)
+	if err != nil {
+		return str, err
+	}
+	var result strings.Builder
+	err = tmpl.Execute(&result, data)
+	if err != nil {
+		return str, err
+	}
+
+	return result.String(), nil
+}
+
+// 判断是否是管理员
+
+func IsAdmin(moduleName string, unitId string, userId string) bool {
+	if moduleName == "admin_plat" {
+		return getAdminData(unitId, userId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
+	} else {
+		return getAdminData(unitId, userId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
+	}
+}
+
+// 获取管理员用户
+func getAdminData[RoleClassifyModel interface{ TableName() string }, RoleModel interface{ TableName() string }, UserRoleModel interface{ TableName() string }](unitId string, userId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) bool {
+	tableClassify := roleClassify.TableName()
+	tableRole := role.TableName()
+	tableUserRole := userRoleModel.TableName()
+
+	err := global.GetReadDb().
+		Model(roleClassify).
+		Select(tableClassify+".*").
+		Joins("inner join "+tableRole+" on "+tableRole+".id = "+tableClassify+".role_id").
+		Joins("inner join "+tableUserRole+" on "+tableUserRole+".role_id = "+tableClassify+".role_id").
+		Where(tableClassify+".name = ?", "admin").
+		Where(tableUserRole+".user_id = ?", userId).
+		Where(tableUserRole+".unit_id = ?", unitId).
+		Where(tableUserRole+".deleted = ?", 0).
+		Where(tableRole+".unit_id = ?", unitId).
+		Where(tableRole+".status = ?", 1).
+		Where(tableRole+".deleted = ?", 0).
+		Take(roleClassify).
+		Error
+	return err == nil
+}
+
+// 获取uuid
+func GetUuid() (string, error) {
+	googleUuid.EnableRandPool()
+	uuid, err := googleUuid.NewV7()
+	if err != nil {
+		return "", err
+	}
+	return uuid.String(), nil
 }
