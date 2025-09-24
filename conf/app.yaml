@@ -48,6 +48,6 @@ branca:
     iss: wenBeegoAdminPlat
     aud: wenBeegoAdminPlatUi
     key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
-    exp: 604800
-    expRemark: 7*24*60*60
+    exp: 86400
+    expRemark: 24*60*60
   

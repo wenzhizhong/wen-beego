@@ -92,3 +92,36 @@ func (c *AuthController) GetCatpcha() {
 	c.Data["json"] = helper.Response{Code: 200, Message: "获取验证码成功", Data: data}
 	c.ServeJSON()
 }
+
+// 刷新token
+// @Summary      刷新token
+// @Description  刷新token
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  helper.Response
+// @Failure      0  {object}  helper.Response
+// @Router       /admin_plat/auth/refresh-token [post]
+// @Security     ApiKeyAuth
+func (c *AuthController) RefreshToken() {
+	type refreshStruct struct {
+		RefreshToken_ string `json:"refreshToken"`
+		BrancaToken_  string `json:"accessToken"`
+	}
+	body, err := helper.GetReqBody[refreshStruct](c.Ctx)
+	if err != nil {
+		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.ServeJSON()
+		return
+	}
+
+	data, err := c.AuthService.RefreshToken(c.ModuleName, body.BrancaToken_, body.RefreshToken_)
+	if err != nil {
+		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.ServeJSON()
+		return
+	}
+
+	c.Data["json"] = helper.Response{Code: 200, Message: "刷新成功", Data: data}
+	c.ServeJSON()
+}

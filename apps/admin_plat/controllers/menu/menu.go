@@ -23,7 +23,7 @@ type MenuController struct {
 func (c *MenuController) GetAsyncRoutes() {
 	userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
-	data, err := c.MenuService.GetAsyncRoutes("admin_plat", unitId.(string), userId.(string))
+	data, err := c.MenuService.GetAsyncRoutes(c.ModuleName, unitId.(string), userId.(string))
 	if err != nil {
 		c.Data["json"] = helper.Response{Code: 500, Message: err.Error()}
 		c.ServeJSON()

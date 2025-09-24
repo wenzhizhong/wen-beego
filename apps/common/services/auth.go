@@ -10,7 +10,6 @@ import (
 
 	"WenBeego/apps/common/dto"
 
-	"github.com/google/uuid"
 	"github.com/samber/lo"
 )
 
@@ -253,7 +252,7 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 		global.Log.Error("生成token异常: %v", err)
 		return nil, errors.New("生成token异常")
 	}
-	refreshToken, err := uuid.NewV7()
+	refreshToken, err := helper.GetRefreshToken(moduleName, token, user.Id)
 	if err != nil {
 		global.Log.Error("生成refreshToken异常: %v", err)
 		return nil, errors.New("生成refreshToken异常")
@@ -268,7 +267,7 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 	loginInfo.UserInfo.Avatar = userProfile.Avatar
 	loginInfo.UserInfo.Expires = brancaData.Exp * 1000
 	loginInfo.UserInfo.AccessToken = token
-	loginInfo.UserInfo.RefreshToken = refreshToken.String()
+	loginInfo.UserInfo.RefreshToken = refreshToken
 	loginInfo.UserInfo.DefaultUnitId = defualtUnitId
 	loginInfo.UserInfo.Permissions = perms
 	loginInfo.UserInfo.Roles = rolesClassifies
@@ -307,7 +306,7 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 		global.Log.Error("生成token异常: %v", err)
 		return nil, errors.New("生成token异常")
 	}
-	refreshToken, err := uuid.NewV7()
+	refreshToken, err := helper.GetRefreshToken(moduleName, token, user.Id)
 	if err != nil {
 		global.Log.Error("生成refreshToken异常: %v", err)
 		return nil, errors.New("生成refreshToken异常")
@@ -322,7 +321,7 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 	loginInfo.UserInfo.Avatar = userProfile.Avatar
 	loginInfo.UserInfo.Expires = brancaData.Exp * 1000
 	loginInfo.UserInfo.AccessToken = token
-	loginInfo.UserInfo.RefreshToken = refreshToken.String()
+	loginInfo.UserInfo.RefreshToken = refreshToken
 	loginInfo.UserInfo.DefaultUnitId = ""
 	loginInfo.UserInfo.Permissions = []string{}
 	loginInfo.UserInfo.Roles = []string{}
@@ -393,4 +392,23 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId
 	}
 
 	return perms, err
+}
+
+// 刷新token
+func (s *CommonAuth) RefreshToken(moduleName string, brancaToken string, refreshToken string) (loginInfo *dto.UserLoginInfoDto, err error) {
+	verifyRes, userId, _ := helper.VerifyRefreshToken(moduleName, brancaToken, refreshToken)
+	if !verifyRes {
+		return loginInfo, errors.New("refreshToken已过期，请重新登录")
+	}
+
+	if moduleName == "admin_plat" || moduleName == "admin_mchnt" {
+		loginInfo, err = s.GetAdminLoginInfo(moduleName, userId)
+	} else {
+		loginInfo, err = s.GetApiLoginInfo(moduleName, userId)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return loginInfo, nil
 }

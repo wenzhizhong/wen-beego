@@ -4,6 +4,8 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/middleware/captcha_store"
 	"WenBeego/apps/common/models"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"html/template"
@@ -211,4 +213,48 @@ func GetUuid() (string, error) {
 		return "", err
 	}
 	return uuid.String(), nil
+}
+
+// 获取refresh token 缓存key
+func getRefreshTokenKey(brancaToken string, refreshToken string) string {
+	handle := md5.New()
+	handle.Write([]byte(refreshToken + ":" + brancaToken))
+	return hex.EncodeToString(handle.Sum(nil))
+}
+
+// 获取refresh token
+func GetRefreshToken(moduleName string, brancaToken string, userId string) (string, error) {
+	refresh_token, err := GetUuid()
+	if err != nil {
+		return "", err
+	}
+	redisKey := getRefreshTokenKey(brancaToken, refresh_token)
+
+	exp, err := global.GetConfigDiy("branca." + moduleName + ".exp")
+	if err != nil {
+		return "", err
+	}
+	refresh_exp := exp.(int) * 2
+	if refresh_exp <= 86400 {
+		refresh_exp = 2 * 24 * 60 * 60
+	}
+	err = RedisPut(redisKey, userId, time.Duration(refresh_exp))
+	if err != nil {
+		return "", err
+	}
+	return refresh_token, nil
+}
+
+// 验证refresh token
+func VerifyRefreshToken(moduleName string, brancaToken string, refreshToken string) (result bool, userId string, err error) {
+	redisKey := getRefreshTokenKey(brancaToken, refreshToken)
+	exits, err := RedisGet(redisKey)
+	if err == nil && exits != nil {
+		if bytes, ok := exits.([]byte); ok {
+			userId = string(bytes)
+			RedisDel(redisKey)
+			return true, userId, nil
+		}
+	}
+	return
 }

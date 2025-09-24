@@ -45,16 +45,20 @@ func AppVersion() (string, error) {
 	return version, nil
 }
 
+// 获取框架runmode
+func AppRunmode() (string, error) {
+	tmp, err := global.GetConfigDiy("runmode")
+	if err != nil {
+		return "", errors.New("获取runmode错误")
+	}
+	data := tmp.(string)
+	return data, nil
+}
+
 // 从路由路径解析模块名
 func ParseModuleFromRoute(ctx *context.Context) string {
 	path := ctx.Request.URL.Path
-
-	// 移除开头的斜杠
-	if strings.HasPrefix(path, "/") {
-		path = path[1:]
-	}
-
-	// 分割路径部分
+	path = strings.TrimPrefix(path, "/")
 	parts := strings.Split(path, "/")
 
 	// 路径格式: /模块/控制器/方法

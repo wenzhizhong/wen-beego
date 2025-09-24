@@ -16,13 +16,13 @@ var WhiteApiList = []string{
 	"/admin_plat/auth/register",
 	"/admin_plat/auth/forget-password",
 	"/admin_plat/auth/get-captcha",
+	"/admin_plat/auth/refresh-token",
 }
 
 // 登录后基础api
 var AuthApiList = []string{
 	"/admin_plat/auth/logout",
 	"/admin_plat/auth/getUserInfo",
-	"/admin_plat/auth/getPermissionList",
 	"/admin_plat/auth/getPermissionList",
 	"/admin_plat/plat/change-unit",
 	"/admin_plat/plat/get-user-unit",
@@ -33,6 +33,7 @@ func init() {
 	ns := beego.NewNamespace("/admin_plat",
 		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
 		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
+		beego.NSCtrlPost("/auth/refresh-token", (*adminAuth.AuthController).RefreshToken),
 		beego.NSCtrlPost("/plat/change-unit", (*adminPlat.PlatController).ChangeUnit),
 		beego.NSCtrlGet("/plat/get-user-unit-list", (*adminPlat.PlatController).GetUserUnitList),
 		beego.NSCtrlGet("/menu/get-async-routes", (*adminMenu.MenuController).GetAsyncRoutes),

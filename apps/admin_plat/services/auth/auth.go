@@ -27,3 +27,8 @@ func (s *Auth) Register(data dto.RegisterDto, moduleName string) (interface{}, e
 	data.AuthCodeType = cpatchaType
 	return s.commonAuth.Register(data, moduleName)
 }
+
+// 刷新token
+func (s *Auth) RefreshToken(moduleName string, brancaToken string, refreshToken string) (interface{}, error) {
+	return s.commonAuth.RefreshToken(moduleName, brancaToken, refreshToken)
+}
