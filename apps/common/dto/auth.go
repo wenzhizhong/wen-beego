@@ -43,3 +43,9 @@ type UserLoginInfoDto struct {
 	} `json:"userInfo"`
 	UnitInfo interface{} `json:"unitInfo"`
 }
+
+// 刷新token
+type RefreshTokenDto struct {
+	RefreshToken string `json:"refreshToken"`
+	BrancaToken  string `json:"accessToken"`
+}

@@ -396,7 +396,7 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId
 
 // 刷新token
 func (s *CommonAuth) RefreshToken(moduleName string, brancaToken string, refreshToken string) (loginInfo *dto.UserLoginInfoDto, err error) {
-	verifyRes, userId, _ := helper.VerifyRefreshToken(moduleName, brancaToken, refreshToken)
+	verifyRes, userId, _ := helper.VerifyRefreshToken(brancaToken, refreshToken)
 	if !verifyRes {
 		return loginInfo, errors.New("refreshToken已过期，请重新登录")
 	}

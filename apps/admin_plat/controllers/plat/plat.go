@@ -53,7 +53,7 @@ func (c *PlatController) ChangeUnit() {
 		c.ServeJSON()
 		return
 	}
-	data, err := c.PlatService.ChangeUnit(c.ModuleName, userId.(string), ChangeUnitDto.Id)
+	data, err := c.PlatService.ChangeUnit(c.ModuleName, userId.(string), ChangeUnitDto)
 	if err != nil {
 		c.Data["json"] = helper.Response{Code: 500, Message: err.Error()}
 		c.ServeJSON()

@@ -2,6 +2,8 @@ package plat
 
 import (
 	"WenBeego/apps/common/ar"
+	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/services"
 	"errors"
@@ -24,10 +26,17 @@ func (s *Plat) GetUserUnitList(userId string) (data interface{}, err error) {
 	}
 	return
 }
-func (s *Plat) ChangeUnit(moduleName string, userId string, unitId string) (result interface{}, err error) {
+func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto dto.ChangeUnitDto) (result interface{}, err error) {
+	unitId := changeUnitDto.Id
 	if userId == "" || unitId == "" {
 		return nil, errors.New("切换组织失败，请先登录！")
 	}
+
 	result, err = s.commonPlat.ChangeUnit(moduleName, userId, unitId)
+	if err != nil {
+		return nil, err
+	}
+
+	helper.DelRefreshToken(changeUnitDto.BrancaToken, changeUnitDto.RefreshToken)
 	return
 }

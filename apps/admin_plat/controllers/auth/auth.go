@@ -104,18 +104,14 @@ func (c *AuthController) GetCatpcha() {
 // @Router       /admin_plat/auth/refresh-token [post]
 // @Security     ApiKeyAuth
 func (c *AuthController) RefreshToken() {
-	type refreshStruct struct {
-		RefreshToken_ string `json:"refreshToken"`
-		BrancaToken_  string `json:"accessToken"`
-	}
-	body, err := helper.GetReqBody[refreshStruct](c.Ctx)
+	body, err := helper.GetReqBody[dto.RefreshTokenDto](c.Ctx)
 	if err != nil {
 		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
 		c.ServeJSON()
 		return
 	}
 
-	data, err := c.AuthService.RefreshToken(c.ModuleName, body.BrancaToken_, body.RefreshToken_)
+	data, err := c.AuthService.RefreshToken(c.ModuleName, body.BrancaToken, body.RefreshToken)
 	if err != nil {
 		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
 		c.ServeJSON()

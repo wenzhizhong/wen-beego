@@ -219,7 +219,7 @@ func GetUuid() (string, error) {
 func getRefreshTokenKey(brancaToken string, refreshToken string) string {
 	handle := md5.New()
 	handle.Write([]byte(refreshToken + ":" + brancaToken))
-	return hex.EncodeToString(handle.Sum(nil))
+	return "refreshToken:" + hex.EncodeToString(handle.Sum(nil))
 }
 
 // 获取refresh token
@@ -246,15 +246,23 @@ func GetRefreshToken(moduleName string, brancaToken string, userId string) (stri
 }
 
 // 验证refresh token
-func VerifyRefreshToken(moduleName string, brancaToken string, refreshToken string) (result bool, userId string, err error) {
+func VerifyRefreshToken(brancaToken string, refreshToken string) (result bool, userId string, err error) {
 	redisKey := getRefreshTokenKey(brancaToken, refreshToken)
 	exits, err := RedisGet(redisKey)
 	if err == nil && exits != nil {
 		if bytes, ok := exits.([]byte); ok {
 			userId = string(bytes)
-			RedisDel(redisKey)
+			DelRefreshToken(brancaToken, refreshToken)
 			return true, userId, nil
 		}
 	}
 	return
+}
+
+// 删除refresh token
+func DelRefreshToken(brancaToken string, refreshToken string) {
+	if brancaToken != "" && refreshToken != "" {
+		redisKey := getRefreshTokenKey(brancaToken, refreshToken)
+		RedisDel(redisKey)
+	}
 }
