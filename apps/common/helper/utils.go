@@ -215,11 +215,20 @@ func GetUuid() (string, error) {
 	return uuid.String(), nil
 }
 
+// 获取md5值
+func Md5(str string) string {
+	if str == "" {
+		return ""
+	}
+
+	handle := md5.New()
+	handle.Write([]byte(str))
+	return hex.EncodeToString(handle.Sum(nil))
+}
+
 // 获取refresh token 缓存key
 func getRefreshTokenKey(brancaToken string, refreshToken string) string {
-	handle := md5.New()
-	handle.Write([]byte(refreshToken + ":" + brancaToken))
-	return "refreshToken:" + hex.EncodeToString(handle.Sum(nil))
+	return "refreshToken:" + Md5(refreshToken+":"+brancaToken)
 }
 
 // 获取refresh token

@@ -31,6 +31,8 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		// TODO: 用户状态
 		// 验证：组织状态
 		// TODO: 组织状态
+		// 验证：角色状态
+		// TODO: 角色状态
 
 		ctx.Input.SetData("userId", brancaData.Sub)
 		ctx.Input.SetData("unitId", brancaData.SubUnit)

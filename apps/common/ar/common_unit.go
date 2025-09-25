@@ -45,3 +45,36 @@ func GetUserUnitList[UnitModel models.ModelInterface, UnitUserModel models.Model
 		Scan(&listData)
 	return listData, result.Error
 }
+
+// 查找是否存在用户组织单位
+func ExistUserUnit[UnitModel models.ModelInterface, UnitUserModel models.ModelInterface](userId string, unitId string, unitModel UnitModel, unitUserModel UnitUserModel) (UnitModel, error) {
+	tableUnitName := unitModel.TableName()
+	tableUnitUserName := unitUserModel.TableName()
+
+	tableStruct := struct {
+		TableUnit     string
+		TableUserUnit string
+	}{
+		TableUnit:     tableUnitName,
+		TableUserUnit: tableUnitUserName,
+	}
+
+	selectStr, err := helper.ParseStringTpl(`{{.TableUnit}}.*`, tableStruct)
+	joinStr, err2 := helper.ParseStringTpl(`inner join {{.TableUserUnit}} on {{.TableUserUnit}}.unit_id = {{.TableUnit}}.id`, tableStruct)
+	if err != nil {
+		return unitModel, err
+	}
+	if err2 != nil {
+		return unitModel, err2
+	}
+
+	result := global.GetReadDb().
+		Model(unitModel).
+		Select(selectStr).
+		Joins(joinStr).
+		Where(tableUnitUserName+".user_id = ?", userId).
+		Where(tableUnitUserName+".unit_id = ?", unitId).
+		Where(tableUnitUserName + ".deleted = 0").
+		Take(&unitModel)
+	return unitModel, result.Error
+}

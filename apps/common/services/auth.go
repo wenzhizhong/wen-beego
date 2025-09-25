@@ -243,8 +243,8 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 	brancaData.Iss = moduleName
 	brancaData.Sub = user.Id
 	brancaData.SubUnit = defualtUnitId
-	brancaData.Role = strings.Join(rolesClassifies, ";")
-	brancaData.Scope = strings.Join(perms, ";")
+	brancaData.Role = helper.Md5(strings.Join(rolesClassifies, ";"))
+	brancaData.Scope = helper.Md5(strings.Join(perms, ";"))
 	brancaData.Exp = cutTime + int64(exp.(int))
 	brancaData.Iat = cutTime
 	token, err := helper.BrancaEncode(brancaData, moduleName)

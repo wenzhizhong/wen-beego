@@ -32,6 +32,17 @@ func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto dto.Ch
 		return nil, errors.New("切换组织失败，请先登录！")
 	}
 
+	unitInfo, err := ar.ExistUserUnit(userId, unitId, &models.Plat{}, &models.PlatUser{})
+	if err != nil {
+		return nil, err
+	}
+	if unitInfo.Id == "" {
+		return nil, errors.New("切换组织失败，请先添加组织！")
+	}
+	if unitInfo.Status != 1 {
+		return nil, errors.New("切换组织失败，请先启用组织！")
+	}
+
 	result, err = s.commonPlat.ChangeUnit(moduleName, userId, unitId)
 	if err != nil {
 		return nil, err
