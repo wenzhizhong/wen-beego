@@ -247,7 +247,7 @@ func GetRefreshToken(moduleName string, brancaToken string, userId string) (stri
 	if refresh_exp <= 86400 {
 		refresh_exp = 2 * 24 * 60 * 60
 	}
-	err = RedisPut(redisKey, userId, time.Duration(refresh_exp))
+	err = RedisPut(redisKey, userId, refresh_exp)
 	if err != nil {
 		return "", err
 	}
@@ -258,12 +258,10 @@ func GetRefreshToken(moduleName string, brancaToken string, userId string) (stri
 func VerifyRefreshToken(brancaToken string, refreshToken string) (result bool, userId string, err error) {
 	redisKey := getRefreshTokenKey(brancaToken, refreshToken)
 	exits, err := RedisGet(redisKey)
-	if err == nil && exits != nil {
-		if bytes, ok := exits.([]byte); ok {
-			userId = string(bytes)
-			DelRefreshToken(brancaToken, refreshToken)
-			return true, userId, nil
-		}
+	if err == nil && exits != "" {
+		userId = exits
+		DelRefreshToken(brancaToken, refreshToken)
+		return true, userId, nil
 	}
 	return
 }

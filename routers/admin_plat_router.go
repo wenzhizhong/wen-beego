@@ -22,8 +22,6 @@ var WhiteApiList = []string{
 // 登录后基础api
 var AuthApiList = []string{
 	"/admin_plat/auth/logout",
-	"/admin_plat/auth/getUserInfo",
-	"/admin_plat/auth/getPermissionList",
 	"/admin_plat/plat/change-unit",
 	"/admin_plat/plat/get-user-unit",
 	"/admin_plat/menu/get-async-routes",

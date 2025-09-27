@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserProfile struct {
+type PlatUserProfile struct {
 	Id                string         `json:"id" gorm:"not null;primaryKey;type:bpchar(36);comment:ID"`
 	Avatar            string         `json:"avatar" gorm:"size:255;comment:头像"`
 	CardType          int            `json:"card_type" gorm:"type:int2;comment:1大陆身份证2港澳台身份证3护照4军官证5其它"`
@@ -29,16 +29,25 @@ type UserProfile struct {
 	DegreeNumber      string         `json:"degree_number" gorm:"size:100;comment:学位编号"`
 	LearnProfessional string         `json:"learn_professional" gorm:"size:100;comment:所学专业"`
 	Professional      string         `json:"professional" gorm:"size:100;comment:职业"`
-	Status            int            `json:"status" gorm:"not null;default:1;comment:用户行为状态：1正常，2已注销"`
+	Status            int            `json:"status" gorm:"not null;default:1;comment:用户行为状态：1正常，2已注销，组织单位状态：1正常，3禁用，4离职"`
 	CreatedAt         time.Time      `json:"created_at" gorm:"default:CURRENT_TIMESTAMP;comment:记录创建时间"`
 	UpdatedAt         time.Time      `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP;comment:记录修改时间"`
 	DeletedAt         gorm.DeletedAt `json:"deleted_at" gorm:"comment:记录删除时间"`
 	Deleted           bool           `json:"deleted" gorm:"not null;default:0;comment:是否删除"`
 }
 
-var USER_STATUS_NORMAL = 1
-var USER_STATUS_CANCLED = 2
+var PLAT_USER_PROFILE_STATUS_NORMAL = 1
+var PLAT_USER_PROFILE_STATUS_CANCLED = 2
+var PLAT_USER_PROFILE_STATUS_DISABLED = 3
+var PLAT_USER_PROFILE_STATUS_LEAVE = 4
 
-func (m *UserProfile) TableName() string {
-	return `user_profile`
+var PLAT_USER_PROFILE_STATUS_MAP = map[int]string{
+	PLAT_USER_PROFILE_STATUS_NORMAL:   "正常",
+	PLAT_USER_PROFILE_STATUS_CANCLED:  "已注销",
+	PLAT_USER_PROFILE_STATUS_DISABLED: "已禁用",
+	PLAT_USER_PROFILE_STATUS_LEAVE:    "已离职",
+}
+
+func (m *PlatUserProfile) TableName() string {
+	return `plat_user_profile`
 }

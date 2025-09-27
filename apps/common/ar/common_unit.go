@@ -47,7 +47,7 @@ func GetUserUnitList[UnitModel models.ModelInterface, UnitUserModel models.Model
 }
 
 // 查找是否存在用户组织单位
-func ExistUserUnit[UnitModel models.ModelInterface, UnitUserModel models.ModelInterface](userId string, unitId string, unitModel UnitModel, unitUserModel UnitUserModel) (UnitModel, error) {
+func GetUserUnitById[UnitModel models.ModelInterface, UnitUserModel models.ModelInterface](userId string, unitId string, unitModel UnitModel, unitUserModel UnitUserModel) (UnitModel, error) {
 	tableUnitName := unitModel.TableName()
 	tableUnitUserName := unitUserModel.TableName()
 

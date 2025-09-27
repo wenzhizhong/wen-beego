@@ -13,9 +13,9 @@ type CommonPlat struct {
 
 func (a *CommonPlat) ChangeUnit(moduleName string, userId string, unitId string) (result interface{}, err error) {
 	if moduleName == "admin_plat" {
-		err = changeUnit[*models.Plat, *models.PlatUser](userId, unitId)
+		err = changeUnit[*models.Plat, *models.PlatUser, *models.PlatUserProfile](userId, unitId)
 	} else {
-		err = changeUnit[*models.Mchnt, *models.MchntUser](userId, unitId)
+		err = changeUnit[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile](userId, unitId)
 	}
 	if err != nil {
 		return nil, err
@@ -26,24 +26,41 @@ func (a *CommonPlat) ChangeUnit(moduleName string, userId string, unitId string)
 	}
 	return result, nil
 }
-func changeUnit[UnitModel models.ModelInterface, UserUnitModel models.ModelInterface](userId string, unitId string) error {
+func changeUnit[UnitModel models.ModelInterface, UnitUserModel models.ModelInterface, UnitUserProfileModel models.ModelInterface](userId string, unitId string) error {
 	if userId == "" {
 		return errors.New("userId 不能为空")
 	}
-	userData, err := ar.GetUserOfUnitById[UserUnitModel](userId, unitId)
+	_, err := ar.GetUserOfUnitById[UnitUserModel](userId, unitId)
 	if err != nil && !helper.DbNotFound(err) {
 		return err
 	} else if helper.DbNotFound(err) {
-		err = ar.AddUserOfUnit[UserUnitModel](userId, unitId, 1, 0)
+		return errors.New("用户不存在")
 	} else {
-		status := userData["status"].(int)
-		if status == 0 {
-			return errors.New("用户已禁用")
+		userProfile, err2 := ar.GetUserProfileOfUnitById[UnitUserModel, UnitUserProfileModel](userId, unitId)
+		if err2 != nil {
+			return err2
 		}
-		if status == 2 {
-			return errors.New("用户已离职")
+
+		status := -1
+		switch t := any(userProfile).(type) {
+		case *models.PlatUserProfile:
+			status = t.Status
+			if status != models.PLAT_USER_PROFILE_STATUS_NORMAL {
+				err = errors.New("用户" + models.PLAT_USER_PROFILE_STATUS_MAP[status])
+			}
+		case *models.MchntUserProfile:
+			status = t.Status
+			if status != models.MCHNT_USER_PROFILE_STATUS_NORMAL {
+				err = errors.New("用户" + models.MCHNT_USER_PROFILE_STATUS_MAP[status])
+			}
+		default:
+			return errors.New("未知的单位用户信息类型")
 		}
-		err = ar.UpdateUserDefaultUnit[UserUnitModel](userId, unitId)
+		if err != nil {
+			return err
+		}
+
+		err = ar.UpdateUserDefaultUnit[UnitUserModel](userId, unitId)
 
 	}
 	if err != nil {

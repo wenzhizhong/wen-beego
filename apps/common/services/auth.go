@@ -237,10 +237,12 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 	}
 	exp, _ := global.GetConfigDiy("branca." + moduleName + ".exp")
 	aud, _ := global.GetConfigDiy("branca." + moduleName + ".aud")
+	iss, _ := global.GetConfigDiy("branca." + moduleName + ".iss")
+
 	cutTime := helper.GetTimestamp()
 	brancaData := helper.BrancaData{}
 	brancaData.Aud = aud.(string)
-	brancaData.Iss = moduleName
+	brancaData.Iss = iss.(string)
 	brancaData.Sub = user.Id
 	brancaData.SubUnit = defualtUnitId
 	brancaData.Role = helper.Md5(strings.Join(rolesClassifies, ";"))
@@ -291,10 +293,12 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 
 	exp, _ := global.GetConfigDiy("branca." + moduleName + ".exp")
 	aud, _ := global.GetConfigDiy("branca." + moduleName + ".aud")
+	iss, _ := global.GetConfigDiy("branca." + moduleName + ".iss")
+
 	cutTime := helper.GetTimestamp()
 	brancaData := helper.BrancaData{}
 	brancaData.Aud = aud.(string)
-	brancaData.Iss = moduleName
+	brancaData.Iss = iss.(string)
 	brancaData.Sub = user.Id
 	brancaData.SubUnit = ""
 	brancaData.Role = ""

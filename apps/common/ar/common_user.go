@@ -10,7 +10,7 @@ import (
 )
 
 /**
- * 获取用户信息
+ * 获取用户
  * UnitUserModel: models.PlatUser, models.MchntUser
  * @param userId
  * @param unitId
@@ -133,7 +133,6 @@ func AddUserOfUnit[UnitUserModel models.ModelInterface](userId string, unitId st
 		UserId    string `json:"user_id"`
 		UnitId    string `json:"unit_id"`
 		IsDefault int    `json:"is_default"`
-		Status    int    `json:"status"`
 		IsAdmin   int    `json:"is_admin"`
 		Deleted   int    `json:"deleted"`
 	}{
@@ -141,7 +140,6 @@ func AddUserOfUnit[UnitUserModel models.ModelInterface](userId string, unitId st
 		UserId:    userId,
 		UnitId:    unitId,
 		IsDefault: isDefault,
-		Status:    1,
 		IsAdmin:   isAdmin,
 		Deleted:   0,
 	}

@@ -17,6 +17,17 @@ type Plat struct {
 	UpdateAt    time.Time `json:"updated_at" gorm:"type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间"`
 }
 
+var PLAT_STATUS_UNREVIEWED = 0
+var PLAT_STATUS_PASSED = 1
+var PLAT_STATUS_UNPASSED = 2
+var PLAT_STATUS_DISABLED = 3
+var PLAT_STATUS_MAP = map[int]string{
+	PLAT_STATUS_UNREVIEWED: "未审核",
+	PLAT_STATUS_PASSED:     "审核通过",
+	PLAT_STATUS_UNPASSED:   "审核不通过",
+	PLAT_STATUS_DISABLED:   "已禁用",
+}
+
 func (m *Plat) TableName() string {
 	return `plat`
 }

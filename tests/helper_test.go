@@ -7,6 +7,7 @@ import (
 )
 
 func init() {
+	fmt.Println("init .... ")
 }
 
 func TestGetRandomPassword(t *testing.T) {
@@ -57,4 +58,20 @@ func TestGetMapKeys(t *testing.T) {
 	m3 := map[string]map[string]interface{}{"a": {"aa": "1", "bb": "2", "cc": "3"}, "b": {"aa": "1", "bb": "2", "cc": "3"}, "c": {"aa": "1", "bb": "2", "cc": "3"}}
 	fmt.Println(m3)
 	fmt.Println(helper.GetMapKeys(m3))
+}
+
+func TestRedis(t *testing.T) {
+	helper.RedisPut("test", "test", 300)
+	helper.RedisPut("test1", 1, 300)
+	helper.RedisPut("test2", struct {
+		Test string `json:"test"`
+	}{Test: "1"}, 300)
+
+	value1, err1 := helper.RedisGet("test")
+	value2, err2 := helper.RedisGet("test1")
+	value3, err3 := helper.RedisGet("test2")
+
+	fmt.Println(err1, err2, err3)
+	fmt.Println(value1, value2, value3)
+
 }

@@ -17,6 +17,17 @@ type Mchnt struct {
 	UpdatedAt   time.Time `json:"updated_at" gorm:"type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间"`
 }
 
+var MCHNT_STATUS_UNREVIEWED = 0
+var MCHNT_STATUS_PASSED = 1
+var MCHNT_STATUS_UNPASSED = 2
+var MCHNT_STATUS_DISABLED = 3
+var MCHNT_STATUS_MAP = map[int]string{
+	MCHNT_STATUS_UNREVIEWED: "未审核",
+	MCHNT_STATUS_PASSED:     "审核通过",
+	MCHNT_STATUS_UNPASSED:   "审核不通过",
+	MCHNT_STATUS_DISABLED:   "已禁用",
+}
+
 func (m *Mchnt) TableName() string {
 	return `mchnt`
 }

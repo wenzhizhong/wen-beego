@@ -32,7 +32,7 @@ func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto dto.Ch
 		return nil, errors.New("切换组织失败，请先登录！")
 	}
 
-	unitInfo, err := ar.ExistUserUnit(userId, unitId, &models.Plat{}, &models.PlatUser{})
+	unitInfo, err := ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
 	if err != nil {
 		return nil, err
 	}
