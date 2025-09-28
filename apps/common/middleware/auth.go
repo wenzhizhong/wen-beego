@@ -32,21 +32,43 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		ctx.Input.SetData("unitId", brancaData.SubUnit)
 
 		// 验证:认证后基础api,通过则不校验权限
-		isValid := checkAuth(ctx, tmpAuthApiListMap)
+		isValid := checkBaseAuthApi(ctx, tmpAuthApiListMap)
 		if isValid {
 			return
 		}
+
+		type checkResult struct {
+			status    bool
+			err       error
+			checkType string
+		}
+		checkResultNumber := 2
+		ch := make(chan checkResult, checkResultNumber)
 		// 验证状态:用户状态/组织单位状态/角色状态
-		_, err = checkAuthAdminStatus(ctx, moduleName, brancaData)
-		if err != nil {
+		go func() {
+			status, err := checkAuthAdminStatus(moduleName, brancaData)
+			ch <- checkResult{status: status, err: err, checkType: "status"}
+		}()
+		// 检测用户是否有api权限
+		go func() {
+			status, err := checkAuthAdminPermis(moduleName, brancaData, helper.GetReqUrl(*ctx))
+			ch <- checkResult{status: status, err: err, checkType: "perms"}
+		}()
+		errorStr := ""
+		for i := 0; i < checkResultNumber; i++ {
+			result := <-ch
+			if result.err != nil {
+				errorStr += result.err.Error() + ";\n"
+			}
+		}
+		close(ch)
+		if errorStr != "" {
+			setResponse(ctx, http.StatusNetworkAuthenticationRequired, errorStr, nil)
 			return
 		}
-
-		// 检测用户是否有api权限
-		checkUrlPermis(ctx, moduleName, brancaData)
 	}
 }
-func resposeStr(code int, msg string, data interface{}) string {
+func responseStr(code int, msg string, data interface{}) string {
 	res := helper.Response{
 		Code:    code,
 		Message: msg,
@@ -54,6 +76,11 @@ func resposeStr(code int, msg string, data interface{}) string {
 	}
 	jsonString, _ := json.Marshal(res)
 	return string(jsonString)
+}
+func setResponse(ctx *beecontext.Context, code int, msg string, data interface{}) {
+	jsonString := responseStr(code, msg, data)
+	ctx.ResponseWriter.ResponseWriter.WriteHeader(code)
+	ctx.ResponseWriter.Write([]byte(jsonString))
 }
 
 // list 转 map
@@ -82,49 +109,35 @@ func checkToken(ctx *beecontext.Context, moduleName string) (helper.BrancaData, 
 	token := helper.GetReqToken(*ctx)
 	brancaData, err := helper.BrancaDecode(token, moduleName)
 	if err != nil {
-		jsonString := resposeStr(http.StatusUnauthorized, err.Error(), nil)
-		ctx.ResponseWriter.ResponseWriter.WriteHeader(http.StatusUnauthorized)
-		ctx.ResponseWriter.Write([]byte(jsonString))
+		setResponse(ctx, http.StatusUnauthorized, err.Error(), nil)
 		return brancaData, err
 	}
 
 	aud, _ := global.GetConfigDiy("branca." + moduleName + ".aud")
 	iss, _ := global.GetConfigDiy("branca." + moduleName + ".iss")
 	if aud != nil && iss != nil && (brancaData.Aud != aud.(string) || brancaData.Iss != iss.(string)) {
-		jsonString := resposeStr(http.StatusUnauthorized, "无效的token", nil)
-		ctx.ResponseWriter.ResponseWriter.WriteHeader(http.StatusUnauthorized)
-		ctx.ResponseWriter.Write([]byte(jsonString))
+		setResponse(ctx, http.StatusUnauthorized, "无效的token", nil)
 		return brancaData, err
 	}
 	return brancaData, nil
 }
 
 // 校验登录后基本路由，通过则不校验权限
-func checkAuth(ctx *beecontext.Context, authApiListMap map[string]bool) bool {
+func checkBaseAuthApi(ctx *beecontext.Context, authApiListMap map[string]bool) bool {
 	hasBaseAuthApi := inAuthApiList(ctx, authApiListMap)
 	return hasBaseAuthApi
 }
 
 // 检测用户是否有api权限
-func checkUrlPermis(ctx *beecontext.Context, moduleName string, brancaData helper.BrancaData) (bool, error) {
+func checkAuthAdminPermis(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
 	service := &services.AuthMiddlewate{}
-	status, err := service.CheckAuthAdminRouters(moduleName, brancaData, helper.GetReqUrl(*ctx))
-	if err != nil {
-		jsonString := resposeStr(http.StatusBadGateway, err.Error(), nil)
-		ctx.ResponseWriter.ResponseWriter.WriteHeader(http.StatusBadGateway)
-		ctx.ResponseWriter.Write([]byte(jsonString))
-	}
+	status, err := service.CheckAuthAdminRouters(moduleName, brancaData, path)
 	return status, err
 }
 
 // 检测用户状态
-func checkAuthAdminStatus(ctx *beecontext.Context, moduleName string, brancaData helper.BrancaData) (bool, error) {
+func checkAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
 	service := &services.AuthMiddlewate{}
 	status, err := service.CheckAuthAdminStatus(moduleName, brancaData)
-	if err != nil {
-		jsonString := resposeStr(http.StatusBadGateway, err.Error(), nil)
-		ctx.ResponseWriter.ResponseWriter.WriteHeader(http.StatusBadGateway)
-		ctx.ResponseWriter.Write([]byte(jsonString))
-	}
 	return status, err
 }

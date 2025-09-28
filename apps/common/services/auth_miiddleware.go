@@ -23,29 +23,53 @@ func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData help
 		return false, errors.New("CheckAuthAdminStatus(): 用户id,组织单位id，均不能为空。userId=" + userId + ", unitId=" + unitId)
 	}
 
-	isOk, err := s.checkUnitUserProfileStatus(moduleName, userId, unitId)
-	if !isOk {
-		if err == nil {
+	type checkResult struct {
+		status bool
+		err    error
+	}
+
+	// 创建通道接收结果
+	checkResultNum := 3
+	ch := make(chan checkResult, checkResultNum)
+
+	// 并发执行检查
+	go func() {
+		status, err := s.checkUnitUserProfileStatus(moduleName, userId, unitId)
+		if !status && err == nil {
 			err = errors.New("用户状态不可用")
 		}
-		return false, err
-	}
+		ch <- checkResult{status, err}
+	}()
 
-	isOk, err = s.checkUnitStatus(moduleName, userId, unitId)
-	if !isOk {
-		if err == nil {
+	go func() {
+		status, err := s.checkUnitStatus(moduleName, userId, unitId)
+		if !status && err == nil {
 			err = errors.New("组织单位状态不可用")
 		}
-		return false, err
+		ch <- checkResult{status, err}
+	}()
+
+	go func() {
+		status, err := s.checkUserRoleStatus(moduleName, userId, unitId)
+		if !status && err == nil {
+			err = errors.New("角色状态不可用")
+		}
+		ch <- checkResult{status, err}
+	}()
+
+	// 收集结果并检查
+	errorStr := ""
+	for i := 0; i < checkResultNum; i++ {
+		result := <-ch
+		if result.err != nil {
+			errorStr += result.err.Error() + ";\n"
+		}
+	}
+	close(ch)
+	if errorStr != "" {
+		return false, errors.New(errorStr)
 	}
 
-	isOk, err = s.checkUserRoleStatus(moduleName, userId, unitId)
-	if !isOk {
-		if err == nil {
-			err = errors.New("用户角色状态不可用")
-		}
-		return false, err
-	}
 	return true, nil
 }
 
@@ -94,6 +118,7 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	}
 	if data == nil {
 		err = errors.New("用户资料信息不存在")
+		return
 	}
 
 	tmpStatus := -1
@@ -154,6 +179,7 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 	}
 	if data == nil {
 		err = errors.New("用户组织单位不存在")
+		return
 	}
 
 	tmpStatus := -1
