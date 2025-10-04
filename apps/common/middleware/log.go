@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -23,13 +24,13 @@ type logConfig struct {
 	Separate []string `json:"separate"`
 }
 
-func InitLog() error {
-	return initFileLog()
+func InitLog(logType string) error {
+	return initFileLog(logType)
 }
-func initFileLog() error {
+func initFileLog(logType string) error {
 	fmt.Println("init file log...")
 
-	logConfig, err := getFileLogConfig()
+	logConfig, err := getFileLogConfig(logType)
 	if err != nil {
 		return err
 	}
@@ -42,15 +43,21 @@ func initFileLog() error {
 	return nil
 }
 
-func getFileLogConfig() (string, error) {
+func getFileLogConfig(logType string) (string, error) {
 	mapConfig, err := global.GetConfig("log")
 	if err != nil {
 		return "", err
 	}
 	config, _ := helper.MapInterface2MapString(mapConfig)
 
-	defLogPath := "temp/logs"
+	defLogPath := "../../temp/logs"
 	logPath := config["path"]
+	if logType != "" {
+		if config[logType] == "" {
+			return "", errors.New("log config error, can't find log config for " + logType)
+		}
+		logPath = config[logType]
+	}
 	if logPath == "" {
 		logPath = defLogPath
 	}
@@ -64,7 +71,7 @@ func getFileLogConfig() (string, error) {
 		}
 	}
 	var logConfigObj logConfig
-	logConfigObj.Filename = defLogPath + "/app.log"
+	logConfigObj.Filename = logPath + "/app.log"
 	if config["maxlines"] != "" {
 		logConfigObj.MaxLines, _ = strconv.ParseInt(config["maxlines"], 10, 64)
 	}

@@ -1,18 +1,41 @@
 package middleware
 
 import (
+	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
+	"time"
 
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/RichardKnop/machinery/v1/tasks"
 	"github.com/beego/beego/v2/server/web"
 	beecontext "github.com/beego/beego/v2/server/web/context"
 	"golang.org/x/time/rate"
 )
 
-var limiter = rate.NewLimiter(10, 20)
+var (
+	limiter            = rate.NewLimiter(10, 20)
+	cacheApiStatistics = make([]interface{}, 0)
+	cacheMutex         = sync.Mutex{}
+	maxBatchSize       = 50
+	flushCacheInterval = 1 * time.Second
+)
 
 type AccessMiddleware struct {
+}
+
+func init() {
+	// 启动定期检查和批量处理
+	go func() {
+		ticker := time.NewTicker(flushCacheInterval)
+		defer ticker.Stop()
+		for range ticker.C {
+			flushCacheIfNeeded()
+		}
+	}()
 }
 
 // 限制访问次数,防止dos攻击
@@ -20,7 +43,7 @@ func (m *AccessMiddleware) LimitTimes() web.FilterFunc {
 	return func(ctx *beecontext.Context) {
 		if !limiter.Allow() {
 			fmt.Println("Too Many Requests")
-			logs.Warn("Too Many Requests")
+			global.Log.Warn("Too Many Requests")
 			http.Error(ctx.ResponseWriter, "Too Many Requests", http.StatusTooManyRequests)
 			return
 		}
@@ -36,10 +59,9 @@ func (m *AccessMiddleware) RouterBefore() web.FilterFunc {
 }
 
 // api 请求后
-func (m *AccessMiddleware) RouterAfter() web.FilterFunc {
+func (m *AccessMiddleware) RouterAfter(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 	return func(ctx *beecontext.Context) {
-		// url, host, shceme, method, token, ip := m.getBaseInfo(ctx)
-		// timeStr := time.Now().Format("2006-01-02 15:04:05")
+		m.statisticsApiLog(ctx, whiteApiList, authApiList)
 	}
 }
 
@@ -51,4 +73,64 @@ func (m *AccessMiddleware) getBaseInfo(ctx *beecontext.Context) (url, host, shce
 	token = ctx.Request.Header.Get("Authorization")
 	ip = ctx.Request.RemoteAddr
 	return
+}
+
+// api 统计
+func (m *AccessMiddleware) statisticsApiLog(ctx *beecontext.Context, whiteApiList *[]string, authApiList *[]string) {
+	modules, _ := global.GetConfigDiy("logToDbModules")
+	moduleName := helper.ParseModuleFromRoute(ctx)
+	// tmpIgnoreArr := helper.ArrayMerge(*whiteApiList, *authApiList)
+	url, host, _, method, token, ip := m.getBaseInfo(ctx)
+	// isInArray, _ := helper.InArray(url, tmpIgnoreArr)
+
+	if modules != nil {
+		if res, err := helper.InArray(moduleName, modules); err == nil && res {
+
+			userId, unitId := "", ""
+			if token != "" {
+				brancaData, _ := helper.BrancaDecode(token, moduleName)
+				userId = brancaData.Sub
+				unitId = brancaData.SubUnit
+			}
+			data := dto.ApiLogDto{Uri: url, Host: host, Ip: ip, Method: method, UserId: userId, UnitId: unitId}
+
+			// 加锁操作共享变量
+			cacheMutex.Lock()
+			cacheApiStatistics = append(cacheApiStatistics, data)
+			needFlush := len(cacheApiStatistics) >= maxBatchSize
+			cacheCopy := make([]interface{}, len(cacheApiStatistics))
+			copy(cacheCopy, cacheApiStatistics)
+			cacheMutex.Unlock()
+
+			// 如果达到批量大小则立即发送
+			if needFlush {
+				go mqSendTask(cacheCopy)
+			}
+		}
+	}
+}
+
+func flushCacheIfNeeded() {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
+	if len(cacheApiStatistics) > 0 {
+		mqSendTask(cacheApiStatistics)
+		cacheApiStatistics = make([]interface{}, 0) // 清空缓存
+	}
+}
+
+// mq发送任务
+func mqSendTask(data interface{}) {
+	if data == nil {
+		return
+	}
+	dataNew := data.([]interface{})
+	dataStr, err := json.Marshal(dataNew)
+	if err != nil {
+		global.Log.Error("mqSendTask() json.Marshal err:", err)
+		return
+	}
+	args := []tasks.Arg{{Name: "actionSaveToDbData", Type: "string", Value: dataStr}}
+	(&MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
 }

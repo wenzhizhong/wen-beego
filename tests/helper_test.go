@@ -3,6 +3,7 @@ package tests
 import (
 	"WenBeego/apps/common/helper"
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -74,4 +75,17 @@ func TestRedis(t *testing.T) {
 	fmt.Println(err1, err2, err3)
 	fmt.Println(value1, value2, value3)
 
+}
+
+func Test(t *testing.T) {
+	data1 := helper.Ternary(true, "data_true", "data_false")
+	fmt.Println("data1=", data1)
+	fmt.Println("data1 type=", reflect.TypeOf(data1))
+
+	var1 := "var_1"
+	var2 := "var_2"
+	data2 := helper.TernaryPtr(true, &var1, &var2)
+	fmt.Println("data2=", data2)
+	fmt.Println("data2=", *data2)
+	fmt.Println("data2 type=", reflect.TypeOf(*data2))
 }

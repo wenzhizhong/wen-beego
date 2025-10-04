@@ -19,6 +19,20 @@ import (
 	"github.com/mojocn/base64Captcha"
 )
 
+// 三元运算符-变量原样返回
+func Ternary(condition bool, trueVal, falseVal interface{}) interface{} {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
+func TernaryPtr[T any](condition bool, trueVal, falseVal *T) *T {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
+
 // interface{} 转 map[string]interface{}
 func Interface2MapInterface(i interface{}) (map[string]interface{}, error) {
 	if i == nil {
@@ -141,20 +155,6 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 func VerifyCaptcha(cpatchaType string, id string, answer string) bool {
 	store := captcha_store.Base64CaptchaRedisStore{}
 	return store.Verify(id, answer, true)
-}
-
-// 获取时间戳
-func GetTimestamp() int64 {
-	timezone, _ := global.GetConfigDiy("timezone")
-	loc, _ := time.LoadLocation(timezone.(string))
-	return time.Now().In(loc).Unix()
-}
-
-// 获取时间
-func GetTime() time.Time {
-	timezone, _ := global.GetConfigDiy("timezone")
-	loc, _ := time.LoadLocation(timezone.(string))
-	return time.Now().In(loc)
 }
 
 // 解析字符串模板

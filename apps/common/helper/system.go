@@ -14,7 +14,7 @@ import (
 // ASCII 艺术字符
 func Get_ASCII_ArtisticCharacters() (string, error) {
 	// static/common/text/logo.txt
-	file, err := os.Open("static/common/text/logo.txt")
+	file, err := os.Open("../../static/common/text/logo.txt")
 	if err != nil {
 		return "", errors.New("打开文件错误")
 	}

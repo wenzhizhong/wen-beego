@@ -16,5 +16,5 @@ func (c *BaseController) Prepare() {
 	c.ModuleName = helper.ParseModuleFromRoute(c.Ctx) // 使用正确的context类型
 	// 设置视图路径
 	c.TplExt = "html"
-	c.ViewPath = "apps/" + c.ModuleName + "/views"
+	c.ViewPath = "../../apps/" + c.ModuleName + "/views"
 }

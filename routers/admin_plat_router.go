@@ -11,7 +11,7 @@ import (
 )
 
 // 白名单api
-var WhiteApiList = []string{
+var platWhiteApiList = []string{
 	"/admin_plat/auth/login",
 	"/admin_plat/auth/register",
 	"/admin_plat/auth/forget-password",
@@ -20,10 +20,10 @@ var WhiteApiList = []string{
 }
 
 // 登录后基础api
-var AuthApiList = []string{
+var platAuthApiList = []string{
 	"/admin_plat/auth/logout",
 	"/admin_plat/plat/change-unit",
-	"/admin_plat/plat/get-user-unit",
+	"/admin_plat/plat/get-user-unit-list",
 	"/admin_plat/menu/get-async-routes",
 }
 
@@ -40,12 +40,12 @@ func init() {
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
 		(new(middleware.AccessMiddleware).RouterBefore())(ctx)
-		middleware.AuthAdmin(&WhiteApiList, &AuthApiList)(ctx)
+		middleware.AuthAdmin(&platWhiteApiList, &platAuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
 	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/admin_plat/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/admin_plat/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(&platWhiteApiList, &platAuthApiList), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }

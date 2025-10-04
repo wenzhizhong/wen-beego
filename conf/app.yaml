@@ -36,13 +36,20 @@ redis:
 
 log:
   level: debug
-  path: temp/logs
+  path: ../../temp/logs
+  pathMq: ../../temp/logs-mq
+  pathTerminal: ../../temp/logs-terminal
+  pathUnitTest: ../../temp/logs-unit-test
   maxlines: ""
   maxsize: ""
   daily: true
   maxdays: 15
   rotate: true
   separate: emergency,alert,critical,error,warning,notice,info,debug
+logToDbModules:
+  - "admin_plat"
+  - "admin_mchnt"
+  - "api"
 branca:
   admin_plat:
     iss: wenBeegoAdminPlat
@@ -50,4 +57,16 @@ branca:
     key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
     exp: 86400
     expRemark: 24*60*60
-  
+queue:
+  type: redis
+  default_queue: wen_beego_tasks
+  redis:
+    host: 127.0.0.1
+    dbNum: 0
+    port: 6379
+    password: ""
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    user: guest
+    password: guest

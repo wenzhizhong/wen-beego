@@ -8,6 +8,8 @@ import (
 	"github.com/beego/beego/v2/server/web/context"
 )
 
+var indexWhiteApiList, indexAuthApiList []string
+
 func init() {
 	// beego.Router("/", &indeHome.IndexController{})
 	// beego.Router("/index", &indeHome.IndexController{})
@@ -29,7 +31,7 @@ func init() {
 	// ns.Filter("after", func(ctx *context.Context) {
 	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/index/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/index/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(&indexWhiteApiList, &indexAuthApiList), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }
