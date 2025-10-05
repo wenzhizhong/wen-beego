@@ -1,12 +1,29 @@
 package models
 
+import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
+)
+
+var _ itf.RoleMenuItf = (*MchntRoleMenu)(nil)
+
 type MchntRoleMenu struct {
-	Id          string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
-	RoleId      string `json:"role_id" gorm:"type:bpchar(36);not null;comment:角色ID"`
-	MenuId      string `json:"menu_id" gorm:"type:bpchar(36);not null;comment:菜单权限ID"`
-	MenuPermsId string `json:"menu_perms_id" gorm:"type:varchar(36);not null;comment:资源关联菜单"`
+	base_model.UnitRoleMenu
 }
 
 func (m *MchntRoleMenu) TableName() string {
 	return `mchnt_role_menu`
+}
+
+func (m *MchntRoleMenu) GetId() string {
+	return m.Id
+}
+func (m *MchntRoleMenu) GetRoleId() string {
+	return m.RoleId
+}
+func (m *MchntRoleMenu) GetMenuId() string {
+	return m.MenuId
+}
+func (m *MchntRoleMenu) GetMenuPermsId() string {
+	return m.MenuPermsId
 }

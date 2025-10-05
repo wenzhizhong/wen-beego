@@ -1,19 +1,41 @@
 package models
 
-type PlatUser struct {
-	Id            string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
-	UnitId        string `json:"unit_id" gorm:"type:bpchar(36);not null;comment:组织单位id"`
-	IsDefault     int    `json:"is_default" gorm:"type:int4;default:0;comment:是否默认：0否1是"`
-	DefaultUnitId string `json:"default_unit_id" gorm:"-"`
-	UserId        string `json:"user_id" gorm:"type:bpchar(36);not null;comment:员工id"`
-	Deleted       int    `json:"deleted" gorm:"type:int4;default:0;comment:删除：0否,1是"`
-	Phone         string `json:"phone" gorm:"not null;unique;size:11;comment:手机号"`
-	Name          string `json:"name" gorm:"not null;size:20;comment:姓名"`
-}
+import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
+)
 
-var PLAT_IS_DEFAULT_NO = 0
-var PLAT_IS_DEFAULT_YEs = 1
+var _ itf.UnitUserItf = (*PlatUser)(nil)
+
+type PlatUser struct {
+	base_model.UnitUser
+}
 
 func (m *PlatUser) TableName() string {
 	return `plat_user`
+}
+
+func (m *PlatUser) GetId() string {
+	return m.Id
+}
+func (m *PlatUser) GetUnitId() string {
+	return m.UnitId
+}
+func (m *PlatUser) GetIsDefault() int {
+	return m.IsDefault
+}
+func (m *PlatUser) GetDefaultUnitId() string {
+	return m.DefaultUnitId
+}
+func (m *PlatUser) GetUserId() string {
+	return m.UserId
+}
+func (m *PlatUser) GetDeleted() int {
+	return m.Deleted
+}
+func (m *PlatUser) GetPhone() string {
+	return m.Phone
+}
+func (m *PlatUser) GetName() string {
+	return m.Name
 }

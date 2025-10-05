@@ -1,10 +1,10 @@
 package plat
 
 import (
-	"WenBeego/apps/common/ar"
 	"WenBeego/apps/common/dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models_ar/base_ar"
 	"WenBeego/apps/common/services"
 	"errors"
 )
@@ -18,7 +18,7 @@ func (s *Plat) GetUserUnitList(userId string) (data interface{}, err error) {
 	if userId == "" {
 		return nil, errors.New("获取组织信息失败，请先登录！")
 	}
-	dataList, err := ar.GetUserUnitList(userId, &models.Plat{}, &models.PlatUser{})
+	dataList, err := base_ar.GetUserUnitList(userId, &models.Plat{}, &models.PlatUser{})
 	data = struct {
 		List interface{} `json:"list"`
 	}{
@@ -32,7 +32,7 @@ func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto dto.Ch
 		return nil, errors.New("切换组织失败，请先登录！")
 	}
 
-	unitInfo, err := ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
+	unitInfo, err := base_ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
 	if err != nil {
 		return nil, err
 	}

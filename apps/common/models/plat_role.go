@@ -1,30 +1,51 @@
 package models
 
 import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
 	"time"
 )
 
-type PlatRole struct {
-	Id        string     `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:角色ID"`
-	UnitId    string     `json:"unit_id" gorm:"type:bpchar(36);not null;comment:组织单位id"`
-	RoleName  string     `json:"role_name" gorm:"type:varchar(50);not null;comment:角色名称"`
-	RoleSort  int        `json:"role_sort" gorm:"type:int4;not null;comment:显示顺序"`
-	Status    int        `json:"status" gorm:"type:int4;not null;default:1;comment:角色状态：0停用，1正常"`
-	Deleted   int        `json:"deleted" gorm:"type:int4;default:0;comment:删除：0否,1是"`
-	CreateBy  string     `json:"create_by" gorm:"type:varchar(64);default:'';comment:创建者"`
-	CreatedAt *time.Time `json:"created_at" gorm:"type:timestamp;comment:创建时间"`
-	UpdateBy  string     `json:"update_by" gorm:"type:varchar(64);default:'';comment:更新者"`
-	UpdateAt  *time.Time `json:"updated_at" gorm:"type:timestamp;comment:更新时间"`
-	Remark    string     `json:"remark" gorm:"type:varchar(500);comment:备注"`
-}
+var _ itf.RoleItf = (*PlatRole)(nil)
 
-var PLAT_ROLE_STATUS_NORMAL = 1
-var PLAT_ROLE_STATUS_DISABLE = 0
-var PLAT_ROLE_STATUS_MAP = map[int]string{
-	PLAT_ROLE_STATUS_NORMAL:  "正常",
-	PLAT_ROLE_STATUS_DISABLE: "已禁用",
+type PlatRole struct {
+	base_model.UnitRole
 }
 
 func (m *PlatRole) TableName() string {
 	return `plat_role`
+}
+
+func (m *PlatRole) GetId() string {
+	return m.Id
+}
+func (m *PlatRole) GetUnitId() string {
+	return m.UnitId
+}
+func (m *PlatRole) GetRoleName() string {
+	return m.RoleName
+}
+func (m *PlatRole) GetRoleSort() int {
+	return m.RoleSort
+}
+func (m *PlatRole) GetStatus() int {
+	return m.Status
+}
+func (m *PlatRole) GetDeleted() int {
+	return m.Deleted
+}
+func (m *PlatRole) GetCreatedBy() string {
+	return m.CreatedBy
+}
+func (m *PlatRole) GetCreatedAt() time.Time {
+	return m.CreatedAt
+}
+func (m *PlatRole) GetUpdatedBy() string {
+	return m.UpdatedBy
+}
+func (m *PlatRole) GetUpdatedAt() time.Time {
+	return m.UpdatedAt
+}
+func (m *PlatRole) GetRemark() string {
+	return m.Remark
 }

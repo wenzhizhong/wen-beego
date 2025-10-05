@@ -1,13 +1,32 @@
 package models
 
+import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
+)
+
+var _ itf.UserRoleItf = (*PlatUserRole)(nil)
+
 type PlatUserRole struct {
-	Id      string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
-	UnitId  string `json:"unit_id" gorm:"type:bpchar(36);not null;comment:组织单位id"`
-	UserId  string `json:"user_id" gorm:"type:bpchar(36);not null;comment:员工id"`
-	RoleId  string `json:"role_id" gorm:"type:bpchar(36);not null;comment:员工角色id"`
-	Deleted int64  `json:"deleted" gorm:"type:int4;default:0;comment:删除：0否,1是"`
+	base_model.UnitUserRole
 }
 
 func (m *PlatUserRole) TableName() string {
 	return `plat_user_role`
+}
+
+func (m *PlatUserRole) GetId() string {
+	return m.Id
+}
+func (m *PlatUserRole) GetUnitId() string {
+	return m.UnitId
+}
+func (m *PlatUserRole) GetUserId() string {
+	return m.UserId
+}
+func (m *PlatUserRole) GetRoleId() string {
+	return m.RoleId
+}
+func (m *PlatUserRole) GetDeleted() int {
+	return m.Deleted
 }

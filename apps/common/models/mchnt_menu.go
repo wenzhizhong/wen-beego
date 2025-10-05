@@ -1,25 +1,57 @@
 package models
 
 import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
 	"time"
 )
 
+var _ itf.MenuItf = (*MchntMenu)(nil)
+
 type MchntMenu struct {
-	Id        string    `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
-	UnitId    string    `json:"unit_id" gorm:"type:bpchar(36);not null;comment:plat/mchut id"`
-	Icon      string    `json:"icon" gorm:"type:varchar(50);default:'';comment:图标"`
-	Name      string    `json:"name" gorm:"type:varchar(20);default:'';comment:菜单名称"`
-	ApiPath   string    `json:"api_path" gorm:"type:varchar(255);default:'';comment:API路径"`
-	PagePath  string    `json:"page_path" gorm:"type:varchar(255);default:'';comment:页面路径"`
-	Type      *int16    `json:"type" gorm:"type:int2;default:1;comment:类型"`
-	Pid       string    `json:"pid" gorm:"type:varchar(36);default:'';comment:父级ID"`
-	AllPid    string    `json:"all_pid" gorm:"type:varchar(1000);default:'';comment:所有父级ID"`
-	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"`
-	Weight    *int32    `json:"weight" gorm:"type:int4;default:0;comment:权重"`
-	Visible   int32     `json:"visible" gorm:"type:int4;not null;default:1;comment:是否可见"`
-	Deleted   *int32    `json:"deleted" gorm:"type:int4;default:0;comment:是否删除"`
+	base_model.UnitMenu
 }
 
 func (m *MchntMenu) TableName() string {
 	return `mchnt_menu`
+}
+
+func (m *MchntMenu) GetId() string {
+	return m.Id
+}
+func (m *MchntMenu) GetUnitId() string {
+	return m.UnitId
+}
+func (m *MchntMenu) GetIcon() string {
+	return m.Icon
+}
+func (m *MchntMenu) GetName() string {
+	return m.Name
+}
+func (m *MchntMenu) GetApiPath() string {
+	return m.ApiPath
+}
+func (m *MchntMenu) GetPagePath() string {
+	return m.PagePath
+}
+func (m *MchntMenu) GetType() int {
+	return m.Type
+}
+func (m *MchntMenu) GetPid() string {
+	return m.Pid
+}
+func (m *MchntMenu) GetAllPid() string {
+	return m.AllPid
+}
+func (m *MchntMenu) GetCreatedAt() time.Time {
+	return m.CreatedAt
+}
+func (m *MchntMenu) GetWeight() int {
+	return m.Weight
+}
+func (m *MchntMenu) GetVisible() int {
+	return m.Visible
+}
+func (m *MchntMenu) GetDeleted() int {
+	return m.Deleted
 }

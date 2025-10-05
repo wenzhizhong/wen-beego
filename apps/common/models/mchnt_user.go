@@ -1,19 +1,41 @@
 package models
 
-type MchntUser struct {
-	Id            string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
-	UnitId        string `json:"unit_id" gorm:"type:bpchar(36);not null;comment:组织单位id"`
-	IsDefault     int    `json:"is_default" gorm:"type:int4;default:0;comment:是否默认：0否1是"`
-	DefaultUnitId string `json:"default_unit_id" gorm:"-"`
-	UserId        string `json:"user_id" gorm:"type:bpchar(36);not null;comment:员工id"`
-	Deleted       int    `json:"deleted" gorm:"type:int4;default:0;comment:删除：0否,1是"`
-	Phone         string `json:"phone" gorm:"not null;unique;size:11;comment:手机号"`
-	Name          string `json:"name" gorm:"not null;size:20;comment:姓名"`
-}
+import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
+)
 
-var MCHNT_IS_DEFAULT_NO = 0
-var MCHNT_IS_DEFAULT_YES = 1
+var _ itf.UnitUserItf = (*MchntUser)(nil)
+
+type MchntUser struct {
+	base_model.UnitUser
+}
 
 func (m *MchntUser) TableName() string {
 	return `mchnt_user`
+}
+
+func (m *MchntUser) GetId() string {
+	return m.Id
+}
+func (m *MchntUser) GetUnitId() string {
+	return m.UnitId
+}
+func (m *MchntUser) GetIsDefault() int {
+	return m.IsDefault
+}
+func (m *MchntUser) GetDefaultUnitId() string {
+	return m.DefaultUnitId
+}
+func (m *MchntUser) GetUserId() string {
+	return m.UserId
+}
+func (m *MchntUser) GetDeleted() int {
+	return m.Deleted
+}
+func (m *MchntUser) GetPhone() string {
+	return m.Phone
+}
+func (m *MchntUser) GetName() string {
+	return m.Name
 }

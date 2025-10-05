@@ -79,7 +79,7 @@ func TestRedis(t *testing.T) {
 
 func Test(t *testing.T) {
 	data1 := helper.Ternary(true, "data_true", "data_false")
-	fmt.Println("data1=", data1)
+	fmt.Println("data1=", data1+"1")
 	fmt.Println("data1 type=", reflect.TypeOf(data1))
 
 	var1 := "var_1"

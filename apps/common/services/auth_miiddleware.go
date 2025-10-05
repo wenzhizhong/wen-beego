@@ -1,9 +1,10 @@
 package services
 
 import (
-	"WenBeego/apps/common/ar"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 	"strconv"
 	"strings"
@@ -91,58 +92,35 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	exits, err := helper.RedisGet(redisKey)
 	if err == nil && exits != "" {
 		index, _ := strconv.Atoi(exits)
-		if moduleName == "admin_plat" {
-			status = exits == strconv.Itoa(models.PLAT_USER_PROFILE_STATUS_NORMAL)
-			if !status {
-				err = errors.New("用户" + models.PLAT_USER_PROFILE_STATUS_MAP[index])
-			}
-		} else {
-			status = exits == strconv.Itoa(models.MCHNT_USER_PROFILE_STATUS_NORMAL)
-			if !status {
-				err = errors.New("用户" + models.MCHNT_USER_PROFILE_STATUS_MAP[index])
-			}
+		status = exits == strconv.Itoa(base_model.UNIT_USER_PROFILE_NORMAL)
+		if !status {
+			err = errors.New("用户" + base_model.UNIT_USER_PROFILE_MAP[index])
 		}
 		return
 	} else if err != nil {
 		return
 	}
 
-	var data interface{}
+	var data base_model.UnitUserProfile
 	if moduleName == "admin_plat" {
-		data, err = ar.GetUserProfileOfUnitById[*models.PlatUser, *models.PlatUserProfile](userId, unitId)
+		data, err = base_ar.GetUserProfileOfUnitById[*models.PlatUser, *models.PlatUserProfile](userId, unitId)
 	} else {
-		data, err = ar.GetUserProfileOfUnitById[*models.MchntUser, *models.MchntUserProfile](userId, unitId)
+		data, err = base_ar.GetUserProfileOfUnitById[*models.MchntUser, *models.MchntUserProfile](userId, unitId)
 	}
 	if err != nil {
 		return
 	}
-	if data == nil {
+	if data.Id == "" {
 		err = errors.New("用户资料信息不存在")
 		return
 	}
 
-	tmpStatus := -1
-	switch v := data.(type) {
-	case *models.PlatUserProfile:
-		tmpStatus = v.Status
-		status = v.Status == models.PLAT_USER_PROFILE_STATUS_NORMAL
-		if !status {
-			err = errors.New("用户" + models.PLAT_USER_PROFILE_STATUS_MAP[v.Status])
-		}
-	case *models.MchntUserProfile:
-		tmpStatus = v.Status
-		status = v.Status == models.MCHNT_USER_PROFILE_STATUS_NORMAL
-		if !status {
-			err = errors.New("用户" + models.MCHNT_USER_PROFILE_STATUS_MAP[v.Status])
-		}
-	default:
-		err = errors.New("未知的单位用户信息类型")
-	}
-	if err != nil {
+	if !(data.Status == base_model.UNIT_USER_PROFILE_NORMAL) {
+		err = errors.New("用户" + base_model.UNIT_USER_PROFILE_MAP[data.Status])
 		return
 	}
 
-	err = helper.RedisPut(redisKey, tmpStatus, 4*60*60)
+	err = helper.RedisPut(redisKey, data.Status, 4*60*60)
 	return
 }
 
@@ -153,14 +131,14 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 	if err == nil && exits != "" {
 		index, _ := strconv.Atoi(exits)
 		if moduleName == "admin_plat" {
-			status = exits == strconv.Itoa(models.PLAT_STATUS_PASSED)
+			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
 			if !status {
-				err = errors.New("用户" + models.PLAT_STATUS_MAP[index])
+				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
 		} else {
-			status = exits == strconv.Itoa(models.MCHNT_STATUS_PASSED)
+			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
 			if !status {
-				err = errors.New("用户" + models.MCHNT_STATUS_MAP[index])
+				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
 		}
 		return
@@ -170,9 +148,9 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 
 	var data interface{}
 	if moduleName == "admin_plat" {
-		data, err = ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
+		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
 	} else {
-		data, err = ar.GetUserUnitById(userId, unitId, &models.Mchnt{}, &models.MchntUser{})
+		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Mchnt{}, &models.MchntUser{})
 	}
 	if err != nil {
 		return
@@ -210,57 +188,32 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, userId string, u
 	exits, err := helper.RedisGet(redisKey)
 	if err == nil && exits != "" {
 		index, _ := strconv.Atoi(exits)
-		if moduleName == "admin_plat" {
-			status = exits == strconv.Itoa(models.PLAT_ROLE_STATUS_NORMAL)
-			if !status {
-				err = errors.New("用户" + models.PLAT_ROLE_STATUS_MAP[index])
-			}
-		} else {
-			status = exits == strconv.Itoa(models.MCHNT_ROLE_STATUS_NORMAL)
-			if !status {
-				err = errors.New("用户" + models.MCHNT_ROLE_STATUS_MAP[index])
-			}
+
+		status = exits == strconv.Itoa(base_model.UNIT_ROLE_STATUS_NORMAL)
+		if !status {
+			err = errors.New("用户" + base_model.UNIT_ROLE_STATUS_MAP[index])
 		}
 		return
 	}
 
-	var datas []interface{}
+	var roles []base_model.UnitRole
 	if moduleName == "admin_plat" {
-		result, tmpErr := ar.GetUserRole(moduleName, unitId, userId, &models.PlatUserRole{}, &models.PlatRole{})
-		err = tmpErr
-		if err == nil && result != nil {
-			for _, item := range result {
-				datas = append(datas, item)
-			}
-		}
-
+		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.PlatUserRole{}, &models.PlatRole{})
 	} else {
-		result, tmpErr := ar.GetUserRole(moduleName, unitId, userId, &models.MchntUserRole{}, &models.MchntRole{})
-		err = tmpErr
-		if err == nil && result != nil {
-			for _, item := range result {
-				datas = append(datas, item)
-			}
-		}
+		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.MchntUserRole{}, &models.MchntRole{})
 	}
 	if err != nil {
 		return
 	}
-	if len(datas) == 0 {
+	if len(roles) == 0 {
 		err = errors.New("用户角色不存在")
 		return
 	}
 
 	tmpStatus := -1
-	for _, item := range datas {
-		switch v := item.(type) {
-		case *models.PlatRole:
-			tmpStatus = v.Status
-			status = v.Status == models.PLAT_ROLE_STATUS_NORMAL
-		case *models.MchntRole:
-			tmpStatus = v.Status
-			status = v.Status == models.MCHNT_ROLE_STATUS_NORMAL
-		}
+	for _, item := range roles {
+		tmpStatus = item.Status
+		status = item.Status == base_model.UNIT_ROLE_STATUS_NORMAL
 		if status {
 			break
 		}
@@ -285,11 +238,11 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId stri
 			tmpMap[item] = true
 		}
 	} else {
-		var permissions []map[string]interface{}
+		var permissions []base_model.UnitMenuPerms
 		if moduleName == "admin_plat" {
-			permissions, err = ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		} else {
-			permissions, err = ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		}
 		if err != nil {
 			return
@@ -301,7 +254,7 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId stri
 
 		keys := make([]string, len(permissions))
 		for _, item := range permissions {
-			key := item["uri"].(string)
+			key := item.Uri
 			keys = append(keys, key)
 			tmpMap[key] = true
 		}

@@ -1,15 +1,36 @@
 package models
 
+import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
+)
+
+var _ itf.ApiStatisticsItf = (*PlatApiStatistics)(nil)
+
 type PlatApiStatistics struct {
-	ID      string `gorm:"column:id;type:bpchar(36);primaryKey" json:"id"`             // ID
-	PermsID string `gorm:"column:perms_id;type:bpchar(36);default:''" json:"perms_id"` // menu_perms.id
-	URI     string `gorm:"column:uri;type:varchar;not null;default:''" json:"uri"`     // URI
-	PV      int64  `gorm:"column:pv;type:int8;not null;default:0" json:"pv"`           // 当日PV
-	UV      int64  `gorm:"column:uv;type:int8;not null;default:0" json:"uv"`           // 单日UV
-	Date    int64  `gorm:"column:date;type:int8;not null" json:"date"`                 // 日期
+	base_model.UnitApiStatistics
 }
 
 // TableName 指定表名
 func (m *PlatApiStatistics) TableName() string {
 	return "plat_api_statistics"
+}
+
+func (m *PlatApiStatistics) GetID() string {
+	return m.ID
+}
+func (m *PlatApiStatistics) GetPermsID() string {
+	return m.PermsID
+}
+func (m *PlatApiStatistics) GetURI() string {
+	return m.URI
+}
+func (m *PlatApiStatistics) GetPV() int64 {
+	return m.PV
+}
+func (m *PlatApiStatistics) GetUV() int64 {
+	return m.UV
+}
+func (m *PlatApiStatistics) GetDate() int64 {
+	return m.Date
 }

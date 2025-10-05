@@ -1,53 +1,101 @@
 package models
 
 import (
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
 	"time"
 
 	"gorm.io/gorm"
 )
 
+var _ itf.UserProfileItf = (*MchntUserProfile)(nil)
+
 type MchntUserProfile struct {
-	Id                string         `json:"id" gorm:"not null;primaryKey;type:bpchar(36);comment:ID"`
-	Avatar            string         `json:"avatar" gorm:"size:255;comment:头像"`
-	CardType          int            `json:"card_type" gorm:"type:int2;comment:1大陆身份证2港澳台身份证3护照4军官证5其它"`
-	CardNum           string         `json:"card_num" gorm:"size:100;comment:证件号码"`
-	CardImages        string         `json:"card_images" gorm:"size:1000;comment:证件照片"`
-	Gender            int            `json:"gender" gorm:"comment:性别:1男，2女"`
-	BirthDate         time.Time      `json:"birth_date" gorm:"type:date;comment:出生日期"`
-	Constellation     string         `json:"constellation" gorm:"size:50;comment:星座"`
-	Occupation        string         `json:"occupation" gorm:"size:50;comment:职业"`
-	Company           string         `json:"company" gorm:"size:500;comment:所属公司名称"`
-	EmergencyName     string         `json:"emergency_name" gorm:"size:50;comment:紧急联系人姓名"`
-	EmergencyTel      string         `json:"emergency_tel" gorm:"size:100;comment:紧急联系人电话"`
-	Address           string         `json:"address" gorm:"size:200;comment:通讯地址"`
-	EMail             string         `json:"e_mail" gorm:"size:50;comment:邮箱"`
-	Source            string         `json:"source" gorm:"not null;default:'微信';comment:来源：微信,web,其它,app"`
-	Headimgurl        string         `json:"headimgurl" gorm:"size:500;comment:头像"`
-	ValidDateBegin    time.Time      `json:"valid_date_begin" gorm:"comment:身份证有效期开始时间"`
-	ValidDateEnd      time.Time      `json:"valid_date_end" gorm:"comment:身份证有效期截止时间"`
-	Schooling         string         `json:"schooling" gorm:"size:100;comment:学历"`
-	DegreeNumber      string         `json:"degree_number" gorm:"size:100;comment:学位编号"`
-	LearnProfessional string         `json:"learn_professional" gorm:"size:100;comment:所学专业"`
-	Professional      string         `json:"professional" gorm:"size:100;comment:职业"`
-	Status            int            `json:"status" gorm:"not null;default:1;comment:用户行为状态：1正常，2已注销，组织单位状态：1正常，3禁用，4离职"`
-	CreatedAt         time.Time      `json:"created_at" gorm:"default:CURRENT_TIMESTAMP;comment:记录创建时间"`
-	UpdatedAt         time.Time      `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP;comment:记录修改时间"`
-	DeletedAt         gorm.DeletedAt `json:"deleted_at" gorm:"comment:记录删除时间"`
-	Deleted           bool           `json:"deleted" gorm:"not null;default:0;comment:是否删除"`
-}
-
-var MCHNT_USER_PROFILE_STATUS_NORMAL = 1
-var MCHNT_USER_PROFILE_STATUS_CANCLED = 2
-var MCHNT_USER_PROFILE_STATUS_DISABLED = 3
-var MCHNT_USER_PROFILE_STATUS_LEAVE = 4
-
-var MCHNT_USER_PROFILE_STATUS_MAP = map[int]string{
-	MCHNT_USER_PROFILE_STATUS_NORMAL:   "正常",
-	MCHNT_USER_PROFILE_STATUS_CANCLED:  "已注销",
-	MCHNT_USER_PROFILE_STATUS_DISABLED: "已禁用",
-	MCHNT_USER_PROFILE_STATUS_LEAVE:    "已离职",
+	base_model.UnitUserProfile
 }
 
 func (m *MchntUserProfile) TableName() string {
 	return `mchnt_user_profile`
+}
+
+func (m *MchntUserProfile) GetId() string {
+	return m.Id
+}
+func (m *MchntUserProfile) GetAvatar() string {
+	return m.Avatar
+}
+func (m *MchntUserProfile) GetCardType() int {
+	return m.CardType
+}
+func (m *MchntUserProfile) GetCardNum() string {
+	return m.CardNum
+}
+func (m *MchntUserProfile) GetCardImages() string {
+	return m.CardImages
+}
+func (m *MchntUserProfile) GetGender() int {
+	return m.Gender
+}
+func (m *MchntUserProfile) GetBirthDate() time.Time {
+	return m.BirthDate
+}
+func (m *MchntUserProfile) GetConstellation() string {
+	return m.Constellation
+}
+func (m *MchntUserProfile) GetOccupation() string {
+	return m.Occupation
+}
+func (m *MchntUserProfile) GetCompany() string {
+	return m.Company
+}
+func (m *MchntUserProfile) GetEmergencyName() string {
+	return m.EmergencyName
+}
+func (m *MchntUserProfile) GetEmergencyTel() string {
+	return m.EmergencyTel
+}
+func (m *MchntUserProfile) GetAddress() string {
+	return m.Address
+}
+func (m *MchntUserProfile) GetEMail() string {
+	return m.EMail
+}
+func (m *MchntUserProfile) GetSource() string {
+	return m.Source
+}
+func (m *MchntUserProfile) GetHeadimgurl() string {
+	return m.Headimgurl
+}
+func (m *MchntUserProfile) GetValidDateBegin() time.Time {
+	return m.ValidDateBegin
+}
+func (m *MchntUserProfile) GetValidDateEnd() time.Time {
+	return m.ValidDateEnd
+}
+func (m *MchntUserProfile) GetSchooling() string {
+	return m.Schooling
+}
+func (m *MchntUserProfile) GetDegreeNumber() string {
+	return m.DegreeNumber
+}
+func (m *MchntUserProfile) GetLearnProfessional() string {
+	return m.LearnProfessional
+}
+func (m *MchntUserProfile) GetProfessional() string {
+	return m.Professional
+}
+func (m *MchntUserProfile) GetStatus() int {
+	return m.Status
+}
+func (m *MchntUserProfile) GetCreatedAt() time.Time {
+	return m.CreatedAt
+}
+func (m *MchntUserProfile) GetUpdatedAt() time.Time {
+	return m.UpdatedAt
+}
+func (m *MchntUserProfile) GetDeletedAt() gorm.DeletedAt {
+	return m.DeletedAt
+}
+func (m *MchntUserProfile) GetDeleted() int {
+	return m.Deleted
 }

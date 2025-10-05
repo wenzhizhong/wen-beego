@@ -1,10 +1,12 @@
 package services
 
 import (
-	"WenBeego/apps/common/ar"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models_ar"
+	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 	"strings"
 
@@ -14,8 +16,8 @@ import (
 )
 
 type CommonAuth struct {
-	userAr        ar.UserAr
-	userProfileAr ar.UserProfileAr
+	userAr        models_ar.UserAr
+	userProfileAr models_ar.UserProfileAr
 }
 
 // 登录
@@ -208,7 +210,6 @@ func (s *CommonAuth) getAndCheckUserProfile(userId string) (*models.UserProfile,
  * 获取后台管理用户信息
  */
 func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.UserLoginInfoDto, error) {
-	defualtUnitId := ""
 	perms := []string{}
 	rolesClassifies := []string{}
 
@@ -224,13 +225,12 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 	if err != nil && !helper.DbNotFound(err) {
 		return nil, err
 	}
-	if defualtUnit["id"] != nil {
-		defualtUnitId = defualtUnit["id"].(string)
-		rolesClassifies, _, err = s.getUserRolesClassifies(moduleName, defualtUnitId, userId)
+	if defualtUnit.Id != "" {
+		rolesClassifies, _, err = s.getUserRolesClassifies(moduleName, defualtUnit.Id, userId)
 		if err != nil {
 			return nil, err
 		}
-		perms, err = s.GetUserPermissions(moduleName, defualtUnitId, userId)
+		perms, err = s.GetUserPermissions(moduleName, defualtUnit.Id, userId)
 		if err != nil {
 			return nil, err
 		}
@@ -244,7 +244,7 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 	brancaData.Aud = aud.(string)
 	brancaData.Iss = iss.(string)
 	brancaData.Sub = user.Id
-	brancaData.SubUnit = defualtUnitId
+	brancaData.SubUnit = defualtUnit.Id
 	brancaData.Role = helper.Md5(strings.Join(rolesClassifies, ";"))
 	brancaData.Scope = helper.Md5(strings.Join(perms, ";"))
 	brancaData.Exp = cutTime + int64(exp.(int))
@@ -270,7 +270,7 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 	loginInfo.UserInfo.Expires = brancaData.Exp * 1000
 	loginInfo.UserInfo.AccessToken = token
 	loginInfo.UserInfo.RefreshToken = refreshToken
-	loginInfo.UserInfo.DefaultUnitId = defualtUnitId
+	loginInfo.UserInfo.DefaultUnitId = defualtUnit.Id
 	loginInfo.UserInfo.Permissions = perms
 	loginInfo.UserInfo.Roles = rolesClassifies
 	loginInfo.UnitInfo = defualtUnit
@@ -334,11 +334,11 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 }
 
 // 获取用户默认组织
-func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData map[string]interface{}, err error) {
+func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData base_model.Unit, err error) {
 	if moduleName == "admin_plat" {
-		unitUserData, err = ar.GetUserDefaultUnit[*models.Plat, *models.PlatUser](userId)
+		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Plat, *models.PlatUser](userId)
 	} else {
-		unitUserData, err = ar.GetUserDefaultUnit[*models.Mchnt, *models.MchntUser](userId)
+		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Mchnt, *models.MchntUser](userId)
 	}
 	return unitUserData, err
 }
@@ -355,15 +355,15 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
 	if unitId == "" {
 		return
 	}
-	var dataList []map[string]interface{}
+	var roleClassifies []base_model.UnitRoleClassify
 	if moduleName == "admin_plat" {
-		dataList, err = ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
 	} else {
-		dataList, err = ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	}
 
-	for _, data := range dataList {
-		roleName := data["name"].(string)
+	for _, roleClassify := range roleClassifies {
+		roleName := roleClassify.Name
 		rolesClassifies = append(rolesClassifies, roleName)
 		if roleName == "admin" {
 			isAdmin = true
@@ -384,15 +384,15 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
  */
 func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId string) (perms []string, err error) {
 
-	var permissions []map[string]interface{}
+	var permissions []base_model.UnitMenuPerms
 	if moduleName == "admin_plat" {
-		permissions, err = ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 	} else {
-		permissions, err = ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 	}
 
 	for _, permission := range permissions {
-		perms = append(perms, permission["permission"].(string))
+		perms = append(perms, permission.Permission)
 	}
 
 	return perms, err

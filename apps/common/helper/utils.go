@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/middleware/captcha_store"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/itf"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
@@ -19,14 +20,40 @@ import (
 	"github.com/mojocn/base64Captcha"
 )
 
-// 三元运算符-变量原样返回
-func Ternary(condition bool, trueVal, falseVal interface{}) interface{} {
+// Ternary 泛型三元运算符
+func Ternary[T any](condition bool, trueVal, falseVal T) T {
 	if condition {
 		return trueVal
 	}
 	return falseVal
 }
+
+// 指针版本（避免值复制）
 func TernaryPtr[T any](condition bool, trueVal, falseVal *T) *T {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
+
+// 字符串专用
+func StringTernary(condition bool, trueVal, falseVal string) string {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
+
+// 整数专用
+func IntTernary(condition bool, trueVal, falseVal int) int {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
+
+// 布尔专用
+func BoolTernary(condition bool, trueVal, falseVal bool) bool {
 	if condition {
 		return trueVal
 	}
@@ -183,7 +210,7 @@ func IsAdmin(moduleName string, unitId string, userId string) bool {
 }
 
 // 获取管理员用户
-func getAdminData[RoleClassifyModel interface{ TableName() string }, RoleModel interface{ TableName() string }, UserRoleModel interface{ TableName() string }](unitId string, userId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) bool {
+func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, UserRoleModel itf.UserRoleItf](unitId string, userId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) bool {
 	tableClassify := roleClassify.TableName()
 	tableRole := role.TableName()
 	tableUserRole := userRoleModel.TableName()

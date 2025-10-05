@@ -1,14 +1,16 @@
 package services
 
 import (
-	"WenBeego/apps/common/ar"
 	"WenBeego/apps/common/dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models_ar"
+	"WenBeego/apps/common/models_ar/base_ar"
 )
 
 type CommonMenu struct {
-	PlatMenuAr ar.PlatMenuAr
+	PlatMenuAr models_ar.PlatMenuAr
 }
 
 /**
@@ -24,28 +26,28 @@ type CommonMenu struct {
  */
 func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []dto.RoleMenuDto, err error) {
 
-	var permissions []map[string]interface{}
-	var roleClassifies []map[string]interface{}
+	var permissions []base_model.UnitMenuPerms
+	var roleClassifies []base_model.UnitRoleClassify
 	if moduleName == "admin_plat" {
-		menuAuthList, err = ar.GetUserMenu(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		permissions, err = ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		roleClassifies, err = ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
 	} else {
-		menuAuthList, err = ar.GetUserMenu(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		permissions, err = ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		roleClassifies, err = ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	}
 
 	if err != nil && !helper.DbNotFound(err) {
@@ -56,15 +58,15 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId str
 		permissionsMap := make(map[string]map[string]string)
 		roleClassifiesMap := make(map[string]string)
 		for _, permission := range permissions {
-			menuId := permission["menu_id"].(string)
-			perm := permission["permission"].(string)
+			menuId := permission.MenuId
+			perm := permission.Permission
 			if _, exists := permissionsMap[menuId]; !exists {
 				permissionsMap[menuId] = make(map[string]string)
 			}
 			permissionsMap[menuId][perm] = perm
 		}
 		for _, roleClassify := range roleClassifies {
-			roleClassifiesMap[roleClassify["name"].(string)] = roleClassify["name"].(string)
+			roleClassifiesMap[roleClassify.Name] = roleClassify.Name
 		}
 		roleClassifiesKeys := helper.GetMapKeys(roleClassifiesMap)
 		for i, menu := range menuAuthList {
