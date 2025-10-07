@@ -6,7 +6,9 @@ type ApiStatisticsItf interface {
 	GetID() string
 	GetPermsID() string
 	GetURI() string
-	GetPV() int64
-	GetUV() int64
+	GetPV() int
+	GetUV() int
 	GetDate() int64
+	GetUnitId() string
+	GetModulename() string
 }

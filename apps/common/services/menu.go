@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/models_ar/base_ar"
+	"errors"
 )
 
 type CommonMenu struct {
@@ -38,7 +39,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId str
 			return
 		}
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
@@ -48,6 +49,8 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId str
 			return
 		}
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
+	} else {
+		err = errors.New("未知的模块名称")
 	}
 
 	if err != nil && !helper.DbNotFound(err) {

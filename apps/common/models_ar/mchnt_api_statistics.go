@@ -4,6 +4,6 @@ import (
 	"WenBeego/apps/common/models"
 )
 
-type MchntApiStatisticsAr struct {
-	models.MchntApiStatistics
+type PlatApiStatisticsAr struct {
+	models.PlatApiStatistics
 }

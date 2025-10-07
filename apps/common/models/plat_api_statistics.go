@@ -25,12 +25,20 @@ func (m *PlatApiStatistics) GetPermsID() string {
 func (m *PlatApiStatistics) GetURI() string {
 	return m.URI
 }
-func (m *PlatApiStatistics) GetPV() int64 {
+func (m *PlatApiStatistics) GetPV() int {
 	return m.PV
 }
-func (m *PlatApiStatistics) GetUV() int64 {
+func (m *PlatApiStatistics) GetUV() int {
 	return m.UV
 }
 func (m *PlatApiStatistics) GetDate() int64 {
 	return m.Date
+}
+
+func (m *PlatApiStatistics) GetUnitId() string {
+	return m.UnitId
+}
+
+func (m *PlatApiStatistics) GetModulename() string {
+	return m.Modulename
 }

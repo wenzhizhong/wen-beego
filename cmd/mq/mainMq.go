@@ -38,8 +38,7 @@ func main() {
 	// 注册任务
 	for _, task := range tasks {
 		mqServer.RegisterTask(task.Name, func(args ...interface{}) error {
-			reflectCallback(task.CallBack, args)
-			return nil
+			return reflectCallback(task.CallBack, args)
 		})
 	}
 
@@ -67,7 +66,7 @@ func reflectCallback(f interface{}, args interface{}) error {
 	callbackValue := reflect.ValueOf(f)
 	// 检查是否是函数类型
 	if callbackValue.Kind() != reflect.Func {
-		err := errors.New("Callback is not a function")
+		err := errors.New("callback is not a function")
 		return err
 	}
 	funcObj := runtime.FuncForPC(callbackValue.Pointer())
@@ -131,6 +130,11 @@ func reflectCallback(f interface{}, args interface{}) error {
 		}
 	}
 
-	callbackValue.Call(in)
+	res := callbackValue.Call(in)
+	if len(res) > 0 {
+		if err, ok := res[0].Interface().(error); ok {
+			return err
+		}
+	}
 	return nil
 }

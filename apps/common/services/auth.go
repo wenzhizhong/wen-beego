@@ -337,8 +337,10 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData base_model.Unit, err error) {
 	if moduleName == "admin_plat" {
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Plat, *models.PlatUser](userId)
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Mchnt, *models.MchntUser](userId)
+	} else {
+		err = errors.New("模块名称错误")
 	}
 	return unitUserData, err
 }
@@ -358,8 +360,10 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
 	var roleClassifies []base_model.UnitRoleClassify
 	if moduleName == "admin_plat" {
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
+	} else {
+		err = errors.New("模块名称错误")
 	}
 
 	for _, roleClassify := range roleClassifies {
@@ -387,8 +391,10 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId
 	var permissions []base_model.UnitMenuPerms
 	if moduleName == "admin_plat" {
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+	} else {
+		err = errors.New("模块名称错误")
 	}
 
 	for _, permission := range permissions {

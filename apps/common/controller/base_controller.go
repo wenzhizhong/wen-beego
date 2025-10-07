@@ -13,7 +13,7 @@ type BaseController struct {
 
 func (c *BaseController) Prepare() {
 	// 从路由中解析模块名
-	c.ModuleName = helper.ParseModuleFromRoute(c.Ctx) // 使用正确的context类型
+	c.ModuleName = helper.ParseModuleFromRoute(c.Ctx.Request.URL.Path) // 使用正确的context类型
 	// 设置视图路径
 	c.TplExt = "html"
 	c.ViewPath = "../../apps/" + c.ModuleName + "/views"

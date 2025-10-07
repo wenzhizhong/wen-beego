@@ -78,7 +78,7 @@ func (m *AccessMiddleware) getBaseInfo(ctx *beecontext.Context) (url, host, shce
 // api 统计
 func (m *AccessMiddleware) statisticsApiLog(ctx *beecontext.Context, whiteApiList *[]string, authApiList *[]string) {
 	modules, _ := global.GetConfigDiy("logToDbModules")
-	moduleName := helper.ParseModuleFromRoute(ctx)
+	moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
 	// tmpIgnoreArr := helper.ArrayMerge(*whiteApiList, *authApiList)
 	url, host, _, method, token, ip := m.getBaseInfo(ctx)
 	// isInArray, _ := helper.InArray(url, tmpIgnoreArr)

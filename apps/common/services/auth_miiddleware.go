@@ -104,8 +104,10 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	var data base_model.UnitUserProfile
 	if moduleName == "admin_plat" {
 		data, err = base_ar.GetUserProfileOfUnitById[*models.PlatUser, *models.PlatUserProfile](userId, unitId)
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		data, err = base_ar.GetUserProfileOfUnitById[*models.MchntUser, *models.MchntUserProfile](userId, unitId)
+	} else {
+		err = errors.New("未知的模块名称")
 	}
 	if err != nil {
 		return
@@ -135,11 +137,13 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
-		} else {
+		} else if moduleName == "admin_mchnt" {
 			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
+		} else {
+			err = errors.New("未知的模块名称")
 		}
 		return
 	} else if err != nil {
@@ -149,8 +153,10 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 	var data interface{}
 	if moduleName == "admin_plat" {
 		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Mchnt{}, &models.MchntUser{})
+	} else {
+		err = errors.New("未知的模块名称")
 	}
 	if err != nil {
 		return
@@ -199,8 +205,10 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, userId string, u
 	var roles []base_model.UnitRole
 	if moduleName == "admin_plat" {
 		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.PlatUserRole{}, &models.PlatRole{})
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.MchntUserRole{}, &models.MchntRole{})
+	} else {
+		err = errors.New("未知的模块名称")
 	}
 	if err != nil {
 		return
@@ -241,8 +249,10 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId stri
 		var permissions []base_model.UnitMenuPerms
 		if moduleName == "admin_plat" {
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-		} else {
+		} else if moduleName == "admin_mchnt" {
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		} else {
+			err = errors.New("未知的模块名称")
 		}
 		if err != nil {
 			return

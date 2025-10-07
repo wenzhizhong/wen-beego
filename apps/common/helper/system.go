@@ -7,8 +7,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	"github.com/beego/beego/v2/server/web/context"
 )
 
 // ASCII 艺术字符
@@ -56,8 +54,7 @@ func AppRunmode() (string, error) {
 }
 
 // 从路由路径解析模块名
-func ParseModuleFromRoute(ctx *context.Context) string {
-	path := ctx.Request.URL.Path
+func ParseModuleFromRoute(path string) string {
 	path = strings.TrimPrefix(path, "/")
 	parts := strings.Split(path, "/")
 

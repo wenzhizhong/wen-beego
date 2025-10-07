@@ -23,7 +23,7 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		}
 
 		// 验证:认证token是否有效
-		moduleName := helper.ParseModuleFromRoute(ctx)
+		moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
 		brancaData, err := checkToken(ctx, moduleName)
 		if err != nil {
 			return

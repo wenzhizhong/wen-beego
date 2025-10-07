@@ -204,8 +204,10 @@ func ParseStringTpl(tpl string, data any) (str string, err error) {
 func IsAdmin(moduleName string, unitId string, userId string) bool {
 	if moduleName == "admin_plat" {
 		return getAdminData(unitId, userId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
-	} else {
+	} else if moduleName == "admin_mchnt" {
 		return getAdminData(unitId, userId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
+	} else {
+		return false
 	}
 }
 

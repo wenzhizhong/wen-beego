@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/global"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/hako/branca"
 )
@@ -37,6 +38,7 @@ func BrancaEncode(data BrancaData, moduleName string) (string, error) {
 
 // decode
 func BrancaDecode(needDecodeString string, moduleName string) (BrancaData, error) {
+	needDecodeString = strings.TrimPrefix(needDecodeString, "Bearer ")
 	key, err := getBranceKey(moduleName)
 	if err != nil {
 		return BrancaData{}, err

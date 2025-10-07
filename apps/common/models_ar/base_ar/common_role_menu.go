@@ -172,3 +172,17 @@ func GetUserPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf, 
 	}
 	return
 }
+
+// 获取单位权限列表
+func GetUnitPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf](unitId string, menuModel MenuModel, menuPermsModel MenuPermsModel) (menuPermsList []base_model.UnitMenuPerms, err error) {
+	tablePermsName := menuPermsModel.TableName()
+	tableMenuName := menuModel.TableName()
+	err = global.GetReadDb().
+		Model(menuPermsModel).
+		Select(tablePermsName+".*").
+		Joins("inner join "+tableMenuName+" on "+tableMenuName+".id = "+tablePermsName+".menu_id").
+		Where(tableMenuName+".unit_id = ?", unitId).
+		Where(tablePermsName+".deleted = ?", 0).
+		Find(&menuPermsList).Error
+	return
+}

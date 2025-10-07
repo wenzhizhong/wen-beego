@@ -25,12 +25,18 @@ func (m *MchntApiStatistics) GetPermsID() string {
 func (m *MchntApiStatistics) GetURI() string {
 	return m.URI
 }
-func (m *MchntApiStatistics) GetPV() int64 {
+func (m *MchntApiStatistics) GetPV() int {
 	return m.PV
 }
-func (m *MchntApiStatistics) GetUV() int64 {
+func (m *MchntApiStatistics) GetUV() int {
 	return m.UV
 }
 func (m *MchntApiStatistics) GetDate() int64 {
 	return m.Date
+}
+func (m *MchntApiStatistics) GetUnitId() string {
+	return m.UnitId
+}
+func (m *MchntApiStatistics) GetModulename() string {
+	return m.Modulename
 }
