@@ -39,10 +39,25 @@ func (mq *MqServer) RegisterTask(funcName string, funcCallBack func(...any) erro
 
 // 获取配置
 func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
-	tmpQueueType, err := beego.AppConfig.DIY("queue.type")
-	if err != nil {
+	tmpQueueType, err1 := beego.AppConfig.DIY("queue.type")
+	runMode, err2 := helper.AppRunmode()
+	tmpDefaultQueue, err3 := beego.AppConfig.DIY("queue.default_queue")
+	if err1 != nil {
+		err = err1
 		return cnf, err
 	}
+	if err2 != nil {
+		err = err2
+		return cnf, err
+	}
+	if err3 != nil {
+		err = err3
+		return cnf, err
+	}
+	cnf = &config.Config{
+		DefaultQueue: tmpDefaultQueue.(string) + "_" + runMode,
+	}
+
 	var brokerURL string
 	queueType, _ := tmpQueueType.(string)
 	switch queueType {
@@ -67,7 +82,8 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 			password = tmpRedisMap["password"].(string)
 			brokerURL = fmt.Sprintf("redis://%s@%s:%d/%d", password, host, port, dbNum)
 		}
-
+		cnf.Broker = brokerURL
+		cnf.ResultBackend = brokerURL
 	case "rabbitmq":
 		tmpRabbitMQ, err := beego.AppConfig.DIY("queue.rabbitmq")
 		if err != nil {
@@ -84,23 +100,23 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		password := tmpRabitMqConfig["password"].(string)
 		host := tmpRabitMqConfig["host"].(string)
 		port := tmpRabitMqConfig["port"].(int)
+		exchange := tmpRabitMqConfig["exchange"].(string)
+		exchangeType := tmpRabitMqConfig["exchangeType"].(string)
+		bindingKey := tmpRabitMqConfig["bindingKey"].(string)
 
 		brokerURL = fmt.Sprintf("amqp://%s:%s@%s:%d/",
 			user,
 			password,
 			host,
 			port)
-	}
 
-	runMode, _ := helper.AppRunmode()
-	tmpDefaultQueue, err := beego.AppConfig.DIY("queue.default_queue")
-	if err != nil {
-		return cnf, err
-	}
-	cnf = &config.Config{
-		Broker:        brokerURL,
-		DefaultQueue:  tmpDefaultQueue.(string) + "_" + runMode,
-		ResultBackend: brokerURL,
+		cnf.Broker = brokerURL
+		cnf.ResultBackend = brokerURL
+		cnf.AMQP = &config.AMQPConfig{
+			Exchange:     exchange,
+			ExchangeType: exchangeType,
+			BindingKey:   bindingKey,
+		}
 	}
 
 	return
@@ -110,6 +126,11 @@ func (mq *MqServer) TestConnection() error {
 	backend := mq.Server.GetBackend()
 	_, err := backend.GetState("non-existent-task-id")
 	if err != nil {
+		// 对于 AMQP，"No state ready" 是正常的，因为它意味着连接成功但任务不存在
+		if strings.Contains(err.Error(), "No state ready") {
+			global.Log.Info("✅ MQ connection test successful (no state found as expected)")
+			return nil
+		}
 		// 忽略任务不存在的错误，关注连接错误
 		if !strings.Contains(err.Error(), "not found") &&
 			!strings.Contains(err.Error(), "redigo: nil returned") {

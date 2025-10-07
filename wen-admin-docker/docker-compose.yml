@@ -43,6 +43,20 @@ volumes:
       type: none
       device: .\\redis\log
 
+  rabbitmq-data2:
+    name: rabbitmq-data2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\rabbitmq\data
+  rabbitmq-cinfig2:
+    name: rabbitmq-cinfig2
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .\\rabbitmq\cinfig2
 
 services:
   c_postgresql:
@@ -81,5 +95,21 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
       - '6379:6379'
+    networks:
+      - nextcloud_network
+  rabbitmq:
+    image: 'rabbitmq:latest'
+    container_name: c_dev_rabbitmq
+    environment:
+      RABBITMQ_USERNAME: 'guest'
+      RABBITMQ_PASSWORD: 'guest'
+      TZ: "Asia/Shanghai"
+    volumes:
+      - rabbitmq-data2:/var/lib/rabbitmq
+      - rabbitmq-cinfig2:/etc/rabbitmq
+    command: rabbitmq-server
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - nextcloud_network
