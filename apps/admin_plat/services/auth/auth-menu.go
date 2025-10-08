@@ -1,12 +1,12 @@
-package menu
+package auth
 
 import (
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/services"
+	"WenBeego/apps/common/dto/auth_dto"
+	"WenBeego/apps/common/services/auth"
 )
 
 type MenuService struct {
-	commonMenu services.CommonMenu
+	commonMenu auth.CommonMenu
 }
 
 /**
@@ -20,6 +20,6 @@ type MenuService struct {
  * @param roleModel 角色模型
  * @return
  */
-func (s *MenuService) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []dto.RoleMenuDto, err error) {
+func (s *MenuService) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
 	return s.commonMenu.GetAsyncRoutes(moduleName, unitId, userId)
 }

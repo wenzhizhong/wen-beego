@@ -1,6 +1,7 @@
 package base_ar
 
 import (
+	"WenBeego/apps/common/dto/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
@@ -34,6 +35,29 @@ func GetUserOfUnitById[UnitUserModel itf.UnitUserItf](userId string, unitId stri
 		Where(tableUnitUserName+".deleted = ?", 0).
 		Take(&userData)
 	return userData, result.Error
+}
+func GetUserListOfUnitById[UnitUserModel itf.UnitUserItf](reqDto page_dto.SystemUserListReqDto) (userData []base_model.UnitUser, count int64, err error) {
+	var unitUserModel UnitUserModel
+	tableUnitUserName := unitUserModel.TableName()
+	userData = make([]base_model.UnitUser, 0)
+	if reqDto.UnitId == "" {
+		return userData, count, errors.New("GetUserListOfUnitById(): UnitId 不能为空")
+	}
+	query := global.GetReadDb().
+		Model(unitUserModel).
+		Select("*, case is_default when 1 then unit_id else '' end AS default_unit_id").
+		Where(tableUnitUserName+".unit_id = ?", reqDto.UnitId).
+		Where(tableUnitUserName+".deleted = ?", 0)
+
+	err = query.Count(&count).Error
+	if err != nil {
+		return userData, count, err
+	}
+	result := query.Limit(reqDto.PageSize).
+		Offset(reqDto.Offset).
+		Find(&userData)
+
+	return userData, count, result.Error
 }
 
 /**

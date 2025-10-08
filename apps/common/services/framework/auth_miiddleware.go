@@ -1,4 +1,4 @@
-package services
+package framework
 
 import (
 	"WenBeego/apps/common/helper"

@@ -1,14 +1,15 @@
-package menu
+package auth
 
+//身份认证-用户系统菜单/系统权限
 import (
-	serviceMenu "WenBeego/apps/admin_plat/services/menu"
+	menuService "WenBeego/apps/admin_plat/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/helper"
 )
 
 type MenuController struct {
 	commonControllers.AdminBaseController
-	MenuService serviceMenu.MenuService
+	MenuService menuService.MenuService
 }
 
 // 获取异步路由
@@ -17,18 +18,18 @@ type MenuController struct {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Success 200 {object} helper.Response "返回结果"
-// @Router /admin_plat/menu/get-async-routes [get]
+// @Success 200 {object} dto.Response "返回结果"
+// @Router /admin_plat/auth-menu/get-async-routes [get]
 // @Security ApiKeyAuth
 func (c *MenuController) GetAsyncRoutes() {
 	userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
 	data, err := c.MenuService.GetAsyncRoutes(c.ModuleName, unitId.(string), userId.(string))
 	if err != nil {
-		c.Data["json"] = helper.Response{Code: 500, Message: err.Error()}
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	c.Data["json"] = helper.Response{Code: 200, Message: "success", Data: data}
+	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }

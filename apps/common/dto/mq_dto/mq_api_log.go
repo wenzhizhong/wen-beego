@@ -1,4 +1,4 @@
-package dto
+package mq_dto
 
 type ApiLogDto struct {
 	Host   string `json:"host"`

@@ -1,11 +1,11 @@
-package services
+package auth
 
 import (
-	"WenBeego/apps/common/dto"
-	commonServices "WenBeego/apps/common/services"
+	"WenBeego/apps/common/dto/auth_dto"
+	commonServices "WenBeego/apps/common/services/auth"
 )
 
-var cpatchaType = dto.AuthCodeTypeDigit
+var cpatchaType = auth_dto.AuthCodeTypeDigit
 
 type Auth struct {
 	commonAuth commonServices.CommonAuth
@@ -17,13 +17,13 @@ func (s *Auth) GetCatpcha() (interface{}, error) {
 }
 
 // 登录
-func (s *Auth) Login(data dto.LoginDto, moduleName string) (interface{}, error) {
+func (s *Auth) Login(data auth_dto.LoginDto, moduleName string) (interface{}, error) {
 	data.AuthCodeType = cpatchaType
 	return s.commonAuth.Login(data, moduleName)
 }
 
 // 注册
-func (s *Auth) Register(data dto.RegisterDto, moduleName string) (interface{}, error) {
+func (s *Auth) Register(data auth_dto.RegisterDto, moduleName string) (interface{}, error) {
 	data.AuthCodeType = cpatchaType
 	return s.commonAuth.Register(data, moduleName)
 }

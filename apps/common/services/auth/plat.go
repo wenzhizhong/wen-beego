@@ -1,4 +1,4 @@
-package services
+package auth
 
 import (
 	"WenBeego/apps/common/helper"
@@ -15,11 +15,12 @@ type CommonPlat struct {
 }
 
 func (a *CommonPlat) ChangeUnit(moduleName string, userId string, unitId string) (result interface{}, err error) {
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		err = changeUnit[*models.Plat, *models.PlatUser, *models.PlatUserProfile](userId, unitId)
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		err = changeUnit[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile](userId, unitId)
-	} else {
+	default:
 		err = errors.New("模块名称错误")
 	}
 	if err != nil {

@@ -1,18 +1,19 @@
 package auth
 
+//身份认证-登录/注册/退出/获取用户信息等
 import (
 	// beego "github.com/beego/beego/v2/server/web"
 
-	serviceAuth "WenBeego/apps/admin_plat/services/auth"
+	authService "WenBeego/apps/admin_plat/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/helper"
 )
 
 type AuthController struct {
 	// beego.Controller
 	commonControllers.AdminBaseController
-	AuthService serviceAuth.Auth
+	AuthService authService.Auth
 }
 
 // 登录
@@ -21,26 +22,26 @@ type AuthController struct {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param data body dto.LoginDto true "登录参数"
-// @Success      200  {object}  helper.Response
-// @Failure      0  {object}  helper.Response
+// @Param data body auth_dto.LoginDto true "登录参数"
+// @Success      200  {object}  dto.Response
+// @Failure      0  {object}  dto.Response
 // @Router       /admin_plat/auth/login [post]
 func (c *AuthController) Login() {
-	loginDto, err := helper.GetReqBody[dto.LoginDto](c.Ctx)
+	loginDto, err := helper.GetReqBody[auth_dto.LoginDto](c.Ctx)
 	if err != nil {
-		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 
 	data, err := c.AuthService.Login(loginDto, c.ModuleName)
 	if err != nil {
-		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 
-	c.Data["json"] = helper.Response{Code: 200, Message: "登录成功", Data: data}
+	c.Data["json"] = helper.Response(200, "登录成功", data)
 	c.ServeJSON()
 }
 
@@ -50,8 +51,8 @@ func (c *AuthController) Login() {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  helper.Response
-// @Failure      0  {object}  helper.Response
+// @Success      200  {object}  dto.Response
+// @Failure      0  {object}  dto.Response
 // @Router       /admin_plat/auth/logout [post]
 // @Security     ApiKeyAuth
 func (c *AuthController) Logout() {
@@ -77,19 +78,19 @@ func (c *AuthController) UpdateUserInfo() {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  helper.Response
-// @Failure      0  {object}  helper.Response
+// @Success      200  {object}  dto.Response
+// @Failure      0  {object}  dto.Response
 // @Router       /admin_plat/auth/get-captcha [get]
 // @Security     ApiKeyAuth
 func (c *AuthController) GetCatpcha() {
 	data, err := c.AuthService.GetCatpcha()
 	if err != nil {
-		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 
-	c.Data["json"] = helper.Response{Code: 200, Message: "获取验证码成功", Data: data}
+	c.Data["json"] = helper.Response(200, "获取验证码成功", data)
 	c.ServeJSON()
 }
 
@@ -99,25 +100,25 @@ func (c *AuthController) GetCatpcha() {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  helper.Response
-// @Failure      0  {object}  helper.Response
+// @Success      200  {object}  dto.Response
+// @Failure      0  {object}  dto.Response
 // @Router       /admin_plat/auth/refresh-token [post]
 // @Security     ApiKeyAuth
 func (c *AuthController) RefreshToken() {
-	body, err := helper.GetReqBody[dto.RefreshTokenDto](c.Ctx)
+	body, err := helper.GetReqBody[auth_dto.RefreshTokenDto](c.Ctx)
 	if err != nil {
-		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 
 	data, err := c.AuthService.RefreshToken(c.ModuleName, body.BrancaToken, body.RefreshToken)
 	if err != nil {
-		c.Data["json"] = helper.Response{Code: 0, Message: err.Error()}
+		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 
-	c.Data["json"] = helper.Response{Code: 200, Message: "刷新成功", Data: data}
+	c.Data["json"] = helper.Response(200, "刷新成功", data)
 	c.ServeJSON()
 }

@@ -1,4 +1,4 @@
-package dto
+package auth_dto
 
 import "WenBeego/apps/common/models"
 

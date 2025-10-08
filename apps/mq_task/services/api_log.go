@@ -1,7 +1,7 @@
 package services
 
 import (
-	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/mq_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -14,7 +14,7 @@ import (
 type ApiLog struct {
 }
 
-func (s *ApiLog) SaveToDb(data []dto.ApiLogDto) (redslt interface{}, err error) {
+func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (redslt interface{}, err error) {
 	if len(data) <= 0 {
 		return nil, nil
 	}
@@ -59,7 +59,7 @@ func (s *ApiLog) SaveToDb(data []dto.ApiLogDto) (redslt interface{}, err error) 
 	return nil, nil
 }
 
-func (s *ApiLog) groupData(data []dto.ApiLogDto) (groupData mqTaskDto.ApiLogDataDto, err error) {
+func (s *ApiLog) groupData(data []mq_dto.ApiLogDto) (groupData mqTaskDto.ApiLogDataDto, err error) {
 	groupData.ModuleMap = make(map[string]*mqTaskDto.ApiLogDataUnitDto)
 	for _, item := range data {
 		if item.UnitId == "" || item.Uri == "" {
@@ -78,7 +78,7 @@ func (s *ApiLog) groupData(data []dto.ApiLogDto) (groupData mqTaskDto.ApiLogData
 		uriMap, ok := unitMap.UnitMap[item.UnitId]
 		if !ok {
 			uriMap = &mqTaskDto.ApiLogDataUriDto{
-				UriMap: make(map[string][]dto.ApiLogDto),
+				UriMap: make(map[string][]mq_dto.ApiLogDto),
 			}
 		}
 

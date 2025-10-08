@@ -3,7 +3,7 @@ package middleware
 import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
-	"WenBeego/apps/common/services"
+	"WenBeego/apps/common/services/framework"
 	"encoding/json"
 	"net/http"
 
@@ -69,11 +69,7 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 	}
 }
 func responseStr(code int, msg string, data interface{}) string {
-	res := helper.Response{
-		Code:    code,
-		Message: msg,
-		Data:    data,
-	}
+	res := helper.Response(code, msg, data)
 	jsonString, _ := json.Marshal(res)
 	return string(jsonString)
 }
@@ -130,14 +126,14 @@ func checkBaseAuthApi(ctx *beecontext.Context, authApiListMap map[string]bool) b
 
 // 检测用户是否有api权限
 func checkAuthAdminPermis(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
-	service := &services.AuthMiddlewate{}
+	service := &framework.AuthMiddlewate{}
 	status, err := service.CheckAuthAdminRouters(moduleName, brancaData, path)
 	return status, err
 }
 
 // 检测用户状态
 func checkAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
-	service := &services.AuthMiddlewate{}
+	service := &framework.AuthMiddlewate{}
 	status, err := service.CheckAuthAdminStatus(moduleName, brancaData)
 	return status, err
 }

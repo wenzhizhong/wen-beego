@@ -1,5 +1,5 @@
 definitions:
-  dtoAuth.LoginDto:
+  auth_dto.LoginDto:
     properties:
       authCode:
         example: "1234"
@@ -22,7 +22,7 @@ definitions:
     - password
     - phone
     type: object
-  helper.Response:
+  dto.Response:
     properties:
       code:
         type: integer
@@ -33,6 +33,57 @@ definitions:
 info:
   contact: {}
 paths:
+  /admin_plat/auth-menu/get-async-routes:
+    get:
+      consumes:
+      - application/json
+      description: 获取异步路由
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取异步路由
+      tags:
+      - admin
+  /admin_plat/auth-plat/change-unit:
+    get:
+      consumes:
+      - application/json
+      description: 切换组织
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 切换组织
+      tags:
+      - admin
+  /admin_plat/auth-plat/get-user-unit:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户组织单位
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户组织单位
+      tags:
+      - admin
   /admin_plat/auth/get-captcha:
     get:
       consumes:
@@ -44,11 +95,11 @@ paths:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/helper.Response'
+            $ref: '#/definitions/dto.Response'
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/helper.Response'
+            $ref: '#/definitions/dto.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取验证码
@@ -65,18 +116,18 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtoAuth.LoginDto'
+          $ref: '#/definitions/auth_dto.LoginDto'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/helper.Response'
+            $ref: '#/definitions/dto.Response'
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/helper.Response'
+            $ref: '#/definitions/dto.Response'
       summary: 登录
       tags:
       - admin
@@ -91,14 +142,35 @@ paths:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/helper.Response'
+            $ref: '#/definitions/dto.Response'
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/helper.Response'
+            $ref: '#/definitions/dto.Response'
       security:
       - ApiKeyAuth: []
       summary: 退出登录
+      tags:
+      - admin
+  /admin_plat/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: 刷新token
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 刷新token
       tags:
       - admin
 swagger: "2.0"

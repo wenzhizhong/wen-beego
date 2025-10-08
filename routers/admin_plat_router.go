@@ -2,8 +2,6 @@ package routers
 
 import (
 	adminAuth "WenBeego/apps/admin_plat/controllers/auth"
-	adminMenu "WenBeego/apps/admin_plat/controllers/menu"
-	adminPlat "WenBeego/apps/admin_plat/controllers/plat"
 	"WenBeego/apps/common/middleware"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -22,9 +20,9 @@ var platWhiteApiList = []string{
 // 登录后基础api
 var platAuthApiList = []string{
 	"/admin_plat/auth/logout",
-	"/admin_plat/plat/change-unit",
-	"/admin_plat/plat/get-user-unit-list",
-	"/admin_plat/menu/get-async-routes",
+	"/admin_plat/auth-plat/change-unit",
+	"/admin_plat/auth-plat/get-user-unit-list",
+	"/admin_plat/auth-menu/get-async-routes",
 }
 
 func init() {
@@ -32,9 +30,9 @@ func init() {
 		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
 		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
 		beego.NSCtrlPost("/auth/refresh-token", (*adminAuth.AuthController).RefreshToken),
-		beego.NSCtrlPost("/plat/change-unit", (*adminPlat.PlatController).ChangeUnit),
-		beego.NSCtrlGet("/plat/get-user-unit-list", (*adminPlat.PlatController).GetUserUnitList),
-		beego.NSCtrlGet("/menu/get-async-routes", (*adminMenu.MenuController).GetAsyncRoutes),
+		beego.NSCtrlPost("/auth-plat/change-unit", (*adminAuth.PlatController).ChangeUnit),
+		beego.NSCtrlGet("/auth-plat/get-user-unit-list", (*adminAuth.PlatController).GetUserUnitList),
+		beego.NSCtrlGet("/auth-menu/get-async-routes", (*adminAuth.MenuController).GetAsyncRoutes),
 	)
 
 	// 请求前、后处理

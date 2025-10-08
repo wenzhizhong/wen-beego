@@ -71,8 +71,9 @@ func doInitPgSql(config map[string]string) (*gorm.DB, error) {
 
 	return db, nil
 }
-func initMySql() {
-}
+
+// func initMySql() {
+// }
 
 func getPgConfig(keys string) (map[string]string, error) {
 	if keys == "" {
@@ -129,7 +130,7 @@ func getReadDdKeys(firstLevelKey string) ([]string, error) {
 	}
 
 	keys := []string{}
-	for key, _ := range mapConfigData {
+	for key := range mapConfigData {
 		keys = append(keys, key)
 	}
 

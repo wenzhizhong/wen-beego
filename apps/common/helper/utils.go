@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/middleware/captcha_store"
 	"WenBeego/apps/common/models"
@@ -13,8 +14,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"WenBeego/apps/common/dto"
 
 	googleUuid "github.com/google/uuid"
 	"github.com/mojocn/base64Captcha"
@@ -97,7 +96,7 @@ func IsEmail(email string) bool {
 
 // 判断中文
 func IsChinese(str string) bool {
-	return regexp.MustCompile(`^[\u4e00-\u9fa5]+$`).MatchString(str)
+	return regexp.MustCompile(`^[\x{4e00}-\x{9fa5}]+$`).MatchString(str)
 }
 
 // 获取验证码
@@ -117,7 +116,7 @@ func GetCaptcha(cpatchaType string) (id string, b64s string, answer string, err 
 // 获取验证码驱动
 func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err error) {
 	switch cpatchaType {
-	case dto.AuthCodeTypeDigit:
+	case auth_dto.AuthCodeTypeDigit:
 		driver = &base64Captcha.DriverDigit{
 			Height:   80,
 			Width:    240,
@@ -125,7 +124,7 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 			MaxSkew:  0.7,
 			DotCount: 80,
 		}
-	case dto.AuthCodeTypeMath:
+	case auth_dto.AuthCodeTypeMath:
 		driver = &base64Captcha.DriverMath{
 			Height:          80,
 			Width:           240,
@@ -135,7 +134,7 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 			// Source:   "1234567890",
 			Fonts: []string{"wqy-microhei.ttc"},
 		}
-	case dto.AuthCodeTypeString:
+	case auth_dto.AuthCodeTypeString:
 		driver = &base64Captcha.DriverString{
 			Height:          80,
 			Width:           240,
@@ -145,7 +144,7 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 			Source:          "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM",
 			Fonts:           []string{"wqy-microhei.ttc"},
 		}
-	case dto.AuthCodeTypeChinese:
+	case auth_dto.AuthCodeTypeChinese:
 		driver = &base64Captcha.DriverString{
 			Height:          80,
 			Width:           240,
@@ -154,7 +153,7 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 			Length:          6,
 			Source:          "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM",
 		}
-	case dto.AuthCodeTypeEmail:
+	case auth_dto.AuthCodeTypeEmail:
 		driver = &base64Captcha.DriverString{
 			Height:          80,
 			Width:           240,
@@ -163,7 +162,7 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 			Length:          6,
 			Source:          "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM",
 		}
-	case dto.AuthCodeTypeSms:
+	case auth_dto.AuthCodeTypeSms:
 		driver = &base64Captcha.DriverString{
 			Height:          80,
 			Width:           240,
@@ -202,11 +201,12 @@ func ParseStringTpl(tpl string, data any) (str string, err error) {
 // 判断是否是管理员
 
 func IsAdmin(moduleName string, unitId string, userId string) bool {
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		return getAdminData(unitId, userId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		return getAdminData(unitId, userId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
-	} else {
+	default:
 		return false
 	}
 }

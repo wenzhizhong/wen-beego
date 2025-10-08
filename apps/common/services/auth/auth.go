@@ -1,6 +1,7 @@
-package services
+package auth
 
 import (
+	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -9,8 +10,6 @@ import (
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 	"strings"
-
-	"WenBeego/apps/common/dto"
 
 	"github.com/samber/lo"
 )
@@ -21,7 +20,7 @@ type CommonAuth struct {
 }
 
 // 登录
-func (s *CommonAuth) Login(data dto.LoginDto, moduleName string) (loginInfo *dto.UserLoginInfoDto, err error) {
+func (s *CommonAuth) Login(data auth_dto.LoginDto, moduleName string) (loginInfo *auth_dto.UserLoginInfoDto, err error) {
 	err = s.checkLoginDto(&data)
 	if err != nil {
 		return
@@ -38,7 +37,7 @@ func (s *CommonAuth) Login(data dto.LoginDto, moduleName string) (loginInfo *dto
 }
 
 // 注册
-func (s *CommonAuth) Register(data dto.RegisterDto, moduleName string) (loginInfo *dto.UserLoginInfoDto, err error) {
+func (s *CommonAuth) Register(data auth_dto.RegisterDto, moduleName string) (loginInfo *auth_dto.UserLoginInfoDto, err error) {
 	err = s.checkRegisterDto(data)
 	if err != nil {
 		return
@@ -70,7 +69,7 @@ func (s *CommonAuth) GetCatpcha(cpatchaType string) (data interface{}, err error
 }
 
 // 登录
-func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserLoginInfoDto, error) {
+func (s *CommonAuth) doLogin(data auth_dto.LoginDto, moduleName string) (*auth_dto.UserLoginInfoDto, error) {
 	user, err := s.getAndCheckUser(data.Phone, data.Password)
 	if err != nil {
 		return nil, err
@@ -81,7 +80,7 @@ func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserLog
 		return nil, err
 	}
 
-	loginInfo := &dto.UserLoginInfoDto{}
+	loginInfo := &auth_dto.UserLoginInfoDto{}
 	if moduleName == "admin_plat" || moduleName == "admin_mchnt" {
 		loginInfo, err = s.GetAdminLoginInfo(moduleName, user.Id)
 	} else {
@@ -95,7 +94,7 @@ func (s *CommonAuth) doLogin(data dto.LoginDto, moduleName string) (*dto.UserLog
 }
 
 // 校验登录信息
-func (s *CommonAuth) checkLoginDto(data *dto.LoginDto) error {
+func (s *CommonAuth) checkLoginDto(data *auth_dto.LoginDto) error {
 	data.Phone = strings.TrimSpace(data.Phone)
 	data.Password = strings.TrimSpace(data.Password)
 
@@ -115,7 +114,7 @@ func (s *CommonAuth) checkLoginDto(data *dto.LoginDto) error {
 }
 
 // 校验注册信息
-func (s *CommonAuth) checkRegisterDto(data dto.RegisterDto) error {
+func (s *CommonAuth) checkRegisterDto(data auth_dto.RegisterDto) error {
 	data.Phone = strings.TrimSpace(data.Phone)
 	data.Password = strings.TrimSpace(data.Password)
 
@@ -138,16 +137,16 @@ func (s *CommonAuth) checkAuthCode(authCode string, authCodeId string, authCodeT
 	authCode = strings.TrimSpace(authCode)
 	authCodeType = strings.TrimSpace(authCodeType)
 
-	if !lo.Contains(dto.AuthCodeTypes, authCodeType) {
+	if !lo.Contains(auth_dto.AuthCodeTypes, authCodeType) {
 		return errors.New("验证码类型错误")
 	}
 
 	switch authCodeType {
 	case
-		dto.AuthCodeTypeDigit,
-		dto.AuthCodeTypeString,
-		dto.AuthCodeTypeChinese,
-		dto.AuthCodeTypeMath:
+		auth_dto.AuthCodeTypeDigit,
+		auth_dto.AuthCodeTypeString,
+		auth_dto.AuthCodeTypeChinese,
+		auth_dto.AuthCodeTypeMath:
 
 		if authCode == "" {
 			return errors.New("验证码不能为空")
@@ -209,7 +208,7 @@ func (s *CommonAuth) getAndCheckUserProfile(userId string) (*models.UserProfile,
 /**
  * 获取后台管理用户信息
  */
-func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.UserLoginInfoDto, error) {
+func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_dto.UserLoginInfoDto, error) {
 	perms := []string{}
 	rolesClassifies := []string{}
 
@@ -260,7 +259,7 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 		return nil, errors.New("生成refreshToken异常")
 	}
 
-	loginInfo := dto.UserLoginInfoDto{}
+	loginInfo := auth_dto.UserLoginInfoDto{}
 	loginInfo.UserInfo.User.Id = user.Id
 	loginInfo.UserInfo.Name = user.Name
 	loginInfo.UserInfo.Username = user.Name
@@ -281,7 +280,7 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*dto.U
 /**
  * 获取普通用户登录信息
  */
-func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.UserLoginInfoDto, error) {
+func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*auth_dto.UserLoginInfoDto, error) {
 	user, err := s.userAr.GetById(userId)
 	if err != nil {
 		return nil, err
@@ -316,7 +315,7 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 		return nil, errors.New("生成refreshToken异常")
 	}
 
-	loginInfo := dto.UserLoginInfoDto{}
+	loginInfo := auth_dto.UserLoginInfoDto{}
 	loginInfo.UserInfo.User.Id = user.Id
 	loginInfo.UserInfo.Name = user.Name
 	loginInfo.UserInfo.Username = user.Name
@@ -335,11 +334,12 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*dto.Use
 
 // 获取用户默认组织
 func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData base_model.Unit, err error) {
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Plat, *models.PlatUser](userId)
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Mchnt, *models.MchntUser](userId)
-	} else {
+	default:
 		err = errors.New("模块名称错误")
 	}
 	return unitUserData, err
@@ -358,11 +358,12 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
 		return
 	}
 	var roleClassifies []base_model.UnitRoleClassify
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
-	} else {
+	default:
 		err = errors.New("模块名称错误")
 	}
 
@@ -389,11 +390,12 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
 func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId string) (perms []string, err error) {
 
 	var permissions []base_model.UnitMenuPerms
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
-	} else {
+	default:
 		err = errors.New("模块名称错误")
 	}
 
@@ -405,7 +407,7 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId
 }
 
 // 刷新token
-func (s *CommonAuth) RefreshToken(moduleName string, brancaToken string, refreshToken string) (loginInfo *dto.UserLoginInfoDto, err error) {
+func (s *CommonAuth) RefreshToken(moduleName string, brancaToken string, refreshToken string) (loginInfo *auth_dto.UserLoginInfoDto, err error) {
 	verifyRes, userId, _ := helper.VerifyRefreshToken(brancaToken, refreshToken)
 	if !verifyRes {
 		return loginInfo, errors.New("refreshToken已过期，请重新登录")

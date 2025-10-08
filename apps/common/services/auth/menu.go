@@ -1,7 +1,7 @@
-package services
+package auth
 
 import (
-	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -25,11 +25,12 @@ type CommonMenu struct {
  * @param roleModel 角色模型
  * @return
  */
-func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []dto.RoleMenuDto, err error) {
+func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
 
 	var permissions []base_model.UnitMenuPerms
 	var roleClassifies []base_model.UnitRoleClassify
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
@@ -39,7 +40,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId str
 			return
 		}
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
@@ -49,7 +50,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId str
 			return
 		}
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
-	} else {
+	default:
 		err = errors.New("未知的模块名称")
 	}
 

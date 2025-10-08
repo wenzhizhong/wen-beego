@@ -1,16 +1,16 @@
-package plat
+package auth
 
 import (
-	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar/base_ar"
-	"WenBeego/apps/common/services"
+	"WenBeego/apps/common/services/auth"
 	"errors"
 )
 
 type Plat struct {
-	commonPlat services.CommonPlat
+	commonPlat auth.CommonPlat
 }
 
 // 获取组织信息
@@ -26,7 +26,7 @@ func (s *Plat) GetUserUnitList(userId string) (data interface{}, err error) {
 	}
 	return
 }
-func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto dto.ChangeUnitDto) (result interface{}, err error) {
+func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto auth_dto.ChangeUnitDto) (result interface{}, err error) {
 	unitId := changeUnitDto.Id
 	if userId == "" || unitId == "" {
 		return nil, errors.New("切换组织失败，请先登录！")

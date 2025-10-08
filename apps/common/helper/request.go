@@ -1,9 +1,12 @@
 package helper
 
 import (
+	"WenBeego/apps/common/dto"
 	"encoding/json"
+	"errors"
 	"strings"
 
+	"github.com/beego/beego/v2/server/web"
 	beecontext "github.com/beego/beego/v2/server/web/context"
 )
 
@@ -47,5 +50,54 @@ func GetReqBody[T any](ctx *beecontext.Context) (T, error) {
 			return data, err
 		}
 	}
+	return data, nil
+}
+
+// 设置并获取基本参数
+func GetBaseParamDto(moduleName string, unitId string, userId string) (dto.BaseParamDto, error) {
+	data := dto.BaseParamDto{}
+	if moduleName == "" {
+		return data, errors.New("moduleName is empty")
+	}
+	if unitId == "" {
+		return data, errors.New("unitId is empty")
+	}
+	if userId == "" {
+		return data, errors.New("userId is empty")
+	}
+
+	data.ModuleName = moduleName
+	data.UnitId = unitId
+	data.UserId = userId
+	return data, nil
+}
+
+// 设置并返回请求页面数据列表参数
+func GetReqDataListDto(ctxCtrl *web.Controller) (dto.ReqDataListDto, error) {
+	data := dto.ReqDataListDto{}
+
+	page, err1 := ctxCtrl.GetInt("Page", 1)
+	pageSize, err2 := ctxCtrl.GetInt("pageSize", 10)
+	if err1 != nil {
+		return data, err1
+	}
+	if err2 != nil {
+		return data, err2
+	}
+
+	if pageSize <= 10 {
+		pageSize = 10
+	} else if pageSize > 10 && pageSize <= 20 {
+		pageSize = 20
+	} else {
+		pageSize = 50
+	}
+	if page <= 0 {
+		page = 1
+	}
+
+	data.PageSize = pageSize
+	data.Page = page
+	data.Offset = (page - 1) * pageSize
 	return data, nil
 }

@@ -15,6 +15,90 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin_plat/auth-menu/get-async-routes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取异步路由",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "获取异步路由",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/auth-plat/change-unit": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "切换组织",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "切换组织",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/auth-plat/get-user-unit": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取用户组织单位",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "获取用户组织单位",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin_plat/auth/get-captcha": {
             "get": {
                 "security": [
@@ -37,13 +121,13 @@ const docTemplate = `{
                     "0": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/helper.Response"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     },
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/helper.Response"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -69,7 +153,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtoAuth.LoginDto"
+                            "$ref": "#/definitions/auth_dto.LoginDto"
                         }
                     }
                 ],
@@ -77,13 +161,13 @@ const docTemplate = `{
                     "0": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/helper.Response"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     },
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/helper.Response"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -111,13 +195,47 @@ const docTemplate = `{
                     "0": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/helper.Response"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     },
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/helper.Response"
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/auth/refresh-token": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "刷新token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "刷新token",
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -125,7 +243,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dtoAuth.LoginDto": {
+        "auth_dto.LoginDto": {
             "type": "object",
             "required": [
                 "password",
@@ -156,7 +274,7 @@ const docTemplate = `{
                 }
             }
         },
-        "helper.Response": {
+        "dto.Response": {
             "type": "object",
             "properties": {
                 "code": {

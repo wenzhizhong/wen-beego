@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/mq_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"encoding/json"
@@ -20,8 +20,8 @@ var (
 	limiter            = rate.NewLimiter(10, 20)
 	cacheApiStatistics = make([]interface{}, 0)
 	cacheMutex         = sync.Mutex{}
-	maxBatchSize       = 50
-	flushCacheInterval = 1 * time.Second
+	maxBatchSize       = 500
+	flushCacheInterval = 60 * time.Second
 )
 
 type AccessMiddleware struct {
@@ -79,11 +79,11 @@ func (m *AccessMiddleware) getBaseInfo(ctx *beecontext.Context) (url, host, shce
 func (m *AccessMiddleware) statisticsApiLog(ctx *beecontext.Context, whiteApiList *[]string, authApiList *[]string) {
 	modules, _ := global.GetConfigDiy("logToDbModules")
 	moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
-	// tmpIgnoreArr := helper.ArrayMerge(*whiteApiList, *authApiList)
+	tmpIgnoreArr := helper.ArrayMerge(*whiteApiList, *authApiList)
 	url, host, _, method, token, ip := m.getBaseInfo(ctx)
-	// isInArray, _ := helper.InArray(url, tmpIgnoreArr)
+	isInArray, _ := helper.InArray(url, tmpIgnoreArr)
 
-	if modules != nil {
+	if modules != nil && !isInArray {
 		if res, err := helper.InArray(moduleName, modules); err == nil && res {
 
 			userId, unitId := "", ""
@@ -92,7 +92,7 @@ func (m *AccessMiddleware) statisticsApiLog(ctx *beecontext.Context, whiteApiLis
 				userId = brancaData.Sub
 				unitId = brancaData.SubUnit
 			}
-			data := dto.ApiLogDto{Uri: url, Host: host, Ip: ip, Method: method, UserId: userId, UnitId: unitId}
+			data := mq_dto.ApiLogDto{Uri: url, Host: host, Ip: ip, Method: method, UserId: userId, UnitId: unitId}
 
 			// 加锁操作共享变量
 			cacheMutex.Lock()
