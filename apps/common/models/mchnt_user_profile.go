@@ -4,8 +4,6 @@ import (
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 var _ itf.UserProfileItf = (*MchntUserProfile)(nil)
@@ -87,13 +85,13 @@ func (m *MchntUserProfile) GetProfessional() string {
 func (m *MchntUserProfile) GetStatus() int {
 	return m.Status
 }
-func (m *MchntUserProfile) GetCreatedAt() time.Time {
+func (m *MchntUserProfile) GetCreatedAt() int64 {
 	return m.CreatedAt
 }
-func (m *MchntUserProfile) GetUpdatedAt() time.Time {
+func (m *MchntUserProfile) GetUpdatedAt() int64 {
 	return m.UpdatedAt
 }
-func (m *MchntUserProfile) GetDeletedAt() gorm.DeletedAt {
+func (m *MchntUserProfile) GetDeletedAt() *int64 {
 	return m.DeletedAt
 }
 func (m *MchntUserProfile) GetDeleted() int {

@@ -22,6 +22,16 @@ definitions:
     - password
     - phone
     type: object
+  dto.RespDataListDto:
+    properties:
+      currentPage:
+        type: integer
+      list: {}
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
   dto.Response:
     properties:
       code:
@@ -50,6 +60,16 @@ paths:
       summary: 获取异步路由
       tags:
       - admin
+  /admin_plat/auth-params/model-params:
+    get:
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 获取参数-模型常量参数
+      tags:
+      - 参数
   /admin_plat/auth-plat/change-unit:
     get:
       consumes:
@@ -173,4 +193,25 @@ paths:
       summary: 刷新token
       tags:
       - admin
+  /admin_plat/system-unit/get:
+    get:
+      consumes:
+      - application/json
+      description: 获取内部组织管理
+      parameters:
+      - description: 父级ID
+        in: query
+        name: parentUnitId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取内部组织管理
+      tags:
+      - 系统管理-内部组织管理
 swagger: "2.0"

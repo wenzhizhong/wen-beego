@@ -43,17 +43,19 @@ func GetUserListOfUnitById[UnitUserModel itf.UnitUserItf](reqDto page_dto.System
 	if reqDto.UnitId == "" {
 		return userData, count, errors.New("GetUserListOfUnitById(): UnitId 不能为空")
 	}
+	selectStr := "*, case is_default when 1 then unit_id else '' end AS default_unit_id"
 	query := global.GetReadDb().
 		Model(unitUserModel).
-		Select("*, case is_default when 1 then unit_id else '' end AS default_unit_id").
 		Where(tableUnitUserName+".unit_id = ?", reqDto.UnitId).
 		Where(tableUnitUserName+".deleted = ?", 0)
 
-	err = query.Count(&count).Error
+	err = query.Select("id").Count(&count).Error
 	if err != nil {
 		return userData, count, err
 	}
-	result := query.Limit(reqDto.PageSize).
+	result := query.
+		Select(selectStr).
+		Limit(reqDto.PageSize).
 		Offset(reqDto.Offset).
 		Find(&userData)
 

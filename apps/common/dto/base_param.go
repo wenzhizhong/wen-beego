@@ -16,15 +16,15 @@ type Response struct {
 
 // 请求页面数据列表参数
 type ReqDataListDto struct {
-	PageSize int `json:"pageSize"`
-	Page     int `json:"page"`
-	Offset   int
+	PageSize    int `json:"pageSize"`
+	CurrentPage int `json:"currentPage"`
+	Offset      int
 }
 
 // 响应页面数据列表参数
 type RespDataListDto struct {
-	List     interface{} `json:"list"`
-	Total    int64       `json:"total"`
-	PageSize int         `json:"pageSize"`
-	Page     int         `json:"page"`
+	List        interface{} `json:"list"`
+	Total       int64       `json:"total"`
+	PageSize    int         `json:"pageSize"`
+	CurrentPage int         `json:"currentPage"`
 }

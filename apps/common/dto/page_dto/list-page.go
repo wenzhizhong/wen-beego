@@ -2,7 +2,17 @@ package page_dto
 
 import "WenBeego/apps/common/dto"
 
-// 系统管理-用户列表
+// 系统管理-内部组织单位列表
+type SystemUnitListReqDto struct {
+	dto.BaseParamDto
+	dto.ReqDataListDto
+	ParentUnitId string
+	Name         string
+	Code         string
+	Status       int
+}
+
+// 系统管理-内部用户列表
 type SystemUserListReqDto struct {
 	dto.BaseParamDto
 	dto.ReqDataListDto

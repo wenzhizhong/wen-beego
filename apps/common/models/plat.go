@@ -3,7 +3,6 @@ package models
 import (
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
-	"time"
 )
 
 var _ itf.UnitItf = (*Plat)(nil)
@@ -46,9 +45,13 @@ func (m *Plat) GetStatus() int {
 func (m *Plat) GetDeleted() int {
 	return m.Deleted
 }
-func (m *Plat) GetCreatedAt() time.Time {
+func (m *Plat) GetCreatedAt() int64 {
 	return m.CreatedAt
 }
-func (m *Plat) GetUpdatedAt() time.Time {
+func (m *Plat) GetUpdatedAt() int64 {
 	return m.UpdatedAt
+}
+
+func (m *Plat) GetDeletedAt() *int64 {
+	return m.DeletedAt
 }

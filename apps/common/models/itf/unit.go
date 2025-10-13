@@ -1,9 +1,5 @@
 package itf
 
-import (
-	"time"
-)
-
 type UnitItf interface {
 	TableName() string
 
@@ -17,6 +13,7 @@ type UnitItf interface {
 	GetAddress() string
 	GetStatus() int
 	GetDeleted() int
-	GetCreatedAt() time.Time
-	GetUpdatedAt() time.Time
+	GetCreatedAt() int64
+	GetUpdatedAt() int64
+	GetDeletedAt() *int64
 }

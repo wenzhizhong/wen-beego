@@ -1,9 +1,12 @@
 package base_ar
 
 import (
+	"WenBeego/apps/common/dto/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
+	"strings"
 )
 
 /**
@@ -42,7 +45,7 @@ func GetUserUnitList[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 		Joins(joinStr).
 		Where(tableUnitUserName+".user_id = ?", userId).
 		Where(tableUnitUserName + ".deleted = 0").
-		Scan(&listData)
+		Find(&listData)
 	return listData, result.Error
 }
 
@@ -77,4 +80,59 @@ func GetUserUnitById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 		Where(tableUnitUserName + ".deleted = 0").
 		Take(&unitModel)
 	return unitModel, result.Error
+}
+
+// 获取内部组织列表
+func GetUnitListById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []base_model.Unit, count int64, err error) {
+	tableUnitName := unitModel.TableName()
+	tableUnitUserName := unitUserModel.TableName()
+
+	unitDto.Name = strings.TrimSpace(unitDto.Name)
+	unitDto.Code = strings.TrimSpace(unitDto.Code)
+
+	tableStruct := struct {
+		TableUnit     string
+		TableUserUnit string
+	}{
+		TableUnit:     tableUnitName,
+		TableUserUnit: tableUnitUserName,
+	}
+
+	selectStr, err := helper.ParseStringTpl(`{{.TableUnit}}.*`, tableStruct)
+	joinStr, err2 := helper.ParseStringTpl(`inner join {{.TableUserUnit}} on {{.TableUserUnit}}.unit_id = {{.TableUnit}}.id`, tableStruct)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err2 != nil {
+		return nil, 0, err2
+	}
+
+	query := global.GetReadDb().
+		Model(unitModel).
+		Joins(joinStr).
+		Where(tableUnitUserName+".user_id = ?", unitDto.UserId).
+		Where(tableUnitUserName + ".deleted = 0")
+
+	if unitDto.ParentUnitId != "" {
+		query = query.Where(tableUnitName+".pid = ?", unitDto.ParentUnitId)
+	} else {
+		query = query.Where(tableUnitName + ".pid = ''")
+	}
+	if unitDto.Name != "" {
+		query = query.Where(tableUnitName+".name like ?", "%"+unitDto.Name+"%")
+	}
+	if unitDto.Code != "" {
+		query = query.Where(tableUnitName+".code like ?", "%"+unitDto.Code+"%")
+	}
+	if unitDto.Status != -1 {
+		query = query.Where(tableUnitName+".status = ?", unitDto.Status)
+	}
+
+	err = query.Select(tableUnitName + ".id").Count(&count).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = query.Select(selectStr).Find(&listData).Error
+	return
 }

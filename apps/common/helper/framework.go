@@ -53,6 +53,14 @@ func AppRunmode() (string, error) {
 	return data, nil
 }
 
+// 检查运行模式
+func CheckRunMode(runMode string) bool {
+	if runMode, err := AppRunmode(); err == nil && runMode == "dev" {
+		return true
+	}
+	return false
+}
+
 // 从路由路径解析模块名
 func ParseModuleFromRoute(path string) string {
 	path = strings.TrimPrefix(path, "/")

@@ -14,11 +14,11 @@ func Response(code int, message string, data interface{}) dto.Response {
 }
 
 // 设置并返回页面列表数据
-func GetRespDataListDto(pageSize int, page int, total int64, list interface{}) (dto.RespDataListDto, error) {
+func GetRespDataListDto(pageSize int, currentPage int, total int64, list interface{}) (dto.RespDataListDto, error) {
 	data := dto.RespDataListDto{}
 	data.Total = total
 	data.List = list
 	data.PageSize = pageSize
-	data.Page = page
+	data.CurrentPage = currentPage
 	return data, nil
 }

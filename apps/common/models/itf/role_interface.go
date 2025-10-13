@@ -1,9 +1,5 @@
 package itf
 
-import (
-	"time"
-)
-
 type RoleItf interface {
 	TableName() string
 
@@ -14,8 +10,8 @@ type RoleItf interface {
 	GetStatus() int
 	GetDeleted() int
 	GetCreatedBy() string
-	GetCreatedAt() time.Time
+	GetCreatedAt() int64
 	GetUpdatedBy() string
-	GetUpdatedAt() time.Time
+	GetUpdatedAt() int64
 	GetRemark() string
 }

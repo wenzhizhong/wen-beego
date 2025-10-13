@@ -104,7 +104,7 @@
   ```
   go install github.com/swaggo/swag/cmd/swag@latest
 
-  swag init --output apps/swagger
+  swag init -g cmd/http/main.go  --output apps/swagger 
   ```
   After the command is successfully executed, the swagger.json and swagger.yaml files are generated in the apps/swagger directory, and
   the document access address is http://127.0.0.1:8031/swagger/index.html

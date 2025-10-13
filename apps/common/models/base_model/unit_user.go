@@ -13,3 +13,8 @@ type UnitUser struct {
 
 var UNIT_IS_DEFAULT_NO = 0
 var UNIT_IS_DEFAULT_YES = 1
+
+var UNIT_USER_DEFAULT_MAP = map[int]string{
+	UNIT_IS_DEFAULT_NO:  "否",
+	UNIT_IS_DEFAULT_YES: "是",
+}

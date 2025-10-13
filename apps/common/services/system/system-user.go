@@ -29,6 +29,6 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	if err != nil {
 		return
 	}
-	resultDto, err = helper.GetRespDataListDto(reqDto.PageSize, reqDto.Page, count, data)
+	resultDto, err = helper.GetRespDataListDto(reqDto.PageSize, reqDto.CurrentPage, count, data)
 	return
 }

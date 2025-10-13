@@ -10,7 +10,7 @@ import (
 )
 
 type Plat struct {
-	commonPlat auth.CommonPlat
+	CommonUnit auth.CommonUnit
 }
 
 // 获取组织信息
@@ -43,7 +43,7 @@ func (s *Plat) ChangeUnit(moduleName string, userId string, changeUnitDto auth_d
 		return nil, errors.New("切换组织失败，请先启用组织！")
 	}
 
-	result, err = s.commonPlat.ChangeUnit(moduleName, userId, unitId)
+	result, err = s.CommonUnit.ChangeUnit(moduleName, userId, unitId)
 	if err != nil {
 		return nil, err
 	}

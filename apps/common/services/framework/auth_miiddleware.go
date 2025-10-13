@@ -102,11 +102,12 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	}
 
 	var data base_model.UnitUserProfile
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		data, err = base_ar.GetUserProfileOfUnitById[*models.PlatUser, *models.PlatUserProfile](userId, unitId)
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		data, err = base_ar.GetUserProfileOfUnitById[*models.MchntUser, *models.MchntUserProfile](userId, unitId)
-	} else {
+	default:
 		err = errors.New("未知的模块名称")
 	}
 	if err != nil {
@@ -132,17 +133,18 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 	exits, err := helper.RedisGet(redisKey)
 	if err == nil && exits != "" {
 		index, _ := strconv.Atoi(exits)
-		if moduleName == "admin_plat" {
+		switch moduleName {
+		case "admin_plat":
 			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
-		} else if moduleName == "admin_mchnt" {
+		case "admin_mchnt":
 			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
-		} else {
+		default:
 			err = errors.New("未知的模块名称")
 		}
 		return
@@ -151,11 +153,12 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 	}
 
 	var data interface{}
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Mchnt{}, &models.MchntUser{})
-	} else {
+	default:
 		err = errors.New("未知的模块名称")
 	}
 	if err != nil {
@@ -203,11 +206,12 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, userId string, u
 	}
 
 	var roles []base_model.UnitRole
-	if moduleName == "admin_plat" {
+	switch moduleName {
+	case "admin_plat":
 		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.PlatUserRole{}, &models.PlatRole{})
-	} else if moduleName == "admin_mchnt" {
+	case "admin_mchnt":
 		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.MchntUserRole{}, &models.MchntRole{})
-	} else {
+	default:
 		err = errors.New("未知的模块名称")
 	}
 	if err != nil {
@@ -247,11 +251,12 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId stri
 		}
 	} else {
 		var permissions []base_model.UnitMenuPerms
-		if moduleName == "admin_plat" {
+		switch moduleName {
+		case "admin_plat":
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-		} else if moduleName == "admin_mchnt" {
+		case "admin_mchnt":
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
-		} else {
+		default:
 			err = errors.New("未知的模块名称")
 		}
 		if err != nil {

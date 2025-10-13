@@ -76,7 +76,7 @@ func GetBaseParamDto(moduleName string, unitId string, userId string) (dto.BaseP
 func GetReqDataListDto(ctxCtrl *web.Controller) (dto.ReqDataListDto, error) {
 	data := dto.ReqDataListDto{}
 
-	page, err1 := ctxCtrl.GetInt("Page", 1)
+	currentPage, err1 := ctxCtrl.GetInt("currentPage", 1)
 	pageSize, err2 := ctxCtrl.GetInt("pageSize", 10)
 	if err1 != nil {
 		return data, err1
@@ -92,12 +92,12 @@ func GetReqDataListDto(ctxCtrl *web.Controller) (dto.ReqDataListDto, error) {
 	} else {
 		pageSize = 50
 	}
-	if page <= 0 {
-		page = 1
+	if currentPage <= 0 {
+		currentPage = 1
 	}
 
 	data.PageSize = pageSize
-	data.Page = page
-	data.Offset = (page - 1) * pageSize
+	data.CurrentPage = currentPage
+	data.Offset = (currentPage - 1) * pageSize
 	return data, nil
 }

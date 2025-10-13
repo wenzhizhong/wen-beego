@@ -5,16 +5,14 @@ import (
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
-	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 )
 
-type CommonPlat struct {
-	PlatAr models_ar.PlatAr
+type CommonUnit struct {
 }
 
-func (a *CommonPlat) ChangeUnit(moduleName string, userId string, unitId string) (result interface{}, err error) {
+func (a *CommonUnit) ChangeUnit(moduleName string, userId string, unitId string) (result interface{}, err error) {
 	switch moduleName {
 	case "admin_plat":
 		err = changeUnit[*models.Plat, *models.PlatUser, *models.PlatUserProfile](userId, unitId)

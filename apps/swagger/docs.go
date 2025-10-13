@@ -43,6 +43,22 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin_plat/auth-params/model-params": {
+            "get": {
+                "tags": [
+                    "参数"
+                ],
+                "summary": "获取参数-模型常量参数",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin_plat/auth-plat/change-unit": {
             "get": {
                 "security": [
@@ -240,6 +256,38 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/admin_plat/system-unit/get": {
+            "get": {
+                "description": "获取内部组织管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-内部组织管理"
+                ],
+                "summary": "获取内部组织管理",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级ID",
+                        "name": "parentUnitId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -271,6 +319,21 @@ const docTemplate = `{
                 "phone": {
                     "type": "string",
                     "example": "15912345678"
+                }
+            }
+        },
+        "dto.RespDataListDto": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "type": "integer"
+                },
+                "list": {},
+                "pageSize": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

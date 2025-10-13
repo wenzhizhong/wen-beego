@@ -3,7 +3,6 @@ package models
 import (
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
-	"time"
 )
 
 var _ itf.RoleItf = (*MchntRole)(nil)
@@ -37,13 +36,13 @@ func (m *MchntRole) GetDeleted() int {
 func (m *MchntRole) GetCreatedBy() string {
 	return m.CreatedBy
 }
-func (m *MchntRole) GetCreatedAt() time.Time {
+func (m *MchntRole) GetCreatedAt() int64 {
 	return m.CreatedAt
 }
 func (m *MchntRole) GetUpdatedBy() string {
 	return m.UpdatedBy
 }
-func (m *MchntRole) GetUpdatedAt() time.Time {
+func (m *MchntRole) GetUpdatedAt() int64 {
 	return m.UpdatedAt
 }
 func (m *MchntRole) GetRemark() string {

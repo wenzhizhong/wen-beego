@@ -2,8 +2,6 @@ package itf
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type UserProfileItf interface {
@@ -32,8 +30,8 @@ type UserProfileItf interface {
 	GetLearnProfessional() string
 	GetProfessional() string
 	GetStatus() int
-	GetCreatedAt() time.Time
-	GetUpdatedAt() time.Time
-	GetDeletedAt() gorm.DeletedAt
+	GetCreatedAt() int64
+	GetUpdatedAt() int64
+	GetDeletedAt() *int64
 	GetDeleted() int
 }

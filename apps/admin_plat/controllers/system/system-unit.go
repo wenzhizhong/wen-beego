@@ -1,30 +1,28 @@
 package system
 
-// 系统管理-内部用户管理
+// 系统管理-内部组织管理
 import (
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/helper"
-
 	systemService "WenBeego/apps/admin_plat/services/system"
 	commonControllers "WenBeego/apps/common/controller"
+	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/helper"
 )
 
-type UserController struct {
+type UnitController struct {
 	commonControllers.AdminBaseController
-	UserService systemService.UserService
+	UnitService systemService.UnitService
 }
 
-// 系统管理-获取用户列表
-// @Summary 系统管理-获取用户列表
-// @Description 系统管理-获取用户列表
-// @Tags 系统管理-用户管理
+// 系统管理-获取内部组织管理
+// @Summary 获取内部组织管理
+// @Description 获取内部组织管理
+// @Tags 系统管理-内部组织管理
 // @Accept application/json
 // @Produce application/json
-// @Param data body dto.GetUserListDto true "请求参数"
-// @Success 200 {object} dto.GetUserListDto "返回结果"
-// @Router /admin_plat/system-user/getUserList [get]
-
-func (c *UserController) GetUserList() {
+// @Param parentUnitId query string true "父级ID"
+// @Success 200 {object} dto.RespDataListDto
+// @Router /admin_plat/system-unit/get [get]
+func (c *UnitController) GetUnitList() {
 	userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
 
@@ -40,12 +38,14 @@ func (c *UserController) GetUserList() {
 		c.ServeJSON()
 		return
 	}
+	unitDto := page_dto.SystemUnitListReqDto{}
+	unitDto.BaseParamDto = baseParamDto
+	unitDto.ReqDataListDto = reqDataListDto
+	unitDto.Name = c.GetString("name")
+	unitDto.Code = c.GetString("code")
+	unitDto.Status, _ = c.GetInt("status")
 
-	userDto := page_dto.SystemUserListReqDto{}
-	userDto.BaseParamDto = baseParamDto
-	userDto.ReqDataListDto = reqDataListDto
-
-	data, err := c.UserService.GetUserList(userDto)
+	data, err := c.UnitService.GetUnitList(unitDto)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
