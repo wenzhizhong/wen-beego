@@ -16,6 +16,8 @@ import (
 )
 
 func main() {
+	cmdCommon.RunBefore()
+
 	tasks := routers.GetMqTasks()
 	if len(tasks) == 0 {
 		fmt.Println("No task……")
@@ -23,7 +25,7 @@ func main() {
 	}
 
 	// beego自定义配置
-	_ = beego.LoadAppConfig("yaml", "../../conf/app.yaml")
+	_ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
 	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
 
 	// 注册自己资源服务

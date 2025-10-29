@@ -8,3 +8,5 @@ cmd/*/*.exe
 !cmd/*/*.go
 
 *.exe*
+uploads/*
+upload/*

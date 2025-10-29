@@ -3,6 +3,7 @@ package routers
 import (
 	adminAuth "WenBeego/apps/admin_plat/controllers/auth"
 	adminSystem "WenBeego/apps/admin_plat/controllers/system"
+	adminUpload "WenBeego/apps/admin_plat/controllers/upload"
 	"WenBeego/apps/common/middleware"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -25,6 +26,8 @@ var platAuthApiList = []string{
 	"/admin_plat/auth-plat/change-unit",
 	"/admin_plat/auth-plat/get-user-unit-list",
 	"/admin_plat/auth-menu/get-async-routes",
+	"/admin_plat/upload/upload",
+	"/admin_plat/upload/vue-slice-upload",
 }
 
 func init() {
@@ -37,6 +40,10 @@ func init() {
 		beego.NSCtrlPost("/auth-plat/change-unit", (*adminAuth.PlatController).ChangeUnit),
 		beego.NSCtrlGet("/auth-plat/get-user-unit-list", (*adminAuth.PlatController).GetUserUnitList),
 		beego.NSCtrlGet("/auth-menu/get-async-routes", (*adminAuth.MenuController).GetAsyncRoutes),
+
+		beego.NSCtrlPost("/upload/upload", (*adminUpload.UploadController).Upload),
+		beego.NSCtrlGet("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUploadCheck),
+		beego.NSCtrlPost("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUpload),
 
 		// system
 		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).GetUnitList),

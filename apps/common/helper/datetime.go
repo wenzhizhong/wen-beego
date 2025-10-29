@@ -44,11 +44,19 @@ func GetTime() time.Time {
 }
 
 // 获取时间字符串
-func GetTimeString() string {
-	return GetTime().Format("2006-01-02 15:04:05")
+func GetTimeString(format ...string) string {
+	formatStr := "2006-01-02 15:04:05"
+	if len(format) > 0 {
+		formatStr = format[0]
+	}
+	return GetTime().Format(formatStr)
 }
 
 // 时间戳转时间
-func TimestampToTime(timestamp int64) string {
-	return time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
+func TimestampToTime(timestamp int64, format ...string) string {
+	formatStr := "2006-01-02 15:04:05"
+	if len(format) > 0 {
+		formatStr = format[0]
+	}
+	return time.Unix(timestamp, 0).Format(formatStr)
 }

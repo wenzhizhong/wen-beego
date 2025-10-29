@@ -184,7 +184,7 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 		return
 	}
 	if !status {
-		err = errors.New("用户状态不可用")
+		err = errors.New("用户状态不可用, status=" + strconv.Itoa(tmpStatus))
 		return
 	}
 	err = helper.RedisPut(redisKey, strconv.Itoa(tmpStatus), 4*60*60)

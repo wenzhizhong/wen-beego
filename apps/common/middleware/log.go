@@ -50,7 +50,7 @@ func getFileLogConfig(logType string) (string, error) {
 	}
 	config, _ := helper.MapInterface2MapString(mapConfig)
 
-	defLogPath := "../../temp/logs"
+	defLogPath := global.TempDir + "/logs"
 	logPath := config["path"]
 	if logType != "" {
 		if config[logType] == "" {
