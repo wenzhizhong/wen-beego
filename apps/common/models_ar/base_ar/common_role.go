@@ -7,6 +7,8 @@ import (
 	"WenBeego/apps/common/models/itf"
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 /*
@@ -52,5 +54,47 @@ func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleNam
 	if helper.DbNotFound(tmpError) {
 		return rolesList, nil
 	}
+	return
+}
+
+/**
+ * 新增组织单位角色配置
+ */
+func InsertUnitRole[RoleModel itf.RoleItf](tx *gorm.DB, roleModel base_model.UnitRole) (err error) {
+	if roleModel.Id == "" {
+		return errors.New("新增角色，角色id不能为空")
+	}
+	var tmpUnitRole RoleModel
+	err = global.GetReadDb().
+		Model(tmpUnitRole).
+		Where("id = ?", roleModel.Id).
+		Take(&tmpUnitRole).Error
+	if err == nil && tmpUnitRole.GetId() != "" {
+		return nil
+	}
+
+	err = tx.Model(tmpUnitRole).
+		Create(&roleModel).Error
+	return
+}
+
+/**
+ * 新增组织单位用户角色
+ */
+func InsertUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleModel base_model.UnitUserRole) (err error) {
+	if userRoleModel.Id == "" {
+		return errors.New("新增用户角色，用户角色id不能为空")
+	}
+	var tmpUnitUserRole UserRoleModel
+	err = global.GetReadDb().
+		Model(tmpUnitUserRole).
+		Where("id = ?", userRoleModel.Id).
+		Take(&tmpUnitUserRole).Error
+	if err == nil && tmpUnitUserRole.GetId() != "" {
+		return nil
+	}
+
+	err = tx.Model(tmpUnitUserRole).
+		Create(&userRoleModel).Error
 	return
 }

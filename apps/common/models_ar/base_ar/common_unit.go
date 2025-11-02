@@ -2,11 +2,14 @@ package base_ar
 
 import (
 	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto/unit_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 /**
@@ -83,7 +86,7 @@ func GetUserUnitById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 }
 
 // 获取内部组织列表
-func GetUnitListById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []base_model.Unit, count int64, err error) {
+func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []base_model.Unit, count int64, err error) {
 	tableUnitName := unitModel.TableName()
 	tableUnitUserName := unitUserModel.TableName()
 
@@ -135,4 +138,47 @@ func GetUnitListById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitD
 
 	err = query.Select(selectStr).Find(&listData).Error
 	return
+}
+
+func SaveUnit[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel, unitUserModel UnitUserModel) (id string, err error) {
+	if unitDto.Id == "" {
+		unitDto.Id, err = helper.GetUuid()
+		if err != nil {
+			return
+		}
+
+		err = tx.Model(unitModel).
+			Create(&unitDto).Error
+		if err != nil {
+			return
+		}
+	} else {
+		err = tx.Model(unitModel).
+			Where("id = ?", unitDto.Id).
+			Omit("deleted", "created_at", "deleted_at").
+			Updates(&unitDto).Error
+	}
+	if err != nil {
+		return
+	}
+	return unitDto.Id, nil
+}
+
+func DeleteUnit[UnitModel itf.UnitItf](id string, unitModel UnitModel) error {
+	deletedTime := helper.GetTimestamp()
+
+	updateData := struct {
+		Deleted   int
+		UpdatedAt int64
+		DeletedAt *int64
+	}{
+		Deleted:   1,
+		UpdatedAt: deletedTime,
+		DeletedAt: &deletedTime,
+	}
+
+	return global.GetWriteDb().
+		Model(unitModel).
+		Where("id = ?", id).
+		Updates(updateData).Error
 }

@@ -46,7 +46,9 @@ func init() {
 		beego.NSCtrlPost("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUpload),
 
 		// system
-		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).GetUnitList),
+		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).Get),
+		beego.NSCtrlPost("/system-unit/add", (*adminSystem.UnitController).Add),
+		beego.NSCtrlPost("/system-unit/edit", (*adminSystem.UnitController).Edit),
 	)
 
 	// 请求前、后处理

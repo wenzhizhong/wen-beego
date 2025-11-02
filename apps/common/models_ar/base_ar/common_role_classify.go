@@ -7,6 +7,9 @@ import (
 	"WenBeego/apps/common/models/itf"
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleClassifyModel itf.RoleClassifyItf, UserRoleModel itf.UserRoleItf](unitId string, userId string, unitModel UnitModel, roleModel RoleModel, roleClassifyModel RoleClassifyModel, userRoleModel UserRoleModel) (dataList []base_model.UnitRoleClassify, err error) {
@@ -69,5 +72,19 @@ func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleCla
 		err = tmpError
 		return
 	}
+	return
+}
+
+func InsertUserRoleClassifies[RoleClassifyModel itf.RoleClassifyItf](tx *gorm.DB, roleClassifyModel base_model.UnitRoleClassify) (err error) {
+	if roleClassifyModel.Id == "" {
+		return errors.New("InsertUserRoleClassifies():角色分类id不能为空")
+	}
+	var tmpRoleClassifyModel RoleClassifyModel
+	err = tx.Model(tmpRoleClassifyModel).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			UpdateAll: true,
+		}).
+		Create(&roleClassifyModel).Error
 	return
 }

@@ -18,4 +18,5 @@ type UnitMenu struct {
 	Weight    int       `json:"weight" gorm:"type:int4;default:0;comment:权重"`
 	Visible   int       `json:"visible" gorm:"type:int4;not null;default:1;comment:是否可见"`
 	Deleted   int       `json:"deleted" gorm:"type:int4;default:0;comment:是否删除"`
+	Clone     int       `json:"clone" gorm:"type:int2;default:0;comment:允许克隆：0否1是"`
 }

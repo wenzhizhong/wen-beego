@@ -88,6 +88,7 @@ func (s *Upload) getUploadReqDto(file *multipart.File, fileHeader *multipart.Fil
 
 	data.IsSlice = sliceTotal > 1
 	data.BatchId = postData.Get("batchId")
+	data.BucketACL = postData.Get("bucketACL")
 	data.SliceTotal = sliceTotal
 	data.SliceIndex = sliceIndex
 	data.CurrentSize = currentSize

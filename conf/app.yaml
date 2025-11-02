@@ -82,27 +82,18 @@ upload:
     - aliyun
   type: local
   local:
-    path: /uploads
-    url: http://127.0.0.1:8013/uploads
-    maxSize: 10
+    public:
+      path: /uploads/public
+      url: http://127.0.0.1:8013/public
+      maxSize: 10
+    private:
+      path: /uploads/private
+      url: http://127.0.0.1:8013/private
+      maxSize: 10
   minio:
-    endpoint: localhost:9000
-    accessKeyID: minioadmin
-    secretAccessKey: minioadmin
-    useSSL: false
-    bucketName: wen-beego
-    url: http://127.0.0.1:9000/wen-beego
-    maxSize: 10
-    region: ""
-    timeout: 10s
+    public:
+    private:
   aliyun:
-    endpoint: oss-cn-beijing.aliyuncs.com
-    accessKeyID: <>
-    secretAccessKey: <KEY>
-    bucketName: wen-beego
-    url: http://wen-beego.oss-cn-beijing.aliyuncs.com
-    maxSize: 10
-    region: cn-beijing
-    timeout: 10s
-    # ....
+    public:
+    private:
     

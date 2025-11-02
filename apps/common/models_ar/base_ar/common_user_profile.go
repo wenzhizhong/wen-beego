@@ -5,6 +5,8 @@ import (
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"errors"
+
+	"gorm.io/gorm"
 )
 
 /**
@@ -37,4 +39,28 @@ func GetUserProfileOfUnitById[UnitUserModel itf.UnitUserItf, UnitUserProfileMode
 		Where(tableUnitUserName+".deleted = ?", 0).
 		Take(&data)
 	return data, result.Error
+}
+
+/**
+ * 新增用户信息
+ */
+func InsertUnitUserProfile[UnitUserProfileModel itf.UserProfileItf](tx *gorm.DB, unitUserProfileModel base_model.UnitUserProfile) (err error) {
+	if unitUserProfileModel.Id == "" {
+		return errors.New("新增用户信息，id 不能为空")
+	}
+	var tmpUnitUserProfileModel UnitUserProfileModel
+	err = global.GetReadDb().
+		Model(tmpUnitUserProfileModel).
+		Where("id = ?", unitUserProfileModel.Id).
+		Take(&tmpUnitUserProfileModel).Error
+	if err == nil && tmpUnitUserProfileModel.GetId() != "" {
+		return nil
+	}
+
+	err = tx.Model(tmpUnitUserProfileModel).
+		Create(&unitUserProfileModel).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

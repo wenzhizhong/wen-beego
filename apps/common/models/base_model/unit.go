@@ -14,6 +14,9 @@ type Unit struct {
 	CreatedAt     int64  `json:"created_at" gorm:"autoCreateTime;comment:创建时间"`
 	UpdatedAt     int64  `json:"updated_at" gorm:"autoCreateTime;comment:更新时间"`
 	DeletedAt     *int64 `json:"deleted_at" gorm:"comment:删除时间"`
+	CreatedBy     string `json:"created_by" gorm:"type:bpchar(36);default:'';comment:创建者"`
+	UpdatedBy     string `json:"updated_by" gorm:"type:bpchar(36);default:'';comment:更新者"`
+	DeletedBy     string `json:"deleted_by" gorm:"type:bpchar(36);default:'';comment:删除者"`
 	DefaultUnitId string `json:"default_unit_id" gorm:"-"`
 }
 

@@ -13,7 +13,7 @@ type UserProfileItf interface {
 	GetCardNum() string
 	GetCardImages() string
 	GetGender() int
-	GetBirthDate() time.Time
+	GetBirthDate() *time.Time
 	GetConstellation() string
 	GetOccupation() string
 	GetCompany() string
@@ -23,8 +23,8 @@ type UserProfileItf interface {
 	GetEMail() string
 	GetSource() string
 	GetHeadimgurl() string
-	GetValidDateBegin() time.Time
-	GetValidDateEnd() time.Time
+	GetValidDateBegin() *time.Time
+	GetValidDateEnd() *time.Time
 	GetSchooling() string
 	GetDegreeNumber() string
 	GetLearnProfessional() string

@@ -2,9 +2,11 @@ package upload
 
 import (
 	"WenBeego/apps/common/dto/upload_dto"
+	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/services/upload/itf"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,7 +20,7 @@ var _ itf.UploadItf = (*UploadToLocal)(nil)
 
 func (s *UploadToLocal) Upload(requestDto upload_dto.UploadFileReqDto, userId string, unitId string) (result upload_dto.UploadFileRespDto, err error) {
 	var uploadPathStr string
-	uploadPathStr, err = GetUploadpath(userId, requestDto.FilePath)
+	uploadPathStr, err = s.GetUploadpath(requestDto.BucketACL, userId, requestDto.FilePath)
 	if err != nil {
 		return
 	}
@@ -33,7 +35,7 @@ func (s *UploadToLocal) Upload(requestDto upload_dto.UploadFileReqDto, userId st
 }
 func (s *UploadToLocal) SliceUpload(requestDto upload_dto.UploadFileReqDto, userId string, unitId string) (result upload_dto.UploadFileRespDto, err error) {
 
-	_, err = GetUploadConfigPath()
+	_, err = s.GetUploadConfigPath(requestDto.BucketACL)
 	if err != nil {
 		return
 	}
@@ -89,7 +91,7 @@ func (s *UploadToLocal) MergeSliceFile(requestDto upload_dto.UploadFileReqDto, u
 	}
 
 	var uploadPathStr string
-	uploadPathStr, err = GetUploadpath(userId, requestDto.FilePath)
+	uploadPathStr, err = s.GetUploadpath(requestDto.BucketACL, userId, requestDto.FilePath)
 	if err != nil {
 		return false, err
 	}
@@ -122,4 +124,46 @@ func (s *UploadToLocal) MergeSliceFile(requestDto upload_dto.UploadFileReqDto, u
 	uploadResult.Uploaded = make([]int64, 0)
 
 	return true, nil
+}
+
+func (s *UploadToLocal) GetUploadpath(bucketACL string, userId string, originFilepath string) (string, error) {
+	time := helper.GetTimeString("2006/01/02")
+
+	originFileDir := filepath.Dir(originFilepath)
+	if len(originFileDir) <= 1 {
+		originFileDir = ""
+	}
+
+	path, err := s.GetUploadConfigPath(bucketACL)
+	tmpNewPath := filepath.Join(path, time, userId, originFilepath)
+	tmpNewDir := filepath.Join(path, time, userId, originFileDir)
+	if err != nil {
+		return "", err
+	}
+	err = helper.MkdirAll(tmpNewDir)
+	return tmpNewPath, err
+}
+func (s *UploadToLocal) GetUploadConfigPath(bucketACL string) (uploadPathStr string, err error) {
+	var uploadPath interface{}
+
+	publicPathConfig := "upload.local.public.path"
+	privatePathConfig := "upload.local.private.path"
+	uploadPathConfigKey := helper.Ternary(bucketACL == "public", publicPathConfig, privatePathConfig)
+	uploadPath, err = global.GetConfigDiy(uploadPathConfigKey)
+
+	if err != nil {
+		return "", err
+	}
+	if uploadPath == nil {
+		err = errors.New("请配置" + uploadPathConfigKey)
+		return "", err
+	}
+
+	uploadPathStr, err = filepath.Abs(global.RootPath + uploadPath.(string))
+	if err != nil {
+		return "", err
+	}
+
+	err = helper.MkdirAll(uploadPathStr)
+	return
 }

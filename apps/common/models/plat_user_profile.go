@@ -34,7 +34,7 @@ func (m *PlatUserProfile) GetCardImages() string {
 func (m *PlatUserProfile) GetGender() int {
 	return m.Gender
 }
-func (m *PlatUserProfile) GetBirthDate() time.Time {
+func (m *PlatUserProfile) GetBirthDate() *time.Time {
 	return m.BirthDate
 }
 func (m *PlatUserProfile) GetConstellation() string {
@@ -64,10 +64,10 @@ func (m *PlatUserProfile) GetSource() string {
 func (m *PlatUserProfile) GetHeadimgurl() string {
 	return m.Headimgurl
 }
-func (m *PlatUserProfile) GetValidDateBegin() time.Time {
+func (m *PlatUserProfile) GetValidDateBegin() *time.Time {
 	return m.ValidDateBegin
 }
-func (m *PlatUserProfile) GetValidDateEnd() time.Time {
+func (m *PlatUserProfile) GetValidDateEnd() *time.Time {
 	return m.ValidDateEnd
 }
 func (m *PlatUserProfile) GetSchooling() string {

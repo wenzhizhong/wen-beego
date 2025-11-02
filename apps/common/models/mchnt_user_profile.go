@@ -34,7 +34,7 @@ func (m *MchntUserProfile) GetCardImages() string {
 func (m *MchntUserProfile) GetGender() int {
 	return m.Gender
 }
-func (m *MchntUserProfile) GetBirthDate() time.Time {
+func (m *MchntUserProfile) GetBirthDate() *time.Time {
 	return m.BirthDate
 }
 func (m *MchntUserProfile) GetConstellation() string {
@@ -64,10 +64,10 @@ func (m *MchntUserProfile) GetSource() string {
 func (m *MchntUserProfile) GetHeadimgurl() string {
 	return m.Headimgurl
 }
-func (m *MchntUserProfile) GetValidDateBegin() time.Time {
+func (m *MchntUserProfile) GetValidDateBegin() *time.Time {
 	return m.ValidDateBegin
 }
-func (m *MchntUserProfile) GetValidDateEnd() time.Time {
+func (m *MchntUserProfile) GetValidDateEnd() *time.Time {
 	return m.ValidDateEnd
 }
 func (m *MchntUserProfile) GetSchooling() string {

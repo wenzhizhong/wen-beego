@@ -16,6 +16,7 @@ type UploadFileReqDto struct {
 	CurrentSize int64
 	SliceSize   int64
 	TotalSize   int64
+	BucketACL   string // public | private
 }
 type UploadFileRespDto struct {
 	FileId        string `json:"fileId"`

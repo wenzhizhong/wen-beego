@@ -2,11 +2,9 @@ package upload
 
 import (
 	"WenBeego/apps/common/dto/upload_dto"
-	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar"
-	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -23,24 +21,6 @@ func GetTempUploadDir(userId string, fileMd5 string, originFilepath string) (str
 	return path, err
 }
 
-func GetUploadpath(userId string, originFilepath string) (string, error) {
-	time := helper.GetTimeString("2006/01/02")
-
-	originFileDir := filepath.Dir(originFilepath)
-	if len(originFileDir) <= 1 {
-		originFileDir = ""
-	}
-
-	path, err := GetUploadConfigPath()
-	tmpNewPath := filepath.Join(path, time, userId, originFilepath)
-	tmpNewDir := filepath.Join(path, time, userId, originFileDir)
-	if err != nil {
-		return "", err
-	}
-	err = helper.MkdirAll(tmpNewDir)
-	return tmpNewPath, err
-}
-
 func ClearTempUploadData(userId string, fileMd5 string, originFilepath string) error {
 	tempUploadDir, err := GetTempUploadDir(userId, fileMd5, originFilepath)
 	if err != nil {
@@ -50,25 +30,6 @@ func ClearTempUploadData(userId string, fileMd5 string, originFilepath string) e
 	return (&models_ar.FileSliceAr{}).Delete(fileMd5)
 }
 
-func GetUploadConfigPath() (uploadPathStr string, err error) {
-	var uploadPath interface{}
-	uploadPath, err = global.GetConfigDiy("upload.local.path")
-	if err != nil {
-		return "", err
-	}
-	if uploadPath == nil {
-		err = errors.New("请配置upload.local.path")
-		return "", err
-	}
-
-	uploadPathStr, err = filepath.Abs(global.RootPath + uploadPath.(string))
-	if err != nil {
-		return "", err
-	}
-
-	err = helper.MkdirAll(uploadPathStr)
-	return
-}
 func SaveInfoToDB(requestDto upload_dto.UploadFileReqDto, uploadResult *upload_dto.UploadFileRespDto, userId string, unitId string, moduleName string) error {
 	tmpUniqueName := helper.Md5(uploadResult.FilePath)
 	exists, err := (&models_ar.FileAr{}).GetByName(tmpUniqueName)
