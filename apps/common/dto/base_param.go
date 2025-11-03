@@ -2,6 +2,7 @@ package dto
 
 // 基础参数
 type BaseParamDto struct {
+	Host       string
 	ModuleName string
 	UnitId     string
 	UserId     string

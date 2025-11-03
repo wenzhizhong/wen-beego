@@ -7,4 +7,5 @@ var (
 	StaticDir  string
 	RoutersDir string
 	TempDir    string
+	UploadsDir string
 )

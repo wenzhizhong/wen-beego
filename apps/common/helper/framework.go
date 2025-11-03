@@ -12,7 +12,7 @@ import (
 // ASCII 艺术字符
 func Get_ASCII_ArtisticCharacters() (string, error) {
 	// static/common/text/logo.txt
-	file, err := os.Open(global.StaticDir+"/common/text/logo.txt")
+	file, err := os.Open(global.StaticDir + "/common/text/logo.txt")
 	if err != nil {
 		return "", errors.New("打开文件错误")
 	}
@@ -31,6 +31,16 @@ func Output_ASCII_ArtisticCharacters() {
 	version, _ := AppVersion()
 
 	fmt.Println(logo + fmt.Sprintf("\nAppVersion: %s\n\n", version))
+}
+
+// 获取系统应用名称
+func AppName() (string, error) {
+	tmpAppName, err := global.GetConfigDiy("appname")
+	if err != nil {
+		return "", errors.New("获取系统应用名称错误")
+	}
+	appName := tmpAppName.(string)
+	return appName, nil
 }
 
 // 获取框架版本

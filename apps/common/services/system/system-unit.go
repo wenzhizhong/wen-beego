@@ -18,7 +18,7 @@ import (
 type Unit struct {
 }
 
-// 系统管理-获取用户列表
+// 系统管理-获取内部组织列表
 func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto.RespDataListDto, err error) {
 	data := make([]base_model.Unit, 0)
 	var count int64 = 0
@@ -33,6 +33,17 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto
 	}
 	if err != nil {
 		return
+	}
+	for k, v := range data {
+		tmpLogo, err1 := helper.LocalFileSign(unitDto.Host, v.Logo)
+		tmpPath, err2 := helper.LocalFileSign(unitDto.Host, v.License)
+		if err1 != nil || err2 != nil {
+			errStr := helper.Ternary(err1 != nil, err1.Error(), err2.Error())
+			global.Log.Error(errStr)
+			continue
+		}
+		data[k].LogoLink = tmpLogo
+		data[k].LicenseLink = tmpPath
 	}
 	resultDto, err = helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
 	return
@@ -90,12 +101,13 @@ func doSave[
 		}
 
 		if isAdd {
-			err = base_ar.InsertUnitUser[UnitUserModel](tx, baseParamDto.UserId, newUnitId, 0)
+			unitUserTableUuid := ""
+			unitUserTableUuid, err = base_ar.InsertUnitUser[UnitUserModel](tx, baseParamDto.UserId, newUnitId, 0)
 			if err != nil {
 				return err
 			}
 
-			userProfile := getUserProfileObj()
+			userProfile := getUserProfileObj(unitUserTableUuid)
 			err = base_ar.InsertUnitUserProfile[UnitUserProfileModel](tx, userProfile)
 			if err != nil {
 				return err
@@ -130,10 +142,10 @@ func doSave[
 	return
 }
 
-func getUserProfileObj() base_model.UnitUserProfile {
-	unitUserTableUuid, _ := helper.GetUuid()
+func getUserProfileObj(unitUserId string) base_model.UnitUserProfile {
+
 	return base_model.UnitUserProfile{
-		Id:                unitUserTableUuid,
+		Id:                unitUserId,
 		Avatar:            "",
 		CardType:          base_model.UNIT_CARD_TYPE_5,
 		CardNum:           "",

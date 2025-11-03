@@ -28,7 +28,7 @@ func (c *UnitController) Get() {
 	userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
 
-	baseParamDto, err := helper.GetBaseParamDto(c.ModuleName, unitId.(string), userId.(string))
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx.Request.Host, c.ModuleName, unitId.(string), userId.(string))
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
@@ -67,7 +67,7 @@ func (c *UnitController) save(optType string) {
 	unitId := c.Ctx.Input.GetData("unitId")
 
 	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
-	bBaseParamDto, err2 := helper.GetBaseParamDto(c.ModuleName, unitId.(string), userId.(string))
+	bBaseParamDto, err2 := helper.GetBaseParamDto(c.Ctx.Request.Host, c.ModuleName, unitId.(string), userId.(string))
 	if err1 != nil {
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()

@@ -160,8 +160,10 @@ func (s *Upload) doUpload(requestDto upload_dto.UploadFileReqDto, userId string,
 		if err != nil {
 			return result, err
 		}
-		result.FilePath = strings.ReplaceAll(result.FilePath, global.RootPath, "")
-		result.FilePath = strings.ReplaceAll(result.FilePath, "\\", "/")
+		if uploadTypeStr == "local" {
+			result.FilePath = strings.ReplaceAll(result.FilePath, global.RootPath, "")
+			result.FilePath = strings.ReplaceAll(result.FilePath, "\\", "/")
+		}
 		err = uploadObj.SaveInfoToDB(requestDto, &result, userId, unitId, moduleName)
 	}
 	if err == nil {

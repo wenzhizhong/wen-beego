@@ -11,7 +11,7 @@ type UnitService struct {
 	commonSystemUnit CommonSystem.Unit
 }
 
-// 系统管理- 获取用户列表
+// 系统管理- 获取内部组织列表
 func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDataListDto, error) {
 	return s.commonSystemUnit.GetUnitList(unitDto)
 }

@@ -18,6 +18,7 @@ func initGlobalPath() {
 	staticDir := filepath.Join(rootPath, "static")
 	routersDir := filepath.Join(rootPath, "routers")
 	tempDir := filepath.Join(rootPath, "temp")
+	uploadsDir := filepath.Join(rootPath, "uploads")
 
 	global.RootPath = rootPath
 	global.AppDir = appDir
@@ -25,10 +26,15 @@ func initGlobalPath() {
 	global.StaticDir = staticDir
 	global.RoutersDir = routersDir
 	global.TempDir = tempDir
+	global.UploadsDir = uploadsDir
 
-	fileInfo, err := os.Stat(tempDir)
+	createDir(tempDir)
+	createDir(uploadsDir)
+
+}
+func createDir(path string) {
+	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) || !fileInfo.IsDir() {
-		os.MkdirAll(tempDir, os.ModePerm)
+		os.MkdirAll(path, os.ModePerm)
 	}
-
 }

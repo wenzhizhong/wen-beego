@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,6 +47,15 @@ func (m *AccessMiddleware) LimitTimes() web.FilterFunc {
 			global.Log.Warn("Too Many Requests")
 			http.Error(ctx.ResponseWriter, "Too Many Requests", http.StatusTooManyRequests)
 			return
+		}
+		uri := ctx.Request.URL.Path
+		if uri != "" && strings.HasPrefix(uri, "/uploads/private/") {
+			signStr := ctx.Request.URL.Query().Get("sign")
+			_, err := helper.LocalFileSignCheck(signStr)
+			if err != nil {
+				http.Error(ctx.ResponseWriter, "sign error", http.StatusUnauthorized)
+				return
+			}
 		}
 	}
 }

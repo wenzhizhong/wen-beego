@@ -53,6 +53,12 @@ logToDbModules:
   - "admin_mchnt"
   - "api"
 branca:
+  common:
+    iss: wenBeego
+    aud: wenBeegoAdminPlatUi
+    key: rxZIWltzyV39uRjwN071UvPa6EcpJFeK
+    exp: 7200
+    expRemark: 2*60*60
   admin_plat:
     iss: wenBeegoAdminPlat
     aud: wenBeegoAdminPlatUi

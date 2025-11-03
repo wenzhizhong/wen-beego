@@ -25,7 +25,8 @@ type PlatController struct {
 // @Security ApiKeyAuth
 func (c *PlatController) GetUserUnitList() {
 	userId := c.Ctx.Input.GetData("userId")
-	data, err := c.PlatService.GetUserUnitList(userId.(string))
+	host := c.Ctx.Request.Host
+	data, err := c.PlatService.GetUserUnitList(userId.(string), host)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()

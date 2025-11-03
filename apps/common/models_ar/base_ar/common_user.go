@@ -125,12 +125,12 @@ func UpdateUserDefaultUnit[UnitUserModel itf.UnitUserItf](userId string, unitId 
 	}
 
 	updateData := struct {
-		IsDefault int `json:"is_default"`
+		IsDefault int
 	}{
 		IsDefault: 0,
 	}
 	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		result := tx.Model(unitUserModel).Where("user_id = ?", userId).Updates(updateData)
+		result := tx.Model(unitUserModel).Select("is_default").Where("user_id = ?", userId).Updates(updateData)
 		if result.Error != nil {
 			return result.Error
 		}
@@ -155,11 +155,11 @@ func UpdateUserDefaultUnit[UnitUserModel itf.UnitUserItf](userId string, unitId 
  * @return
  * @throws
  */
-func InsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, userId string, unitId string, isDefault int) (err error) {
+func InsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, userId string, unitId string, isDefault int) (unitUserTableUuid string, err error) {
 	var unitUserModel UnitUserModel
 	tableName := unitUserModel.TableName()
 	fmt.Println(tableName)
-	unitUserTableUuid, _ := helper.GetUuid()
+	unitUserTableUuid, _ = helper.GetUuid()
 	userInfo := &models.User{}
 	global.GetReadDb().Model(&models.User{}).Where("id = ?", userId).Take(&userInfo)
 
@@ -176,7 +176,7 @@ func InsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, userId string, u
 	err = tx.Model(unitUserModel).
 		Create(&insertUnitUserData).Error
 	if err != nil {
-		return err
+		return
 	}
-	return err
+	return
 }
