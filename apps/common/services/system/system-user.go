@@ -24,7 +24,7 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	case "mchnt_plat":
 		data, count, err = base_ar.GetUserListOfUnitById[*models.MchntUser](reqDto)
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("GetUserList：模块名称错误")
 	}
 	if err != nil {
 		return

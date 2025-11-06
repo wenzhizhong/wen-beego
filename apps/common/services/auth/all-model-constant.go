@@ -12,5 +12,6 @@ func GetAllModelConstant() map[string]interface{} {
 		"unit_gender_map":       base_model.UNIT_GENDER_MAP,
 		"unit_card_type_map":    base_model.UNIT_CARD_TYPE_MAP,
 		"unit_user_source_map":  base_model.UNIT_USER_SOURCE_MAP,
+		"unit_dept_status_map":  base_model.UNIT_DEPT_STATUS_MAP,
 	}
 }

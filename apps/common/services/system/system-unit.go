@@ -29,7 +29,7 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto
 	case "mchnt_plat":
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Mchnt{}, &models.MchntUser{})
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("GetUnitList:模块名称错误")
 	}
 	if err != nil {
 		return
@@ -66,7 +66,7 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 	case "mchnt_plat":
 		newUnitId, err = doSave[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile, *models.MchntRole, *models.MchntUserRole, *models.MchntMenu, *models.MchntMenuPerms, *models.MchntRoleClassify](isAdd, baseParamDto, unitDto)
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("unit Save：模块名称错误")
 	}
 	if err != nil {
 		global.Log.Error(err.Error())

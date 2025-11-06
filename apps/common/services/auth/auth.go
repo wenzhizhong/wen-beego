@@ -340,7 +340,7 @@ func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (uni
 	case "admin_mchnt":
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Mchnt, *models.MchntUser](userId)
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("GetUserDefaultUnitId:模块名称错误")
 	}
 	return unitUserData, err
 }
@@ -364,7 +364,7 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
 	case "admin_mchnt":
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("getUserRolesClassifies:模块名称错误")
 	}
 
 	for _, roleClassify := range roleClassifies {
@@ -396,7 +396,7 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId
 	case "admin_mchnt":
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("GetUserPermissions:模块名称错误")
 	}
 
 	for _, permission := range permissions {

@@ -131,6 +131,9 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 	if err != nil {
 		return nil, 0, err
 	}
+	if count == 0 {
+		return nil, 0, nil
+	}
 
 	err = query.Select(selectStr).Order(tableUnitName + ".created_by," + tableUnitName + ".sort").Find(&listData).Error
 	return

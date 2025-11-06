@@ -51,7 +51,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId str
 		}
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	default:
-		err = errors.New("未知的模块名称")
+		err = errors.New("GetAsyncRoutes:未知的模块名称")
 	}
 
 	if err != nil && !helper.DbNotFound(err) {

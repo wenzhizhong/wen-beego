@@ -52,7 +52,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (redslt interface{}, err erro
 				return nil, err
 			}
 		default:
-			global.Log.Warn("模块不存在: %s", moduleName)
+			global.Log.Warn("SaveToDb：模块不存在: %s", moduleName)
 			continue
 		}
 	}

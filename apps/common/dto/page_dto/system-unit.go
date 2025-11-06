@@ -11,11 +11,3 @@ type SystemUnitListReqDto struct {
 	Code          string
 	Status        int
 }
-
-// 系统管理-内部用户列表
-type SystemUserListReqDto struct {
-	dto.BaseParamDto
-	dto.ReqDataListDto
-	UserName string
-	Phone    string
-}

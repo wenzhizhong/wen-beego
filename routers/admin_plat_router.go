@@ -49,6 +49,10 @@ func init() {
 		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).Get),
 		beego.NSCtrlPost("/system-unit/add", (*adminSystem.UnitController).Add),
 		beego.NSCtrlPost("/system-unit/edit", (*adminSystem.UnitController).Edit),
+
+		beego.NSCtrlGet("/system-dept/get", (*adminSystem.DeptController).Get),
+		beego.NSCtrlPost("/system-dept/add", (*adminSystem.DeptController).Add),
+		beego.NSCtrlPost("/system-dept/edit", (*adminSystem.DeptController).Edit),
 	)
 
 	// 请求前、后处理

@@ -19,7 +19,7 @@ func (a *CommonUnit) ChangeUnit(moduleName string, userId string, unitId string)
 	case "admin_mchnt":
 		err = changeUnit[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile](userId, unitId)
 	default:
-		err = errors.New("模块名称错误")
+		err = errors.New("ChangeUnit:模块名称错误")
 	}
 	if err != nil {
 		return nil, err

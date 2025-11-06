@@ -108,7 +108,7 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	case "admin_mchnt":
 		data, err = base_ar.GetUserProfileOfUnitById[*models.MchntUser, *models.MchntUserProfile](userId, unitId)
 	default:
-		err = errors.New("未知的模块名称")
+		err = errors.New("checkUnitUserProfileStatus:未知的模块名称")
 	}
 	if err != nil {
 		return
@@ -145,7 +145,7 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
 		default:
-			err = errors.New("未知的模块名称")
+			err = errors.New("checkUnitStatus:未知的模块名称")
 		}
 		return
 	} else if err != nil {
@@ -257,7 +257,7 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId stri
 		case "admin_mchnt":
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		default:
-			err = errors.New("未知的模块名称")
+			err = errors.New("checkUserRolePermissions:未知的模块名称")
 		}
 		if err != nil {
 			return
