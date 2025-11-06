@@ -48,6 +48,7 @@ func GetUserUnitList[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 		Joins(joinStr).
 		Where(tableUnitUserName+".user_id = ?", userId).
 		Where(tableUnitUserName + ".deleted = 0").
+		Order(tableUnitName + ".created_by," + tableUnitName + ".sort").
 		Find(&listData)
 	return listData, result.Error
 }
@@ -116,11 +117,6 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 		Where(tableUnitUserName+".user_id = ?", unitDto.UserId).
 		Where(tableUnitUserName + ".deleted = 0")
 
-	if unitDto.ParentUnitId != "" {
-		query = query.Where(tableUnitName+".pid = ?", unitDto.ParentUnitId)
-	} else {
-		query = query.Where(tableUnitName + ".pid = ''")
-	}
 	if unitDto.Name != "" {
 		query = query.Where(tableUnitName+".name like ?", "%"+unitDto.Name+"%")
 	}
@@ -136,7 +132,7 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 		return nil, 0, err
 	}
 
-	err = query.Select(selectStr).Find(&listData).Error
+	err = query.Select(selectStr).Order(tableUnitName + ".created_by," + tableUnitName + ".sort").Find(&listData).Error
 	return
 }
 

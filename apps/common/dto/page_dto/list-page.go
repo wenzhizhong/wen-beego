@@ -6,10 +6,10 @@ import "WenBeego/apps/common/dto"
 type SystemUnitListReqDto struct {
 	dto.BaseParamDto
 	dto.ReqDataListDto
-	ParentUnitId string
-	Name         string
-	Code         string
-	Status       int
+	SelectUnitIds []string
+	Name          string
+	Code          string
+	Status        int
 }
 
 // 系统管理-内部用户列表

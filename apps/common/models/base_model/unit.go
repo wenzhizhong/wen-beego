@@ -19,6 +19,7 @@ type Unit struct {
 	CreatedBy     string `json:"created_by" gorm:"type:bpchar(36);default:'';comment:创建者"`
 	UpdatedBy     string `json:"updated_by" gorm:"type:bpchar(36);default:'';comment:更新者"`
 	DeletedBy     string `json:"deleted_by" gorm:"type:bpchar(36);default:'';comment:删除者"`
+	Sort          int    `json:"sort" gorm:"type:int4;default:0;comment:排序"`
 	DefaultUnitId string `json:"default_unit_id" gorm:"-"`
 }
 
