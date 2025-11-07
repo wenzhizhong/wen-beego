@@ -53,6 +53,7 @@ func SaveUnitDept[UnitDeptModel itf.DeptItf](unitDeptDto dept_dto.UnitDeptDto, u
 	} else {
 		err = global.GetWriteDb().
 			Model(unitDeptModel).
+			Select("*").
 			Where("id = ?", unitDeptDto.Id).
 			Updates(unitDeptDto).Error
 	}

@@ -17,9 +17,9 @@ func (s *Auth) GetCatpcha() (interface{}, error) {
 }
 
 // 登录
-func (s *Auth) Login(data auth_dto.LoginDto, moduleName string) (interface{}, error) {
+func (s *Auth) Login(data auth_dto.LoginDto, moduleName, host string) (interface{}, error) {
 	data.AuthCodeType = cpatchaType
-	return s.commonAuth.Login(data, moduleName)
+	return s.commonAuth.Login(data, moduleName, host)
 }
 
 // 注册

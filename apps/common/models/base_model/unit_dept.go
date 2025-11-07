@@ -6,9 +6,9 @@ type UnitDept struct {
 	UnitId      string `json:"unit_id" gorm:"type:bpchar(36);not null;comment:组织单位id"`
 	Name        string `json:"name" gorm:"type:varchar(100);not null;comment:部门名称"`
 	PrincipalId string `json:"principal_id" gorm:"type:bpchar(36);comment:负责人id"`
-	Principal   string `json:"principal" gorm:"-"`
-	Phone       string `json:"phone" gorm:"-"`
-	Email       string `json:"email" gorm:"-"`
+	Principal   string `json:"principal" gorm:"->"`
+	Phone       string `json:"phone" gorm:"->"`
+	Email       string `json:"email" gorm:"->"`
 	Sort        int    `json:"sort" gorm:"type:int4;not null;default:0;comment:排序"`
 	Status      int    `json:"status" gorm:"type:int4;not null;default:0;comment:状态：0禁用1启用"`
 	Deleted     int    `json:"deleted" gorm:"type:int4;not null;default:0;comment:是否删除：0否1是"`

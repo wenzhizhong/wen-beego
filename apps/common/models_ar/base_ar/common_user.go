@@ -90,7 +90,7 @@ func GetUserDefaultUnit[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](us
 		TableUserUnit: tableUnitUserName,
 	}
 	joinUserUnitStr, err1 := helper.ParseStringTpl(`inner join {{.TableUserUnit}} on {{.TableUserUnit}}.unit_id = {{.TableUnit}}.id`, tableStruct)
-	selectStr, err2 := helper.ParseStringTpl(`{{.TableUnit}}.*, case {{.TableUserUnit}}.is_default when 1 then {{.TableUserUnit}}.unit_id else '' end AS default_unit_id`, tableStruct)
+	selectStr, err2 := helper.ParseStringTpl(`{{.TableUnit}}.*, case {{.TableUserUnit}}.is_default when 1 then {{.TableUserUnit}}.unit_id else '' end AS default_unit_id, case {{.TableUserUnit}}.is_default when 1 then {{.TableUserUnit}}.id else '' end AS default_unit_user_id`, tableStruct)
 	if err1 != nil {
 		return userData, err1
 	}

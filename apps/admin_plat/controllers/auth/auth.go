@@ -27,6 +27,7 @@ type AuthController struct {
 // @Failure      0  {object}  dto.Response
 // @Router       /admin_plat/auth/login [post]
 func (c *AuthController) Login() {
+	host := c.Ctx.Request.Host
 	loginDto, err := helper.GetReqBody[auth_dto.LoginDto](c.Ctx)
 	if err != nil {
 		c.Data["json"] = helper.Response(0, err.Error(), nil)
@@ -34,7 +35,7 @@ func (c *AuthController) Login() {
 		return
 	}
 
-	data, err := c.AuthService.Login(loginDto, c.ModuleName)
+	data, err := c.AuthService.Login(loginDto, c.ModuleName, host)
 	if err != nil {
 		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()

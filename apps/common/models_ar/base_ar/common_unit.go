@@ -32,7 +32,7 @@ func GetUserUnitList[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 		TableUserUnit: tableUnitUserName,
 	}
 
-	selectStr, err := helper.ParseStringTpl(`{{.TableUnit}}.*`, tableStruct)
+	selectStr, err := helper.ParseStringTpl(`{{.TableUnit}}.id,{{.TableUnit}}.pid,{{.TableUnit}}.name,{{.TableUnit}}.logo,{{.TableUnit}}.status`, tableStruct)
 	joinStr, err2 := helper.ParseStringTpl(`inner join {{.TableUserUnit}} on {{.TableUserUnit}}.unit_id = {{.TableUnit}}.id`, tableStruct)
 	if err != nil {
 		return nil, err

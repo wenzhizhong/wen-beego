@@ -20,7 +20,7 @@ type CommonAuth struct {
 }
 
 // 登录
-func (s *CommonAuth) Login(data auth_dto.LoginDto, moduleName string) (loginInfo *auth_dto.UserLoginInfoDto, err error) {
+func (s *CommonAuth) Login(data auth_dto.LoginDto, moduleName, host string) (loginInfo *auth_dto.UserLoginInfoDto, err error) {
 	err = s.checkLoginDto(&data)
 	if err != nil {
 		return
@@ -31,6 +31,9 @@ func (s *CommonAuth) Login(data auth_dto.LoginDto, moduleName string) (loginInfo
 	loginInfo, err2 := s.doLogin(data, moduleName)
 	if err2 != nil {
 		return nil, err2
+	}
+	if loginInfo.UnitInfo.LogoLink == "" {
+		loginInfo.UnitInfo.LogoLink, _ = helper.LocalFileSign(host, loginInfo.UnitInfo.Logo)
 	}
 
 	return loginInfo, nil
@@ -243,7 +246,8 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_
 	brancaData.Aud = aud.(string)
 	brancaData.Iss = iss.(string)
 	brancaData.Sub = user.Id
-	brancaData.SubUnit = defualtUnit.Id
+	brancaData.SubUnit = defualtUnit.DefaultUnitId
+	brancaData.SubUnitUser = defualtUnit.DefaultUnitUserId
 	brancaData.Role = helper.Md5(strings.Join(rolesClassifies, ";"))
 	brancaData.Scope = helper.Md5(strings.Join(perms, ";"))
 	brancaData.Exp = cutTime + int64(exp.(int))
@@ -269,7 +273,8 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_
 	loginInfo.UserInfo.Expires = brancaData.Exp * 1000
 	loginInfo.UserInfo.AccessToken = token
 	loginInfo.UserInfo.RefreshToken = refreshToken
-	loginInfo.UserInfo.DefaultUnitId = defualtUnit.Id
+	loginInfo.UserInfo.DefaultUnitId = defualtUnit.DefaultUnitId
+	loginInfo.UserInfo.DefaultUnitUserId = defualtUnit.DefaultUnitUserId
 	loginInfo.UserInfo.Permissions = perms
 	loginInfo.UserInfo.Roles = rolesClassifies
 	loginInfo.UnitInfo = defualtUnit

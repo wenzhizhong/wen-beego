@@ -1,26 +1,27 @@
 package base_model
 
 type Unit struct {
-	Id            string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
-	Pid           string `json:"pid" gorm:"type:bpchar(36);not null;default:'';comment:上级组织id"`
-	Logo          string `json:"logo" gorm:"type:varchar(512);default:'';comment:logo"`
-	LogoLink      string `json:"logoLink" gorm:"-"`
-	Name          string `json:"name" gorm:"type:varchar(100);not null;comment:单位名称"`
-	Code          string `json:"code" gorm:"type:varchar(100);not null;comment:组织机构代码"`
-	Corporation   string `json:"corporation" gorm:"type:varchar(100);not null;comment:法人"`
-	License       string `json:"license" gorm:"type:varchar(512);not null;default:'';comment:营业执照"`
-	LicenseLink   string `json:"licenseLink" gorm:"-"`
-	Address       string `json:"address" gorm:"type:varchar(255);default:'';comment:地址"`
-	Status        int    `json:"status" gorm:"type:int4;not null;default:0;comment:0未审核，1审核通过，2审核不通过，3禁用"`
-	Deleted       int    `json:"deleted" gorm:"type:int4;default:0;comment:是否删除：0否1是"`
-	CreatedAt     int64  `json:"created_at" gorm:"autoCreateTime;comment:创建时间"`
-	UpdatedAt     int64  `json:"updated_at" gorm:"autoCreateTime;comment:更新时间"`
-	DeletedAt     *int64 `json:"deleted_at" gorm:"comment:删除时间"`
-	CreatedBy     string `json:"created_by" gorm:"type:bpchar(36);default:'';comment:创建者"`
-	UpdatedBy     string `json:"updated_by" gorm:"type:bpchar(36);default:'';comment:更新者"`
-	DeletedBy     string `json:"deleted_by" gorm:"type:bpchar(36);default:'';comment:删除者"`
-	Sort          int    `json:"sort" gorm:"type:int4;default:0;comment:排序"`
-	DefaultUnitId string `json:"default_unit_id" gorm:"-"`
+	Id                string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
+	Pid               string `json:"pid" gorm:"type:bpchar(36);not null;default:'';comment:上级组织id"`
+	Logo              string `json:"logo" gorm:"type:varchar(512);default:'';comment:logo"`
+	LogoLink          string `json:"logoLink" gorm:"-"`
+	Name              string `json:"name" gorm:"type:varchar(100);not null;comment:单位名称"`
+	Code              string `json:"code" gorm:"type:varchar(100);not null;comment:组织机构代码"`
+	Corporation       string `json:"corporation" gorm:"type:varchar(100);not null;comment:法人"`
+	License           string `json:"license" gorm:"type:varchar(512);not null;default:'';comment:营业执照"`
+	LicenseLink       string `json:"licenseLink" gorm:"-"`
+	Address           string `json:"address" gorm:"type:varchar(255);default:'';comment:地址"`
+	Status            int    `json:"status" gorm:"type:int4;not null;default:0;comment:0未审核，1审核通过，2审核不通过，3禁用"`
+	Deleted           int    `json:"deleted" gorm:"type:int4;default:0;comment:是否删除：0否1是"`
+	CreatedAt         int64  `json:"created_at" gorm:"autoCreateTime;comment:创建时间"`
+	UpdatedAt         int64  `json:"updated_at" gorm:"autoCreateTime;comment:更新时间"`
+	DeletedAt         *int64 `json:"deleted_at" gorm:"comment:删除时间"`
+	CreatedBy         string `json:"created_by" gorm:"type:bpchar(36);default:'';comment:创建者"`
+	UpdatedBy         string `json:"updated_by" gorm:"type:bpchar(36);default:'';comment:更新者"`
+	DeletedBy         string `json:"deleted_by" gorm:"type:bpchar(36);default:'';comment:删除者"`
+	Sort              int    `json:"sort" gorm:"type:int4;default:0;comment:排序"`
+	DefaultUnitId     string `json:"default_unit_id" gorm:"->"`
+	DefaultUnitUserId string `json:"default_unit_user_id" gorm:"->"`
 }
 
 var UNIT_STATUS_UNREVIEWED = 0
