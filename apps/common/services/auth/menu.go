@@ -18,38 +18,38 @@ type CommonMenu struct {
  * 获取用户菜单权限
  * @param moduleName 模块名称
  * @param unitId 单位ID
- * @param userId 用户ID
+ * @param unitUserId 用户ID
  * @param menuModel 菜单模型
  * @param roleMenuModel 角色菜单模型
  * @param userRoleModel 用户角色模型
  * @param roleModel 角色模型
  * @return
  */
-func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
 
 	var permissions []base_model.UnitMenuPerms
 	var roleClassifies []base_model.UnitRoleClassify
 	switch moduleName {
 	case "admin_plat":
-		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
 	case "admin_mchnt":
-		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	default:
 		err = errors.New("GetAsyncRoutes:未知的模块名称")
 	}

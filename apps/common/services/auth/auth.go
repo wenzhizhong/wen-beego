@@ -228,11 +228,11 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_
 		return nil, err
 	}
 	if defualtUnit.Id != "" {
-		rolesClassifies, _, err = s.getUserRolesClassifies(moduleName, defualtUnit.Id, userId)
+		rolesClassifies, _, err = s.getUserRolesClassifies(moduleName, defualtUnit.Id, defualtUnit.DefaultUnitUserId)
 		if err != nil {
 			return nil, err
 		}
-		perms, err = s.GetUserPermissions(moduleName, defualtUnit.Id, userId)
+		perms, err = s.GetUserPermissions(moduleName, defualtUnit.Id, defualtUnit.DefaultUnitUserId)
 		if err != nil {
 			return nil, err
 		}
@@ -354,20 +354,20 @@ func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (uni
  * 获取用户角色分类
  * @param moduleName string 模块名称
  * @param unitId string 单位id
- * @param userId string 用户id
+ * @param unitUserId string 用户id
  * @return []string
  * @return error
  */
-func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, userId string) (rolesClassifies []string, isAdmin bool, err error) {
+func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, unitUserId string) (rolesClassifies []string, isAdmin bool, err error) {
 	if unitId == "" {
 		return
 	}
 	var roleClassifies []base_model.UnitRoleClassify
 	switch moduleName {
 	case "admin_plat":
-		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
 	case "admin_mchnt":
-		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, userId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
+		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	default:
 		err = errors.New("getUserRolesClassifies:模块名称错误")
 	}
@@ -388,18 +388,18 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, us
  * 获取用户操作权限
  * @param moduleName 模块名称
  * @param unitId 组织ID
- * @param userId 用户ID
+ * @param unitUserId 用户ID
  * @return menuAuthList 用户权限列表
  *
  */
-func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, userId string) (perms []string, err error) {
+func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, unitUserId string) (perms []string, err error) {
 
 	var permissions []base_model.UnitMenuPerms
 	switch moduleName {
 	case "admin_plat":
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 	case "admin_mchnt":
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 	default:
 		err = errors.New("GetUserPermissions:模块名称错误")
 	}

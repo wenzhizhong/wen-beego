@@ -125,7 +125,7 @@ func doSave[
 				return err
 			}
 
-			unitUserRole := getUnitUserRoleObj(newUnitId, baseParamDto.UserId, unitRole.Id)
+			unitUserRole := getUnitUserRoleObj(baseParamDto.UserId, unitRole.Id)
 			err = base_ar.InsertUnitUserRole[UnitUserRoleModel](tx, unitUserRole)
 			if err != nil {
 				return err
@@ -202,13 +202,12 @@ func getUnitRoleClassifyObg(newUnitId string, roleId string) base_model.UnitRole
 		Deleted: 0,
 	}
 }
-func getUnitUserRoleObj(newUnitId string, userId string, roleId string) base_model.UnitUserRole {
+func getUnitUserRoleObj(userId string, roleId string) base_model.UnitUserRole {
 	uuid, _ := helper.GetUuid()
 	return base_model.UnitUserRole{
 		Id:      uuid,
 		UserId:  userId,
 		RoleId:  roleId,
-		UnitId:  newUnitId,
 		Deleted: 0,
 	}
 }

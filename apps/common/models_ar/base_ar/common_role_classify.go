@@ -12,9 +12,9 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleClassifyModel itf.RoleClassifyItf, UserRoleModel itf.UserRoleItf](unitId string, userId string, unitModel UnitModel, roleModel RoleModel, roleClassifyModel RoleClassifyModel, userRoleModel UserRoleModel) (dataList []base_model.UnitRoleClassify, err error) {
-	if unitId == "" || userId == "" {
-		str := fmt.Sprintf("GetUserRoleClassifies():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, userId)
+func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleClassifyModel itf.RoleClassifyItf, UserRoleModel itf.UserRoleItf](unitId string, unitUserId string, unitModel UnitModel, roleModel RoleModel, roleClassifyModel RoleClassifyModel, userRoleModel UserRoleModel) (dataList []base_model.UnitRoleClassify, err error) {
+	if unitId == "" || unitUserId == "" {
+		str := fmt.Sprintf("GetUserRoleClassifies():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, unitUserId)
 		global.Log.Error(str)
 		return dataList, errors.New(str)
 	}
@@ -38,7 +38,7 @@ func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleCla
 	selectStr, err := helper.ParseStringTpl(`{{.TableRoleClassify}}.*`, tableStruct)
 	joinUserRoleStr, err3 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRoleClassify}}.role_id`, tableStruct)
 	joinRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleClassify}}.role_id`, tableStruct)
-	joinUnitStr, err5 := helper.ParseStringTpl(`inner join {{.TableUnit}} on {{.TableUnit}}.id = {{.TableUserRole}}.unit_id`, tableStruct)
+	joinUnitStr, err5 := helper.ParseStringTpl(`inner join {{.TableUnit}} on {{.TableUnit}}.id = {{.TableRole}}.unit_id`, tableStruct)
 	if err != nil {
 		return dataList, err
 	}
@@ -62,8 +62,7 @@ func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleCla
 		Where(tableRoleClassify+".deleted = ?", 0).
 		Where(tableRole+".deleted = ?", 0).
 		Where(tableRole+".status = ?", 1).
-		Where(tableUserRole+".user_id = ?", userId).
-		Where(tableUserRole+".unit_id = ?", unitId).
+		Where(tableUserRole+".user_id = ?", unitUserId).
 		Where(tableUserRole+".deleted = ?", 0).
 		Where(tableUnit+".deleted = ?", 0).
 		Where(tableUnit+".status = ?", 1).

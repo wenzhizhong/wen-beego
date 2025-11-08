@@ -18,9 +18,9 @@ import (
 * @param userId 用户id
 * @return rolesList 角色列表
  */
-func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, userId string, userRoleModel UserRoleModel, roleModel RoleModel) (rolesList []base_model.UnitRole, err error) {
-	if unitId == "" || userId == "" {
-		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, userId)
+func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitUserId string, userRoleModel UserRoleModel, roleModel RoleModel) (rolesList []base_model.UnitRole, err error) {
+	if unitUserId == "" {
+		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unitUserId:%s", unitUserId)
 		global.Log.Error(str)
 		return rolesList, errors.New(str)
 	}
@@ -46,8 +46,7 @@ func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleNam
 		Model(roleModel).
 		Select(selectStr).
 		Joins(joinUserRoleStr).
-		Where(tableUserRole+".user_id = ?", userId).
-		Where(tableUserRole+".unit_id = ?", unitId).
+		Where(tableUserRole+".user_id = ?", unitUserId).
 		Where(tableUserRole + ".deleted = 0").
 		Scan(&rolesList).
 		Error

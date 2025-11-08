@@ -18,9 +18,6 @@ func (m *PlatUserRole) TableName() string {
 func (m *PlatUserRole) GetId() string {
 	return m.Id
 }
-func (m *PlatUserRole) GetUnitId() string {
-	return m.UnitId
-}
 func (m *PlatUserRole) GetUserId() string {
 	return m.UserId
 }

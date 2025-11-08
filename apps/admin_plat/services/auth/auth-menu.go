@@ -20,6 +20,6 @@ type MenuService struct {
  * @param roleModel 角色模型
  * @return
  */
-func (s *MenuService) GetAsyncRoutes(moduleName string, unitId string, userId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
-	return s.commonMenu.GetAsyncRoutes(moduleName, unitId, userId)
+func (s *MenuService) GetAsyncRoutes(moduleName string, unitId string, unitUserId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+	return s.commonMenu.GetAsyncRoutes(moduleName, unitId, unitUserId)
 }

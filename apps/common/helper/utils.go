@@ -174,19 +174,19 @@ func ParseStringTpl(tpl string, data any) (str string, err error) {
 
 // 判断是否是管理员
 
-func IsAdmin(moduleName string, unitId string, userId string) bool {
+func IsAdmin(moduleName string, unitUserId string) bool {
 	switch moduleName {
 	case "admin_plat":
-		return getAdminData(unitId, userId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
+		return getAdminData(unitUserId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
 	case "admin_mchnt":
-		return getAdminData(unitId, userId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
+		return getAdminData(unitUserId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
 	default:
 		return false
 	}
 }
 
 // 获取管理员用户
-func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, UserRoleModel itf.UserRoleItf](unitId string, userId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) bool {
+func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, UserRoleModel itf.UserRoleItf](unitUserId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) bool {
 	tableClassify := roleClassify.TableName()
 	tableRole := role.TableName()
 	tableUserRole := userRoleModel.TableName()
@@ -197,10 +197,8 @@ func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, 
 		Joins("inner join "+tableRole+" on "+tableRole+".id = "+tableClassify+".role_id").
 		Joins("inner join "+tableUserRole+" on "+tableUserRole+".role_id = "+tableClassify+".role_id").
 		Where(tableClassify+".name = ?", "admin").
-		Where(tableUserRole+".user_id = ?", userId).
-		Where(tableUserRole+".unit_id = ?", unitId).
+		Where(tableUserRole+".user_id = ?", unitUserId).
 		Where(tableUserRole+".deleted = ?", 0).
-		Where(tableRole+".unit_id = ?", unitId).
 		Where(tableRole+".status = ?", 1).
 		Where(tableRole+".deleted = ?", 0).
 		Take(roleClassify).

@@ -10,9 +10,9 @@ import (
 )
 
 type BrancaData struct {
-	Sub         string `json:"sub" `         // 用户ID（Subject用户主体）
+	Sub         string `json:"sub" `         // 用户ID（user表，Subject用户主体）
 	SubUnit     string `json:"subUnit" `     // 用户所在单位组织
-	SubUnitUser string `json:"subUnitUser" ` // 用户所在单位组织的id
+	SubUnitUser string `json:"subUnitUser" ` // 用户所在单位组织的id（plat_user表/mchnt_user表，用户所在单位组织）
 	Exp         int64  `json:"exp"`          // 过期时间（Unix 时间戳）
 	Iat         int64  `json:"iat"`          // 签发时间（可省略，Header 中已包含时间戳）
 	Iss         string `json:"iss"`          // 签发者 (Issuer)

@@ -10,13 +10,13 @@ import (
 	"fmt"
 )
 
-func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, userId string, menuModel MenuModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_dto.RoleMenuDto, err error) {
-	if unitId == "" || userId == "" {
-		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, userId)
+func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+	if unitId == "" || unitUserId == "" {
+		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, unitUserId:%s", unitId, unitUserId)
 		global.Log.Error(str)
 		return menuAuthList, errors.New(str)
 	}
-	isAdmin := helper.IsAdmin(moduleName, unitId, userId)
+	isAdmin := helper.IsAdmin(moduleName, unitUserId)
 
 	tableMenu := menuModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()
@@ -75,8 +75,7 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 			Where(tableMenu+".deleted = ?", 0).
 			Where(tableRole+".deleted = ?", 0).
 			Where(tableRole+".status = ?", 1).
-			Where(tableUserRole+".user_id = ?", userId).
-			Where(tableUserRole+".unit_id = ?", unitId).
+			Where(tableUserRole+".user_id = ?", unitUserId).
 			Where(tableUserRole+".deleted = ?", 0).
 			Group(tableMenu + ".id").
 			Order(tableMenu + ".weight asc").
@@ -89,13 +88,13 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 	return
 }
 
-func GetUserPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, userId string, menuModel MenuModel, menuPermsModel MenuPermsModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuPermsList []base_model.UnitMenuPerms, err error) {
-	if unitId == "" || userId == "" {
-		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, userId)
+func GetUserPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuPermsModel MenuPermsModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuPermsList []base_model.UnitMenuPerms, err error) {
+	if unitUserId == "" {
+		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, unitUserId)
 		global.Log.Error(str)
 		return menuPermsList, errors.New(str)
 	}
-	isAdmin := helper.IsAdmin(moduleName, unitId, userId)
+	isAdmin := helper.IsAdmin(moduleName, unitUserId)
 
 	tableMenuPerms := menuPermsModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()
@@ -146,7 +145,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf, 
 			Where(tableMenuPerms+".deleted = 0").
 			Where(tableMenu+".deleted = 0").
 			Where(tableMenu+".visible = 1").
-			Where(tableMenu+".id = ?", unitId).
+			Where(tableMenu+".unit_id = ?", unitId).
 			Group(tableMenuPerms + ".id").
 			Scan(&menuPermsList).
 			Error
@@ -158,8 +157,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf, 
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
 			Where(tableMenuPerms+".deleted = 0").
-			Where(tableUserRole+".user_id = ?", userId).
-			Where(tableUserRole+".unit_id = ?", unitId).
+			Where(tableUserRole+".user_id = ?", unitUserId).
 			Where(tableUserRole + ".deleted = 0").
 			Where(tableRole + ".status = 1").
 			Where(tableRole + ".deleted = 0").

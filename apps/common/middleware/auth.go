@@ -29,6 +29,7 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 			return
 		}
 		ctx.Input.SetData("userId", brancaData.Sub)
+		ctx.Input.SetData("unitUserId", brancaData.SubUnitUser) // （plat_user表/mchnt_user表，用户所在单位组织）
 		ctx.Input.SetData("unitId", brancaData.SubUnit)
 
 		// 验证:认证后基础api,通过则不校验权限

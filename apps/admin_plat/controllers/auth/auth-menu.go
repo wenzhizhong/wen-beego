@@ -22,9 +22,10 @@ type MenuController struct {
 // @Router /admin_plat/auth-menu/get-async-routes [get]
 // @Security ApiKeyAuth
 func (c *MenuController) GetAsyncRoutes() {
-	userId := c.Ctx.Input.GetData("userId")
+	// userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
-	data, err := c.MenuService.GetAsyncRoutes(c.ModuleName, unitId.(string), userId.(string))
+	unitUserId := c.Ctx.Input.GetData("unitUserId")
+	data, err := c.MenuService.GetAsyncRoutes(c.ModuleName, unitId.(string), unitUserId.(string))
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()

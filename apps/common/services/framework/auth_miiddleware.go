@@ -20,6 +20,7 @@ type AuthMiddlewate struct {
 func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
 	userId := brancaData.Sub
 	unitId := brancaData.SubUnit
+	unitUserId := brancaData.SubUnitUser
 	if userId == "" || unitId == "" {
 		return false, errors.New("CheckAuthAdminStatus(): 用户id,组织单位id，均不能为空。userId=" + userId + ", unitId=" + unitId)
 	}
@@ -51,7 +52,7 @@ func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData help
 	}()
 
 	go func() {
-		status, err := s.checkUserRoleStatus(moduleName, userId, unitId)
+		status, err := s.checkUserRoleStatus(moduleName, unitUserId)
 		if !status && err == nil {
 			err = errors.New("角色状态不可用")
 		}
@@ -75,13 +76,13 @@ func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData help
 }
 
 func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
-	userId := brancaData.Sub
 	unitId := brancaData.SubUnit
-	if userId == "" || unitId == "" {
-		return false, errors.New("CheckAuthAdminRouters(): 用户id,组织单位id，均不能为空。userId=" + userId + ", unitId=" + unitId)
+	unitUserId := brancaData.SubUnitUser
+	if unitUserId == "" || unitId == "" {
+		return false, errors.New("CheckAuthAdminRouters(): 用户id,组织单位id，均不能为空。unitUserId=" + unitUserId + ", unitId=" + unitId)
 	}
 
-	isOk, err := s.checkUserRolePermissions(moduleName, userId, unitId, path)
+	isOk, err := s.checkUserRolePermissions(moduleName, unitUserId, unitId, path)
 	return isOk, err
 }
 
@@ -192,8 +193,8 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 }
 
 // 验证用户角色状态
-func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, userId string, unitId string) (status bool, err error) {
-	redisKey := "AUMID_URS:" + helper.Md5(userId+unitId)
+func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, unitUserId string) (status bool, err error) {
+	redisKey := "AUMID_URS:" + unitUserId
 	exits, err := helper.RedisGet(redisKey)
 	if err == nil && exits != "" {
 		index, _ := strconv.Atoi(exits)
@@ -208,9 +209,9 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, userId string, u
 	var roles []base_model.UnitRole
 	switch moduleName {
 	case "admin_plat":
-		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.PlatUserRole{}, &models.PlatRole{})
+		roles, err = base_ar.GetUserRole(moduleName, unitUserId, &models.PlatUserRole{}, &models.PlatRole{})
 	case "admin_mchnt":
-		roles, err = base_ar.GetUserRole(moduleName, unitId, userId, &models.MchntUserRole{}, &models.MchntRole{})
+		roles, err = base_ar.GetUserRole(moduleName, unitUserId, &models.MchntUserRole{}, &models.MchntRole{})
 	default:
 		err = errors.New("未知的模块名称")
 	}
@@ -239,8 +240,8 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, userId string, u
 	return
 }
 
-func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId string, unitId string, path string) (status bool, err error) {
-	redisKey := "AUMID_URP:" + helper.Md5(moduleName+userId+unitId)
+func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, unitUserId string, unitId string, path string) (status bool, err error) {
+	redisKey := "AUMID_URP:" + helper.Md5(moduleName+unitUserId+unitId)
 
 	tmpMap := map[string]bool{}
 	exits, err := helper.RedisGet(redisKey)
@@ -253,9 +254,9 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, userId stri
 		var permissions []base_model.UnitMenuPerms
 		switch moduleName {
 		case "admin_plat":
-			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		case "admin_mchnt":
-			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, userId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		default:
 			err = errors.New("checkUserRolePermissions:未知的模块名称")
 		}

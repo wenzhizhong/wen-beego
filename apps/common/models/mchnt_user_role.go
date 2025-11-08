@@ -18,9 +18,6 @@ func (m *MchntUserRole) TableName() string {
 func (m *MchntUserRole) GetId() string {
 	return m.Id
 }
-func (m *MchntUserRole) GetUnitId() string {
-	return m.UnitId
-}
 func (m *MchntUserRole) GetUserId() string {
 	return m.UserId
 }
