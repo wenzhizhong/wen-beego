@@ -20,6 +20,6 @@ func (s *DeptService) SaveUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_d
 	return s.commonSystemDept.SaveUnitDept(baseParamDto, deptDto)
 }
 
-// func (s *DeptService) DeleteUnitDept(deptDto dept_dto.UnitDeptDto) (err error) {
-// 	return s.commonSystemDept.DeleteUnitDept(deptDto)
-// }
+func (s *DeptService) Del(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitDeptDto) (err error) {
+	return s.commonSystemDept.DelUnitDept(baseParamDto, deptDto)
+}

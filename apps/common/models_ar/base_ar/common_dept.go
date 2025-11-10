@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
+	"errors"
 )
 
 // 获取组织架构部门列表
@@ -33,7 +34,7 @@ func GetUnitDeptList[UnitModel itf.UnitItf, UnitDeptModel itf.DeptItf](deptDto p
 	if count == 0 {
 		return make([]base_model.UnitDept, 0), 0, nil
 	}
-	err = query.Select(tableDeptName + ".*").
+	err = query.Select(tableDeptName + ".*," + tableUnitName + ".name as unit_name").
 		Order(tableDeptName + ".sort").
 		Find(&dataList).Error
 	return
@@ -58,4 +59,14 @@ func SaveUnitDept[UnitDeptModel itf.DeptItf](unitDeptDto dept_dto.UnitDeptDto, u
 			Updates(unitDeptDto).Error
 	}
 	return unitDeptDto.Id, err
+}
+
+// 删除组织架构
+func DelUnitDept[UnitDeptModel itf.DeptItf](unitDeptData base_model.UnitDept, unitDeptModel UnitDeptModel) error {
+	if unitDeptData.Id == "" {
+		return errors.New("DelUnitDept: 参数id不能为空")
+	}
+	return global.GetWriteDb().
+		Model(unitDeptModel).
+		Delete(unitDeptData).Error
 }

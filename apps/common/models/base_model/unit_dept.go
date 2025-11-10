@@ -15,6 +15,7 @@ type UnitDept struct {
 	UpdatedAt   int64  `json:"updated_at" gorm:"type:int8;not null;comment:更新时间"`
 	DeletedAt   *int64 `json:"deleted_at" gorm:"type:int8;comment:删除时间"`
 	Remark      string `json:"remark" gorm:"type:varchar(512);comment:备注"`
+	UnitName    string `json:"unit_name" gorm:"->"`
 }
 
 var UNIT_DEPT_STATUS_DISABLED = 0

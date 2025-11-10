@@ -16,14 +16,15 @@ func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.Re
 	return s.commonSystemUnit.GetUnitList(unitDto)
 }
 
-// func (s *UnitService) GetUnitTree() (dto.RespDataListDto, error) {
-// 	return s.commonSystemUnit.GetUnitTree()
-// }
-
-// func (s *UnitService) GetUnitInfo(unitId string) (dto.RespDataDto, error) {
-// 	return s.commonSystemUnit.GetUnitInfo(unitId)
-// }
-
+// 系统管理-内部组织保存
 func (s *UnitService) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (map[string]string, error) {
 	return s.commonSystemUnit.Save(baseParamDto, unitDto)
+}
+
+// 系统管理- 保存
+func (s *UnitService) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) error {
+	// TODO: 删除组织单位前置条件
+
+	// 删除组织单位
+	return s.commonSystemUnit.Del(baseParamDto, unitDto)
 }

@@ -54,7 +54,15 @@ func GetReqBody[T any](ctx *beecontext.Context) (T, error) {
 }
 
 // 设置并获取基本参数
-func GetBaseParamDto(host, moduleName string, unitId string, userId string) (dto.BaseParamDto, error) {
+func GetBaseParamDto(ctx *beecontext.Context, moduleName string) (dto.BaseParamDto, error) {
+	host := ctx.Request.Host
+	tmpUserId := ctx.Input.GetData("userId")
+	tmpUnitId := ctx.Input.GetData("unitId")
+	tmpUnitUserId := ctx.Input.GetData("unitUserId")
+	userId := tmpUserId.(string)
+	unitId := tmpUnitId.(string)
+	unitUserId := tmpUnitUserId.(string)
+
 	data := dto.BaseParamDto{}
 	if moduleName == "" {
 		return data, errors.New("moduleName is empty")
@@ -69,6 +77,7 @@ func GetBaseParamDto(host, moduleName string, unitId string, userId string) (dto
 	data.ModuleName = moduleName
 	data.UnitId = unitId
 	data.UserId = userId
+	data.UnitUserId = unitUserId
 	return data, nil
 }
 

@@ -49,16 +49,15 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto
 	return
 }
 
-// func (s *Unit) GetUnitTree(moduleName string) (resultDto dto.RespDataListDto, err error) {
-// }
-
-// func (s *Unit) GetUnitInfo(moduleName string, unitId string) (resultDto dto.RespDataDto, err error) {
-// }
-
 // 系统管理-保存用户
 func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (result map[string]string, err error) {
 	newUnitId := ""
 	isAdd := unitDto.Id == ""
+	if isAdd {
+		unitDto.CreatedBy = baseParamDto.UnitUserId
+	} else {
+		unitDto.UpdatedBy = baseParamDto.UnitUserId
+	}
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
@@ -77,6 +76,17 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 	result["id"] = newUnitId
 	return
 }
+func (s *Unit) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err error) {
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Plat{})
+	case "mchnt_plat":
+		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Mchnt{})
+	default:
+		err = errors.New("Unit Del:模块名称错误")
+	}
+	return
+}
 func doSave[
 	UnitModel itf.UnitItf,
 	UnitUserModel itf.UnitUserItf,
@@ -92,10 +102,9 @@ func doSave[
 	unitDto unit_dto.UnitDto,
 ) (newUnitId string, err error) {
 	var unitModel UnitModel
-	var unitUserModel UnitUserModel
 
 	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		newUnitId, err = base_ar.SaveUnit(tx, unitDto, unitModel, unitUserModel)
+		newUnitId, err = base_ar.SaveUnit(tx, unitDto, unitModel)
 		if err != nil {
 			return err
 		}
@@ -113,13 +122,13 @@ func doSave[
 				return err
 			}
 
-			unitRole := getUnitRoleObg(newUnitId, baseParamDto.UserId)
+			unitRole := getUnitRoleObj(newUnitId, baseParamDto.UserId)
 			err = base_ar.InsertUnitRole[RoleModel](tx, unitRole)
 			if err != nil {
 				return err
 			}
 
-			unitRoleClassify := getUnitRoleClassifyObg(newUnitId, unitRole.Id)
+			unitRoleClassify := getUnitRoleClassifyObj(newUnitId, unitRole.Id)
 			err = base_ar.InsertUserRoleClassifies[RoleClassifyModel](tx, unitRoleClassify)
 			if err != nil {
 				return err
@@ -175,7 +184,7 @@ func getUserProfileObj(unitUserId string) base_model.UnitUserProfile {
 	}
 }
 
-func getUnitRoleObg(newUnitId string, userId string) base_model.UnitRole {
+func getUnitRoleObj(newUnitId string, userId string) base_model.UnitRole {
 	uuid, _ := helper.GetUuid()
 	return base_model.UnitRole{
 		Id:        uuid,
@@ -192,7 +201,7 @@ func getUnitRoleObg(newUnitId string, userId string) base_model.UnitRole {
 	}
 }
 
-func getUnitRoleClassifyObg(newUnitId string, roleId string) base_model.UnitRoleClassify {
+func getUnitRoleClassifyObj(newUnitId string, roleId string) base_model.UnitRoleClassify {
 	uuid, _ := helper.GetUuid()
 	return base_model.UnitRoleClassify{
 		Id:      uuid,

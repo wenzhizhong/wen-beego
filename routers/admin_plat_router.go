@@ -49,10 +49,12 @@ func init() {
 		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).Get),
 		beego.NSCtrlPost("/system-unit/add", (*adminSystem.UnitController).Add),
 		beego.NSCtrlPost("/system-unit/edit", (*adminSystem.UnitController).Edit),
+		beego.NSCtrlPost("/system-unit/del", (*adminSystem.UnitController).Del),
 
 		beego.NSCtrlGet("/system-dept/get", (*adminSystem.DeptController).Get),
 		beego.NSCtrlPost("/system-dept/add", (*adminSystem.DeptController).Add),
 		beego.NSCtrlPost("/system-dept/edit", (*adminSystem.DeptController).Edit),
+		beego.NSCtrlPost("/system-dept/del", (*adminSystem.DeptController).Del),
 	)
 
 	// 请求前、后处理

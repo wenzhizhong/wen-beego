@@ -6,6 +6,7 @@ type BaseParamDto struct {
 	ModuleName string
 	UnitId     string
 	UserId     string
+	UnitUserId string
 }
 
 //  响应参数

@@ -25,10 +25,7 @@ type UnitController struct {
 // @Success 200 {object} dto.RespDataListDto
 // @Router /admin_plat/system-unit/get [get]
 func (c *UnitController) Get() {
-	userId := c.Ctx.Input.GetData("userId")
-	unitId := c.Ctx.Input.GetData("unitId")
-
-	baseParamDto, err := helper.GetBaseParamDto(c.Ctx.Request.Host, c.ModuleName, unitId.(string), userId.(string))
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
@@ -63,11 +60,8 @@ func (c *UnitController) GetUnitInfo() {
 }
 
 func (c *UnitController) save(optType string) {
-	userId := c.Ctx.Input.GetData("userId")
-	unitId := c.Ctx.Input.GetData("unitId")
-
 	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
-	bBaseParamDto, err2 := helper.GetBaseParamDto(c.Ctx.Request.Host, c.ModuleName, unitId.(string), userId.(string))
+	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err1 != nil {
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()
@@ -91,7 +85,7 @@ func (c *UnitController) save(optType string) {
 		return
 	}
 
-	data, err := c.UnitService.Save(bBaseParamDto, unitDto)
+	data, err := c.UnitService.Save(baseParamDto, unitDto)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
@@ -123,8 +117,39 @@ func (c *UnitController) Add() {
 // @Produce application/json
 // @Param unitDto body unit_dto.UnitDto true "内部组织管理"
 // @Success 200 {object} dto.Response
-// @Router /admin_plat/system-unit/add [post]
+// @Router /admin_plat/system-unit/edit [post]
 
 func (c *UnitController) Edit() {
 	c.save("edit")
+}
+
+// @Summary 删除内部组织管理
+// @Description 删除内部组织管理
+// @Tags 系统管理-内部组织管理
+// @Accept application/json
+// @Produce application/json
+// @Param ids body dto.UnitDto true "内部组织管理"
+// @Success 200 {object} dto.Response
+// @Router /admin_plat/system-unit/del [post]
+func (c *UnitController) Del() {
+	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
+	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	if err1 != nil {
+		c.Data["json"] = helper.Response(500, err1.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	if err2 != nil {
+		c.Data["json"] = helper.Response(500, err2.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	err := c.UnitService.Del(baseParamDto, unitDto)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", nil)
+	c.ServeJSON()
 }

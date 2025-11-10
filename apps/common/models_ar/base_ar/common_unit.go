@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
+	"errors"
 	"strings"
 
 	"gorm.io/gorm"
@@ -48,6 +49,7 @@ func GetUserUnitList[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 		Joins(joinStr).
 		Where(tableUnitUserName+".user_id = ?", userId).
 		Where(tableUnitUserName + ".deleted = 0").
+		Where(tableUnitName + ".deleted = 0").
 		Order(tableUnitName + ".created_by," + tableUnitName + ".sort").
 		Find(&listData)
 	return listData, result.Error
@@ -82,6 +84,7 @@ func GetUserUnitById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 		Where(tableUnitUserName+".user_id = ?", userId).
 		Where(tableUnitUserName+".unit_id = ?", unitId).
 		Where(tableUnitUserName + ".deleted = 0").
+		Where(tableUnitName + ".deleted = 0").
 		Take(&unitModel)
 	return unitModel, result.Error
 }
@@ -115,7 +118,8 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 		Model(unitModel).
 		Joins(joinStr).
 		Where(tableUnitUserName+".user_id = ?", unitDto.UserId).
-		Where(tableUnitUserName + ".deleted = 0")
+		Where(tableUnitUserName + ".deleted = 0").
+		Where(tableUnitName + ".deleted = 0")
 
 	if unitDto.Name != "" {
 		query = query.Where(tableUnitName+".name like ?", "%"+unitDto.Name+"%")
@@ -139,7 +143,7 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 	return
 }
 
-func SaveUnit[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel, unitUserModel UnitUserModel) (id string, err error) {
+func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel) (id string, err error) {
 	if unitDto.Id == "" {
 		unitDto.Id, err = helper.GetUuid()
 		if err != nil {
@@ -176,6 +180,31 @@ func DeleteUnit[UnitModel itf.UnitItf](id string, unitModel UnitModel) error {
 		DeletedAt: &deletedTime,
 	}
 
+	return global.GetWriteDb().
+		Model(unitModel).
+		Where("id = ?", id).
+		Updates(updateData).Error
+}
+
+// 删除组织单位
+func DelUnit[UnitModel itf.UnitItf](id string, unitUserId string, unitModel UnitModel) error {
+	if id == "" {
+		return errors.New("DelUnit：参数id不能为空")
+	}
+	timeInt := helper.GetTimestamp()
+	updateData := struct {
+		Deleted   int
+		UpdatedAt int64
+		DeletedAt *int64
+		UpdatedBy string
+		DeletedBy string
+	}{
+		Deleted:   1,
+		UpdatedAt: timeInt,
+		DeletedAt: &timeInt,
+		UpdatedBy: unitUserId,
+		DeletedBy: unitUserId,
+	}
 	return global.GetWriteDb().
 		Model(unitModel).
 		Where("id = ?", id).
