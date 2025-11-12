@@ -53,12 +53,6 @@ func (c *UnitController) Get() {
 	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }
-func (c *UnitController) GetUnitTree() {
-}
-
-func (c *UnitController) GetUnitInfo() {
-}
-
 func (c *UnitController) save(optType string) {
 	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
 	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)

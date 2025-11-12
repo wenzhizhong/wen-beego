@@ -21,11 +21,53 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 
 	switch deptDto.ModuleName {
 	case "admin_plat":
-		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Plat{}, &models.PlatDept{})
+		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Plat{}, &models.PlatDept{}, &models.PlatUser{}, &models.PlatUserProfile{})
 	case "mchnt_plat":
-		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Mchnt{}, &models.MchntDept{})
+		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Mchnt{}, &models.MchntDept{}, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
+	}
+	if err != nil {
+		return
+	}
+	resultDto = dto.RespDataListDto{Total: count, List: data}
+	return
+}
+func (s *Dept) GetUnitDeptTree(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
+	dataList := make([]base_model.UnitDept, 0)
+
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.PlatDept{})
+	case "mchnt_plat":
+		dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.MchntDept{})
+	default:
+		err = errors.New("GetUnitDeptTree:模块名称错误")
+	}
+	if err != nil {
+		return
+	}
+
+	data = struct {
+		List interface{} `json:"list"`
+	}{
+		List: dataList,
+	}
+	return
+}
+
+// 获取可用组织架构负责人
+func (s *Dept) GetUnitDeptPrincipal(baseParamDto dto.BaseParamDto, deptPrincipalDto page_dto.SystemDeptPrincipalReqDto) (resultDto interface{}, err error) {
+	var count int64
+	var data interface{}
+
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.PlatUser{}, &models.PlatUserProfile{})
+	case "mchnt_plat":
+		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.MchntUser{}, &models.MchntUserProfile{})
+	default:
+		err = errors.New("GetUnitDeptPrincipal:模块名称错误")
 	}
 	if err != nil {
 		return

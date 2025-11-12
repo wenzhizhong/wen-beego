@@ -54,6 +54,74 @@ func (c *DeptController) Get() {
 	c.ServeJSON()
 }
 
+// 组织架构树形列表
+// @Summary 组织架构树形列表
+// @Description 组织架构树形列表
+// @Tags 组织架构
+// @Accept  json
+// @Produce  json
+// @Param   selectUnitIds query string true "selectUnitIds"
+// @Success 200 {object}
+// @Router /admin_plat/system-dept/get-dept-tree [get]
+func (c *DeptController) GetUnitDeptTree() {
+	tmpSelectUnitIds := c.GetString("selectUnitIds")
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	selectUnitIds := strings.Split(tmpSelectUnitIds, ",")
+	data, err := c.deptService.GetUnitDeptTree(baseParamDto, selectUnitIds)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
+	c.ServeJSON()
+}
+
+// 搜索可用的组织架构负责人
+// @Summary 搜索可用的组织架构负责人
+// @Description 搜索可用的组织架构负责人
+// @Tags 组织架构
+// @Accept  json
+// @Produce  json
+// @Param   selectUnitIds query string true "selectUnitIds"
+// @Success 200 {object}
+// @Router /admin_plat/system-dept/get-dept-principal [get]
+func (c *DeptController) GetUnitDeptPrincipal() {
+	tmpSelectUnitIds := c.GetString("selectUnitIds")
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
+	if err2 != nil {
+		c.Data["json"] = helper.Response(500, err2.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+
+	deptPrincipalDto := page_dto.SystemDeptPrincipalReqDto{}
+	deptPrincipalDto.BaseParamDto = baseParamDto
+	deptPrincipalDto.ReqDataListDto = reqDataListDto
+	deptPrincipalDto.SelectUnitIds = strings.Split(tmpSelectUnitIds, ",")
+	deptPrincipalDto.Keyword = c.GetString("keyword")
+
+	data, err := c.deptService.GetUnitDeptPrincipal(baseParamDto, deptPrincipalDto)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
+	c.ServeJSON()
+}
+
 // 新增组织架构
 // @Summary 新增组织架构
 // @Description 新增组织架构

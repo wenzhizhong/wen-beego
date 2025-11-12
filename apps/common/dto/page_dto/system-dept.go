@@ -9,3 +9,11 @@ type SystemDeptListReqDto struct {
 	SelectUnitIds []string
 	Name          string
 }
+
+// 系统管理-获取可用的内部部门负责人列表
+type SystemDeptPrincipalReqDto struct {
+	dto.BaseParamDto
+	dto.ReqDataListDto
+	SelectUnitIds []string
+	Keyword       string
+}

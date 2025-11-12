@@ -28,6 +28,8 @@ var platAuthApiList = []string{
 	"/admin_plat/auth-menu/get-async-routes",
 	"/admin_plat/upload/upload",
 	"/admin_plat/upload/vue-slice-upload",
+	"/admin_plat/system-dept/get-dept-tree",
+	"/admin_plat/system-dept/get-dept-principal",
 }
 
 func init() {
@@ -55,6 +57,8 @@ func init() {
 		beego.NSCtrlPost("/system-dept/add", (*adminSystem.DeptController).Add),
 		beego.NSCtrlPost("/system-dept/edit", (*adminSystem.DeptController).Edit),
 		beego.NSCtrlPost("/system-dept/del", (*adminSystem.DeptController).Del),
+		beego.NSCtrlGet("/system-dept/get-dept-tree", (*adminSystem.DeptController).GetUnitDeptTree),
+		beego.NSCtrlGet("/system-dept/get-dept-principal", (*adminSystem.DeptController).GetUnitDeptPrincipal),
 	)
 
 	// 请求前、后处理

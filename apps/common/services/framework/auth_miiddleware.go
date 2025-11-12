@@ -96,8 +96,8 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 		status = exits == strconv.Itoa(base_model.UNIT_USER_PROFILE_NORMAL)
 		if !status {
 			err = errors.New("用户" + base_model.UNIT_USER_PROFILE_MAP[index])
+			return
 		}
-		return
 	} else if err != nil {
 		return
 	}
