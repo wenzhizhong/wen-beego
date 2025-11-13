@@ -90,15 +90,16 @@ func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData hel
 func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId string, unitId string) (status bool, err error) {
 	redisKey := "AUMID_UPS:" + helper.Md5(userId+unitId)
 
-	exits, err := helper.RedisGet(redisKey)
+	exits := ""
+	exits, err = helper.RedisGet(redisKey)
 	if err == nil && exits != "" {
 		index, _ := strconv.Atoi(exits)
 		status = exits == strconv.Itoa(base_model.UNIT_USER_PROFILE_NORMAL)
 		if !status {
 			err = errors.New("用户" + base_model.UNIT_USER_PROFILE_MAP[index])
-			return
 		}
-	} else if err != nil {
+	}
+	if err != nil {
 		return
 	}
 
@@ -125,6 +126,9 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	}
 
 	err = helper.RedisPut(redisKey, data.Status, 4*60*60)
+	if err == nil {
+		status = true
+	}
 	return
 }
 

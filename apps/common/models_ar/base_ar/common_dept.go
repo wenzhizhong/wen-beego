@@ -48,7 +48,7 @@ func GetUnitDeptList[UnitModel itf.UnitItf, UnitDeptModel itf.DeptItf, UnitUserM
 	if count == 0 {
 		return make([]base_model.UnitDept, 0), 0, nil
 	}
-	err = query.Select(tableDeptName+".*,"+tableUnitName+".name as unit_name, t.principal").
+	err = query.Select(tableDeptName+".*,"+tableUnitName+".name as unit_name, t.principal, t.phone, t.email").
 		Joins("LEFT JOIN (?) AS t ON t.principal_id = "+tableDeptName+".principal_id", subQuery).
 		Order(tableDeptName + ".sort").
 		Find(&dataList).Error
