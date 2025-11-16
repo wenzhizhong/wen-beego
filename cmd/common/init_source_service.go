@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/business_store"
 )
 
 // 初始化公共资源数据
@@ -29,6 +30,9 @@ func InitCommonSource(logType string) {
 		global.Log.Error(err.Error())
 		panic(err)
 	}
+
+	// 清空用户权限认证缓存
+	business_store.ClearAumid()
 }
 
 func InitMqClient() {

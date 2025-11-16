@@ -36,4 +36,5 @@ func main() {
 	// 启动服务
 	httpport, _ := beego.AppConfig.DIY("httpport")
 	beego.Run(":" + strconv.Itoa(httpport.(int)))
+	fmt.Println("---->>>---")
 }

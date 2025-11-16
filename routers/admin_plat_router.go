@@ -59,6 +59,13 @@ func init() {
 		beego.NSCtrlPost("/system-dept/del", (*adminSystem.DeptController).Del),
 		beego.NSCtrlGet("/system-dept/get-dept-tree", (*adminSystem.DeptController).GetUnitDeptTree),
 		beego.NSCtrlGet("/system-dept/get-dept-principal", (*adminSystem.DeptController).GetUnitDeptPrincipal),
+
+		beego.NSCtrlGet("/system-role/get", (*adminSystem.RoleController).Get),
+		beego.NSCtrlPost("/system-role/add", (*adminSystem.RoleController).Add),
+		beego.NSCtrlPost("/system-role/edit", (*adminSystem.RoleController).Edit),
+		beego.NSCtrlPost("/system-role/del", (*adminSystem.RoleController).Del),
+		beego.NSCtrlGet("/system-role/role-menu", (*adminSystem.RoleController).RoleMenu),
+		beego.NSCtrlGet("/system-role/role-menu-ids", (*adminSystem.RoleController).RoleMenuIds),
 	)
 
 	// 请求前、后处理

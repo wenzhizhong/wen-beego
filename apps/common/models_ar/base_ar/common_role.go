@@ -1,6 +1,8 @@
 package base_ar
 
 import (
+	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto/role_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
@@ -9,10 +11,11 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 /*
-* 获取用户角色
+* 身份认证-获取用户角色
 * @param moduleName 模块名称
 * @param unitId 组织单位id
 * @param userId 用户id
@@ -57,7 +60,7 @@ func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleNam
 }
 
 /**
- * 新增组织单位角色配置
+ * 新增组织单位-初始化新增组织单位角色配置
  */
 func InsertUnitRole[RoleModel itf.RoleItf](tx *gorm.DB, roleModel base_model.UnitRole) (err error) {
 	if roleModel.Id == "" {
@@ -78,7 +81,7 @@ func InsertUnitRole[RoleModel itf.RoleItf](tx *gorm.DB, roleModel base_model.Uni
 }
 
 /**
- * 新增组织单位用户角色
+ * 新增组织单位-初始化新增组织单位用户角色
  */
 func InsertUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleModel base_model.UnitUserRole) (err error) {
 	if userRoleModel.Id == "" {
@@ -96,4 +99,67 @@ func InsertUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleMode
 	err = tx.Model(tmpUnitUserRole).
 		Create(&userRoleModel).Error
 	return
+}
+
+// 页面-获取组织架构部门列表
+func GetUnitRoleList[UnitModel itf.UnitItf, UnitRoleModel itf.RoleItf, UnitRoleClassifyModel itf.RoleClassifyItf](RoleDto page_dto.SystemRoleListReqDto, unitModel UnitModel, unitRoleModel UnitRoleModel, unitRoleClassifyModel UnitRoleClassifyModel) (dataList []base_model.UnitRole, count int64, err error) {
+	tableUnitName := unitModel.TableName()
+	tableRoleName := unitRoleModel.TableName()
+	tableRoleClassifyName := unitRoleClassifyModel.TableName()
+
+	query := global.GetReadDb().
+		Model(unitRoleModel).
+		Joins("INNER JOIN " + tableUnitName + " ON " + tableUnitName + ".id = " + tableRoleName + ".unit_id").
+		Joins("INNER JOIN " + tableRoleClassifyName + " ON " + tableRoleClassifyName + ".role_id = " + tableRoleName + ".id").
+		Where(tableRoleName + ".deleted=0").
+		Where(tableUnitName + ".deleted=0")
+
+	if RoleDto.RoleName != "" {
+		query = query.Where(tableRoleName+".role_name like ?", "%"+RoleDto.RoleName+"%")
+	}
+	if len(RoleDto.SelectUnitIds) > 0 {
+		query = query.Where(tableRoleName+".unit_id in ?", RoleDto.SelectUnitIds)
+	}
+	if RoleDto.RoleClassifyName != "" {
+		query = query.Where(tableRoleClassifyName+".name like ?", "%"+RoleDto.RoleClassifyName+"%")
+	}
+	if RoleDto.Status != -1 {
+		query = query.Where(tableRoleName+".status = ?", RoleDto.Status)
+	}
+
+	err = query.Select(tableRoleName + ".id").Count(&count).Error
+	if err != nil {
+		return make([]base_model.UnitRole, 0), 0, nil
+	}
+	if count == 0 {
+		return make([]base_model.UnitRole, 0), 0, nil
+	}
+	err = query.Select(tableRoleName + ".*," + tableUnitName + ".name as unit_name," + tableRoleClassifyName + ".name as role_classify_name").
+		Order(tableRoleName + ".role_sort").
+		Limit(RoleDto.PageSize).
+		Offset(RoleDto.Offset).
+		Find(&dataList).Error
+	return
+}
+
+// 页面-保存部门
+func SaveUnitRole[UnitRoleModel itf.RoleItf](tx *gorm.DB, unitRoleDto role_dto.UnitRoleDto, unitRoleModel UnitRoleModel) (id string, err error) {
+	err = tx.Model(unitRoleModel).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			UpdateAll: true,
+		}).
+		Create(&unitRoleDto).Error
+	return unitRoleDto.Id, err
+}
+
+// 页面-删除组织架构
+func DelUnitRole[UnitRoleModel itf.RoleItf](unitRoleData base_model.UnitRole, unitRoleModel UnitRoleModel) error {
+	if unitRoleData.Id == "" {
+		return errors.New("DelUnitRole: 参数id不能为空")
+	}
+	return global.GetWriteDb().
+		Model(unitRoleModel).
+		Where("id = ?", unitRoleData.Id).
+		Updates(unitRoleData).Error
 }

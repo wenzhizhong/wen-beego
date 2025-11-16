@@ -11,7 +11,7 @@ type UnitMenu struct {
 	Name      string    `json:"name" gorm:"type:varchar(20);default:'';comment:菜单名称"`
 	ApiPath   string    `json:"api_path" gorm:"type:varchar(255);default:'';comment:API路径"`
 	PagePath  string    `json:"page_path" gorm:"type:varchar(255);default:'';comment:页面路径"`
-	Type      int       `json:"type" gorm:"type:int2;default:1;comment:类型"`
+	Type      int       `json:"type" gorm:"type:int2;default:0;comment:类型"` // 菜单类型（0代表菜单、1代表iframe、2代表外链、3代表按钮）
 	Pid       string    `json:"pid" gorm:"type:varchar(36);default:'';comment:父级ID"`
 	AllPid    string    `json:"all_pid" gorm:"type:varchar(1000);default:'';comment:所有父级ID"`
 	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"`

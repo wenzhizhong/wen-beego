@@ -2,6 +2,7 @@ package framework
 
 import (
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models_ar/base_ar"
@@ -88,13 +89,10 @@ func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData hel
 
 // 验证用户资料状态
 func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId string, unitId string) (status bool, err error) {
-	redisKey := "AUMID_UPS:" + helper.Md5(userId+unitId)
-
-	exits := ""
-	exits, err = helper.RedisGet(redisKey)
-	if err == nil && exits != "" {
-		index, _ := strconv.Atoi(exits)
-		status = exits == strconv.Itoa(base_model.UNIT_USER_PROFILE_NORMAL)
+	index := 0
+	index, err = business_store.GetAumidUps(userId, unitId, 0)
+	if err == nil && index > 0 {
+		status = index == base_model.UNIT_USER_PROFILE_NORMAL
 		if !status {
 			err = errors.New("用户" + base_model.UNIT_USER_PROFILE_MAP[index])
 		}
@@ -125,7 +123,7 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 		return
 	}
 
-	err = helper.RedisPut(redisKey, data.Status, 4*60*60)
+	err = business_store.SetAumidUps(userId, unitId, data.Status)
 	if err == nil {
 		status = true
 	}
@@ -134,18 +132,17 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 
 // 验证组织单位状态
 func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitId string) (status bool, err error) {
-	redisKey := "AUMID_US:" + helper.Md5(userId+unitId)
-	exits, err := helper.RedisGet(redisKey)
-	if err == nil && exits != "" {
-		index, _ := strconv.Atoi(exits)
+	index := -1
+	index, err = business_store.GetAumidUs(userId, unitId, -1)
+	if err == nil && index > -1 {
 		switch moduleName {
 		case "admin_plat":
-			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
+			status = index == base_model.UNIT_STATUS_PASSED
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
 		case "admin_mchnt":
-			status = exits == strconv.Itoa(base_model.UNIT_STATUS_PASSED)
+			status = index == base_model.UNIT_STATUS_PASSED
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
@@ -192,18 +189,18 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 		err = errors.New("用户状态不可用, status=" + strconv.Itoa(tmpStatus))
 		return
 	}
-	err = helper.RedisPut(redisKey, strconv.Itoa(tmpStatus), 4*60*60)
+
+	err = business_store.SetAumidUs(userId, unitId, tmpStatus)
 	return
 }
 
 // 验证用户角色状态
 func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, unitUserId string) (status bool, err error) {
-	redisKey := "AUMID_URS:" + unitUserId
-	exits, err := helper.RedisGet(redisKey)
-	if err == nil && exits != "" {
-		index, _ := strconv.Atoi(exits)
 
-		status = exits == strconv.Itoa(base_model.UNIT_ROLE_STATUS_NORMAL)
+	index := -1
+	index, err = business_store.GetAumidUrs(unitUserId, -1)
+	if err == nil && index > -1 {
+		status = index == base_model.UNIT_ROLE_STATUS_NORMAL
 		if !status {
 			err = errors.New("用户" + base_model.UNIT_ROLE_STATUS_MAP[index])
 		}
@@ -240,18 +237,19 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, unitUserId strin
 		return
 	}
 
-	err = helper.RedisPut(redisKey, strconv.Itoa(tmpStatus), 4*60*60)
+	err = business_store.SetAumidUrs(unitUserId, tmpStatus)
 	return
 }
 
 func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, unitUserId string, unitId string, path string) (status bool, err error) {
-	redisKey := "AUMID_URP:" + helper.Md5(moduleName+unitUserId+unitId)
-
 	tmpMap := map[string]bool{}
-	exits, err := helper.RedisGet(redisKey)
+	exits, err := business_store.GetAumidUrp(moduleName, unitUserId, unitId)
 	if err == nil && exits != "" {
 		exitsArr := strings.Split(exits, ";")
 		for _, item := range exitsArr {
+			if item == "" {
+				continue
+			}
 			tmpMap[item] = true
 		}
 	} else {
@@ -272,14 +270,17 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, unitUserId 
 			return
 		}
 
-		keys := make([]string, len(permissions))
+		keys := make([]string, 0)
 		for _, item := range permissions {
+			if item.Uri == "" {
+				continue
+			}
 			key := item.Uri
 			keys = append(keys, key)
 			tmpMap[key] = true
 		}
 
-		err = helper.RedisPut(redisKey, strings.Join(keys, ";"), 4*60*60)
+		err = business_store.SetAumidUrp(moduleName, unitUserId, unitId, strings.Join(keys, ";"))
 		if err != nil {
 			return
 		}

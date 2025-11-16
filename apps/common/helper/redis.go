@@ -9,7 +9,7 @@ import (
 )
 
 // redis key
-func getKey(key string) (string, error) {
+func GetCustomRedisKey(key string) (string, error) {
 	runmode, err := AppRunmode()
 	if err != nil {
 		return "", err
@@ -20,7 +20,7 @@ func getKey(key string) (string, error) {
 // redis put value to redis
 func RedisPut(key string, value interface{}, timeoutAfter int) error {
 	ctx := context.Background()
-	key, err := getKey(key)
+	key, err := GetCustomRedisKey(key)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func RedisPut(key string, value interface{}, timeoutAfter int) error {
 // redis get value from redis
 func RedisGet(key string) (string, error) {
 	ctx := context.Background()
-	key, err := getKey(key)
+	key, err := GetCustomRedisKey(key)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func RedisGet(key string) (string, error) {
 // redis delete value from redis
 func RedisDel(key string) error {
 	ctx := context.Background()
-	key, err := getKey(key)
+	key, err := GetCustomRedisKey(key)
 	if err != nil {
 		return err
 	}

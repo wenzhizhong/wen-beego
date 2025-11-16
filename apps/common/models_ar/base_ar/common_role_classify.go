@@ -74,6 +74,19 @@ func GetUserRoleClassifies[UnitModel itf.UnitItf, RoleModel itf.RoleItf, RoleCla
 	return
 }
 
+func GetRoleClassifyByRoleId[RoleClassifyModel itf.RoleClassifyItf](roleId string, roleClassifyModel RoleClassifyModel) (unitRoleClassify base_model.UnitRoleClassify, err error) {
+	tableRoleClassify := roleClassifyModel.TableName()
+	if roleId == "" {
+		str := fmt.Sprintf("getRoleClassifyByRoleId():获取角色分类必填参数, role_id:%s", roleId)
+		return unitRoleClassify, errors.New(str)
+	}
+	err = global.GetReadDb().
+		Model(&roleClassifyModel).
+		Where(tableRoleClassify+".role_id = ?", roleId).
+		Take(&unitRoleClassify).Error
+	return
+}
+
 func InsertUserRoleClassifies[RoleClassifyModel itf.RoleClassifyItf](tx *gorm.DB, roleClassifyModel base_model.UnitRoleClassify) (err error) {
 	if roleClassifyModel.Id == "" {
 		return errors.New("InsertUserRoleClassifies():角色分类id不能为空")
@@ -85,5 +98,15 @@ func InsertUserRoleClassifies[RoleClassifyModel itf.RoleClassifyItf](tx *gorm.DB
 			UpdateAll: true,
 		}).
 		Create(&roleClassifyModel).Error
+	return
+}
+
+func UpdateUserRoleClassifies[RoleClassifyModel itf.RoleClassifyItf](tx *gorm.DB, roleClassifyModel base_model.UnitRoleClassify) (err error) {
+	if roleClassifyModel.Id == "" {
+		return errors.New("UpdateUserRoleClassifies():角色分类id不能为空")
+	}
+	err = tx.Model(roleClassifyModel).
+		Where("id = ?", roleClassifyModel.Id).
+		Updates(roleClassifyModel).Error
 	return
 }
