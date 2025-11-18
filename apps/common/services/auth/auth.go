@@ -394,18 +394,18 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, un
  */
 func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, unitUserId string) (perms []string, err error) {
 
-	var permissions []base_model.UnitMenuPerms
+	var permissions []base_model.UnitMenu
 	switch moduleName {
 	case "admin_plat":
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 	case "admin_mchnt":
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 	default:
 		err = errors.New("GetUserPermissions:模块名称错误")
 	}
 
 	for _, permission := range permissions {
-		perms = append(perms, permission.Permission)
+		perms = append(perms, permission.Path)
 	}
 
 	return perms, err

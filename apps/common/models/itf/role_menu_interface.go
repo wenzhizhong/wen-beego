@@ -6,5 +6,4 @@ type RoleMenuItf interface {
 	GetId() string
 	GetRoleId() string
 	GetMenuId() string
-	GetMenuPermsId() string
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"WenBeego/apps/common/dto/auth_dto"
+	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -27,7 +28,7 @@ type CommonMenu struct {
  */
 func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
 
-	var permissions []base_model.UnitMenuPerms
+	var permissions []base_model.UnitMenu
 	var roleClassifies []base_model.UnitRoleClassify
 	switch moduleName {
 	case "admin_plat":
@@ -35,7 +36,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuPerms{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
@@ -45,7 +46,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuPerms{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
@@ -61,14 +62,20 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId
 	if len(menuAuthList) > 0 {
 		permissionsMap := make(map[string]map[string]string)
 		roleClassifiesMap := make(map[string]string)
+
 		for _, permission := range permissions {
-			menuId := permission.MenuId
-			perm := permission.Permission
-			if _, exists := permissionsMap[menuId]; !exists {
-				permissionsMap[menuId] = make(map[string]string)
+			parentId := permission.ParentId
+			if parentId == "" {
+				global.Log.Error("GetAsyncRoutes:菜单权限有空父级ID")
+				break
 			}
-			permissionsMap[menuId][perm] = perm
+			perm := permission.Auths
+			if _, exists := permissionsMap[parentId]; !exists {
+				permissionsMap[parentId] = make(map[string]string)
+			}
+			permissionsMap[parentId][perm] = perm
 		}
+
 		for _, roleClassify := range roleClassifies {
 			roleClassifiesMap[roleClassify.Name] = roleClassify.Name
 		}

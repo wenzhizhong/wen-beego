@@ -57,10 +57,10 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 			Model(menuModel).
 			Select(selectStr).
 			Where(tableMenu+".unit_id = ?", unitId).
-			Where(tableMenu+".visible = ?", 1).
 			Where(tableMenu+".deleted = ?", 0).
+			Where(tableMenu+".menu_type <> ?", 3).
 			Group(tableMenu + ".id").
-			Order(tableMenu + ".weight asc").
+			Order(tableMenu + ".rank asc").
 			Scan(&menuAuthList).
 			Error
 	} else {
@@ -71,14 +71,14 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
 			Where(tableMenu+".unit_id = ?", unitId).
-			Where(tableMenu+".visible = ?", 1).
 			Where(tableMenu+".deleted = ?", 0).
+			Where(tableMenu+".menu_type <> ?", 3).
 			Where(tableRole+".deleted = ?", 0).
 			Where(tableRole+".status = ?", 1).
 			Where(tableUserRole+".user_id = ?", unitUserId).
 			Where(tableUserRole+".deleted = ?", 0).
 			Group(tableMenu + ".id").
-			Order(tableMenu + ".weight asc").
+			Order(tableMenu + ".rank asc").
 			Scan(&menuAuthList).
 			Error
 	}
@@ -88,99 +88,91 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 	return
 }
 
-func GetUserPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuPermsModel MenuPermsModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuPermsList []base_model.UnitMenuPerms, err error) {
+func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuList []base_model.UnitMenu, err error) {
 	if unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, unitUserId)
 		global.Log.Error(str)
-		return menuPermsList, errors.New(str)
+		return menuList, errors.New(str)
 	}
 	isAdmin := helper.IsAdmin(moduleName, unitUserId)
 
-	tableMenuPerms := menuPermsModel.TableName()
+	tableMenu := menuModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()
 	tableUserRole := userRoleModel.TableName()
 	tableRole := roleModel.TableName()
-	tableMenu := menuModel.TableName()
 	tableStruct := struct {
-		TableMenuPerms string
-		TableRoleMenu  string
-		TableUserRole  string
-		TableRole      string
-		TableMenu      string
+		TableMenu     string
+		TableRoleMenu string
+		TableUserRole string
+		TableRole     string
 	}{
-		TableMenuPerms: tableMenuPerms,
-		TableRoleMenu:  tableRoleMenu,
-		TableUserRole:  tableUserRole,
-		TableRole:      tableRole,
-		TableMenu:      tableMenu,
+		TableMenu:     tableMenu,
+		TableRoleMenu: tableRoleMenu,
+		TableUserRole: tableUserRole,
+		TableRole:     tableRole,
 	}
 
-	selectStr, err := helper.ParseStringTpl(`{{.TableMenuPerms}}.*`, tableStruct)
-	joinMenuPermsStr, err2 := helper.ParseStringTpl(`inner join {{.TableMenuPerms}} on {{.TableMenuPerms}}.id = {{.TableRoleMenu}}.menu_perms_id`, tableStruct)
+	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.*`, tableStruct)
+	joinMenuStr, err2 := helper.ParseStringTpl(`inner join {{.TableMenu}} on {{.TableMenu}}.id = {{.TableRoleMenu}}.menu_id`, tableStruct)
 	joinUserRoleStr, err3 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRoleMenu}}.role_id`, tableStruct)
 	joinRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleMenu}}.role_id`, tableStruct)
-	joinMenuStr, err5 := helper.ParseStringTpl(`inner join {{.TableMenu}} on {{.TableMenu}}.id = {{.TableRoleMenu}}.menu_id`, tableStruct)
+
 	if err != nil {
-		return menuPermsList, err
+		return menuList, err
 	}
 	if err2 != nil {
-		return menuPermsList, err2
+		return menuList, err2
 	}
 	if err3 != nil {
-		return menuPermsList, err3
+		return menuList, err3
 	}
 	if err4 != nil {
-		return menuPermsList, err4
-	}
-	if err5 != nil {
-		return menuPermsList, err5
+		return menuList, err4
 	}
 
 	var tmpError error
 	if isAdmin {
 		tmpError = global.GetReadDb().
-			Model(menuPermsModel).
+			Model(menuModel).
 			Select(selectStr).
-			Joins(joinMenuStr).
-			Where(tableMenuPerms+".deleted = 0").
 			Where(tableMenu+".deleted = 0").
-			Where(tableMenu+".visible = 1").
+			Where(tableMenu+".menu_type = ?", 3).
 			Where(tableMenu+".unit_id = ?", unitId).
-			Group(tableMenuPerms + ".id").
-			Scan(&menuPermsList).
+			Group(tableMenu + ".id").
+			Scan(&menuList).
 			Error
 	} else {
 		tmpError = global.GetReadDb().
 			Model(roleMenuModel).
 			Select(selectStr).
-			Joins(joinMenuPermsStr).
+			Joins(joinMenuStr).
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
-			Where(tableMenuPerms+".deleted = 0").
+			Where(tableMenu+".deleted = 0").
+			Where(tableMenu+".menu_type = ?", 3).
 			Where(tableUserRole+".user_id = ?", unitUserId).
 			Where(tableUserRole + ".deleted = 0").
 			Where(tableRole + ".status = 1").
 			Where(tableRole + ".deleted = 0").
-			Group(tableMenuPerms + ".id").
-			Scan(&menuPermsList).
+			Group(tableMenu + ".id").
+			Scan(&menuList).
 			Error
 	}
 	if tmpError != nil && !helper.DbNotFound(tmpError) {
-		return menuPermsList, tmpError
+		return menuList, tmpError
 	}
 	return
 }
 
 // 获取单位权限列表
-func GetUnitPermissions[MenuModel itf.MenuItf, MenuPermsModel itf.MenuPermsItf](unitId string, menuModel MenuModel, menuPermsModel MenuPermsModel) (menuPermsList []base_model.UnitMenuPerms, err error) {
-	tablePermsName := menuPermsModel.TableName()
+func GetUnitPermissions[MenuModel itf.MenuItf](unitId string, menuModel MenuModel) (menuList []base_model.UnitMenu, err error) {
 	tableMenuName := menuModel.TableName()
 	err = global.GetReadDb().
-		Model(menuPermsModel).
-		Select(tablePermsName+".*").
-		Joins("inner join "+tableMenuName+" on "+tableMenuName+".id = "+tablePermsName+".menu_id").
+		Model(menuModel).
+		Select(tableMenuName+".*").
 		Where(tableMenuName+".unit_id = ?", unitId).
-		Where(tablePermsName+".deleted = ?", 0).
-		Find(&menuPermsList).Error
+		Where(tableMenuName+".deleted = ?", 0).
+		Where(tableMenuName+".menu_type = ?", 3).
+		Find(&menuList).Error
 	return
 }

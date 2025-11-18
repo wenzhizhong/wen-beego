@@ -61,9 +61,9 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		newUnitId, err = doSave[*models.Plat, *models.PlatUser, *models.PlatUserProfile, *models.PlatRole, *models.PlatUserRole, *models.PlatMenu, *models.PlatMenuPerms, *models.PlatRoleClassify](isAdd, baseParamDto, unitDto)
+		newUnitId, err = doSave[*models.Plat, *models.PlatUser, *models.PlatUserProfile, *models.PlatRole, *models.PlatUserRole, *models.PlatMenu, *models.PlatRoleClassify](isAdd, baseParamDto, unitDto)
 	case "mchnt_plat":
-		newUnitId, err = doSave[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile, *models.MchntRole, *models.MchntUserRole, *models.MchntMenu, *models.MchntMenuPerms, *models.MchntRoleClassify](isAdd, baseParamDto, unitDto)
+		newUnitId, err = doSave[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile, *models.MchntRole, *models.MchntUserRole, *models.MchntMenu, *models.MchntRoleClassify](isAdd, baseParamDto, unitDto)
 	default:
 		err = errors.New("unit Save：模块名称错误")
 	}
@@ -94,7 +94,6 @@ func doSave[
 	RoleModel itf.RoleItf,
 	UnitUserRoleModel itf.UserRoleItf,
 	UnitMenuModel itf.MenuItf,
-	UnitMenuPermsModel itf.MenuPermsItf,
 	RoleClassifyModel itf.RoleClassifyItf,
 ](
 	isAdd bool,
@@ -140,7 +139,7 @@ func doSave[
 				return err
 			}
 
-			err = base_ar.CloneMenu[UnitMenuModel, UnitMenuPermsModel](tx, baseParamDto.UnitId, newUnitId)
+			err = base_ar.CloneMenu[UnitMenuModel](tx, baseParamDto.UnitId, newUnitId)
 			if err != nil {
 				return err
 			}

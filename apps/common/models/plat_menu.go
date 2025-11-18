@@ -19,39 +19,81 @@ func (m *PlatMenu) TableName() string {
 func (m *PlatMenu) GetId() string {
 	return m.Id
 }
+func (m *PlatMenu) GetParentId() string {
+	return m.ParentId
+}
 func (m *PlatMenu) GetUnitId() string {
 	return m.UnitId
 }
-func (m *PlatMenu) GetIcon() string {
-	return m.Icon
+func (m *PlatMenu) GetMenuType() int {
+	return m.MenuType
+}
+func (m *PlatMenu) GetTitle() string {
+	return m.Title
 }
 func (m *PlatMenu) GetName() string {
 	return m.Name
 }
-func (m *PlatMenu) GetApiPath() string {
-	return m.ApiPath
+func (m *PlatMenu) GetPath() string {
+	return m.Path
 }
-func (m *PlatMenu) GetPagePath() string {
-	return m.PagePath
+func (m *PlatMenu) GetComponent() string {
+	return m.Component
 }
-func (m *PlatMenu) GetType() int {
-	return m.Type
+func (m *PlatMenu) GetRank() *int {
+	return m.Rank
 }
-func (m *PlatMenu) GetPid() string {
-	return m.Pid
+func (m *PlatMenu) GetRedirect() string {
+	return m.Redirect
 }
-func (m *PlatMenu) GetAllPid() string {
-	return m.AllPid
+func (m *PlatMenu) GetIcon() string {
+	return m.Icon
+}
+func (m *PlatMenu) GetExtraIcon() string {
+	return m.ExtraIcon
+}
+func (m *PlatMenu) GetEnterTransition() string {
+	return m.EnterTransition
+}
+func (m *PlatMenu) GetLeaveTransition() string {
+	return m.LeaveTransition
+}
+func (m *PlatMenu) GetActivePath() string {
+	return m.ActivePath
+}
+func (m *PlatMenu) GetAuths() string {
+	return m.Auths
+}
+func (m *PlatMenu) GetFrameSrc() string {
+	return m.FrameSrc
+}
+func (m *PlatMenu) GetFrameLoading() bool {
+	return m.FrameLoading
+}
+func (m *PlatMenu) GetKeepAlive() bool {
+	return m.KeepAlive
+}
+func (m *PlatMenu) GetHiddenTag() bool {
+	return m.HiddenTag
+}
+func (m *PlatMenu) GetFixedTag() bool {
+	return m.FixedTag
+}
+func (m *PlatMenu) GetShowLink() bool {
+	return m.ShowLink
+}
+func (m *PlatMenu) GetShowParent() bool {
+	return m.ShowParent
 }
 func (m *PlatMenu) GetCreatedAt() time.Time {
 	return m.CreatedAt
 }
-func (m *PlatMenu) GetWeight() int {
-	return m.Weight
-}
-func (m *PlatMenu) GetVisible() int {
-	return m.Visible
+func (m *PlatMenu) GetUpdatedAt() time.Time {
+	return m.UpdatedAt
 }
 func (m *PlatMenu) GetDeleted() int {
 	return m.Deleted
+}
+func (m *PlatMenu) GetClone() int {
+	return m.Clone
 }

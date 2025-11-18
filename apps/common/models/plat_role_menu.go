@@ -24,6 +24,3 @@ func (m *PlatRoleMenu) GetRoleId() string {
 func (m *PlatRoleMenu) GetMenuId() string {
 	return m.MenuId
 }
-func (m *PlatRoleMenu) GetMenuPermsId() string {
-	return m.MenuPermsId
-}

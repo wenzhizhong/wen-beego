@@ -34,7 +34,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (redslt interface{}, err erro
 		}
 		switch moduleName {
 		case "admin_plat":
-			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.PlatMenu{}, &models.PlatMenuPerms{})
+			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.PlatMenu{})
 			if err != nil {
 				return nil, err
 			}
@@ -43,7 +43,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (redslt interface{}, err erro
 				return nil, err
 			}
 		case "admin_mchnt":
-			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.MchntMenu{}, &models.MchntMenuPerms{})
+			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.MchntMenu{})
 			if err != nil {
 				return nil, err
 			}
@@ -90,9 +90,9 @@ func (s *ApiLog) groupData(data []mq_dto.ApiLogDto) (groupData mqTaskDto.ApiLogD
 }
 
 // 获取报错api数据
-func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDto, menuModel itf.MenuItf, menuPermsModel itf.MenuPermsItf) (apiLogData []*base_model.UnitApiStatistics, err error) {
+func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDto, menuModel itf.MenuItf) (apiLogData []*base_model.UnitApiStatistics, err error) {
 	for unitId, itemUriMap := range unitMap {
-		dbPermsMap, err := s.getUnitPermissions(unitId, menuModel, menuPermsModel)
+		dbPermsMap, err := s.getUnitPermissions(unitId, menuModel)
 		if err != nil {
 			return apiLogData, err
 		}
@@ -107,7 +107,7 @@ func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDt
 			uv := 0
 			permId := ""
 			modulename := helper.ParseModuleFromRoute(uri)
-			if dbPermsMap[uri] != (base_model.UnitMenuPerms{}) && dbPermsMap[uri].Id != "" {
+			if dbPermsMap[uri].Id != "" {
 				permId = dbPermsMap[uri].Id
 			}
 			if todayApiLogMap[uri] != (base_model.UnitApiStatistics{}) {
@@ -139,15 +139,15 @@ func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDt
 }
 
 // 获取组织单位权限列表
-func (s *ApiLog) getUnitPermissions(unitId string, menuModel itf.MenuItf, menuPermsModel itf.MenuPermsItf) (dbPermsMap map[string]base_model.UnitMenuPerms, err error) {
-	dbPermsList, err := base_ar.GetUnitPermissions(unitId, menuModel, menuPermsModel)
+func (s *ApiLog) getUnitPermissions(unitId string, menuModel itf.MenuItf) (dbPermsMap map[string]base_model.UnitMenu, err error) {
+	dbPermsList, err := base_ar.GetUnitPermissions(unitId, menuModel)
 	if err != nil {
 		return dbPermsMap, err
 	}
 
-	dbPermsMap = make(map[string]base_model.UnitMenuPerms)
+	dbPermsMap = make(map[string]base_model.UnitMenu)
 	for _, dbPerm := range dbPermsList {
-		dbPermsMap[dbPerm.Uri] = dbPerm
+		dbPermsMap[dbPerm.Path] = dbPerm
 	}
 	return dbPermsMap, nil
 }
