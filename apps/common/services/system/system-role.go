@@ -108,25 +108,47 @@ func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.UnitR
 	return
 }
 
-func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto) (dataList interface{}, err error) {
-	// switch baseParamDto.ModuleName {
-	// case "admin_plat":
-	// 	dataList, err = base_ar.GetRoleMenu[*models.PlatRole, *models.PlatRoleMenu, *models.PlatRoleMenuClassify]()
-	// case "mchnt_plat":
-	// 	dataList, err = base_ar.GetRoleMenu[*models.MchntRole, *models.MchntRoleMenu, *models.MchntRoleMenuClassify]()
-	// default:
-	// 	err = errors.New("GetRoleMenu：模块名称错误")
-	// }
+func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
+	var dataList interface{}
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatRoleMenu{}, &models.PlatRole{})
+	case "mchnt_plat":
+		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntRoleMenu{}, &models.MchntRole{})
+	default:
+		err = errors.New("GetRoleMenu：模块名称错误")
+	}
+	if err != nil {
+		return
+	}
+	data = struct {
+		List interface{} `json:"list"`
+	}{List: dataList}
+
 	return
 }
-func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, ids string) (dataList interface{}, err error) {
-	// switch baseParamDto.ModuleName {
-	// case "admin_plat":
-	// 	dataList, err = base_ar.GetRoleMenuIds[*models.PlatRole, *models.PlatRoleMenu, *models.PlatRoleMenuClassify](ids)
-	// case "mchnt_plat":
-	// 	dataList, err = base_ar.GetRoleMenuIds[*models.MchntRole, *models.MchntRoleMenu, *models.MchntRoleMenuClassify](ids)
-	// default:
-	// 	err = errors.New("GetRoleMenuIds：模块名称错误")
-	// }
+func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (data interface{}, err error) {
+
+	dataList := make([]base_model.UnitRoleMenu, 0)
+
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatRoleMenu{})
+	case "mchnt_plat":
+		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntRoleMenu{})
+	default:
+		err = errors.New("GetRoleMenuIds：模块名称错误")
+	}
+	if err != nil {
+		return
+	}
+	tmpData := make([]string, 0)
+	for _, v := range dataList {
+		tmpData = append(tmpData, v.MenuId)
+	}
+	data = struct {
+		List []string `json:"list"`
+	}{List: tmpData}
+
 	return
 }

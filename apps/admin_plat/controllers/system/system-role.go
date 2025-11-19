@@ -159,12 +159,13 @@ func (c *RoleController) Del() {
 // @Router /admin_plat/system-role/role-menu [get]
 func (c *RoleController) RoleMenu() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{})
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	data, err := c.roleService.GetRoleMenu(baseParamDto)
+	data, err := c.roleService.GetRoleMenu(baseParamDto, selectUnitIds)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
@@ -180,18 +181,18 @@ func (c *RoleController) RoleMenu() {
 // @Tags 系统管理-角色
 // @Accept application/json
 // @Produce application/json
-// @Param ids query string true "角色ids"
+// @Param id query string true "角色id"
 // @Success 200 {object} dto.RespDataListDto
 // @Router /admin_plat/system-role/role-menu-ids [get]
 func (c *RoleController) RoleMenuIds() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
-	ids := c.GetString("ids")
+	roleId := c.GetString("id")
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	data, err := c.roleService.GetRoleMenuIds(baseParamDto, ids)
+	data, err := c.roleService.GetRoleMenuIds(baseParamDto, roleId)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()

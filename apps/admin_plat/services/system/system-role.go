@@ -26,9 +26,9 @@ func (s *RoleService) Del(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRo
 	return s.commonSystemRole.DelUnitRole(baseParamDto, roleDto)
 }
 
-func (s *RoleService) GetRoleMenu(baseParamDto dto.BaseParamDto) (dataList interface{}, err error) {
-	return s.commonSystemRole.GetRoleMenu(baseParamDto)
+func (s *RoleService) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string) (dataList interface{}, err error) {
+	return s.commonSystemRole.GetRoleMenu(baseParamDto, selectUnitIds)
 }
-func (s *RoleService) GetRoleMenuIds(baseParamDto dto.BaseParamDto, ids string) (dataList interface{}, err error) {
-	return s.commonSystemRole.GetRoleMenuIds(baseParamDto, ids)
+func (s *RoleService) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dataList interface{}, err error) {
+	return s.commonSystemRole.GetRoleMenuIds(baseParamDto, roleId)
 }

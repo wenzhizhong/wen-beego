@@ -58,7 +58,7 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 			Select(selectStr).
 			Where(tableMenu+".unit_id = ?", unitId).
 			Where(tableMenu+".deleted = ?", 0).
-			Where(tableMenu+".menu_type <> ?", 3).
+			Where(tableMenu+".menu_type NOT IN ?", []int{3, 4}).
 			Group(tableMenu + ".id").
 			Order(tableMenu + ".rank asc").
 			Scan(&menuAuthList).
@@ -72,7 +72,7 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 			Joins(joinUserRoleStr).
 			Where(tableMenu+".unit_id = ?", unitId).
 			Where(tableMenu+".deleted = ?", 0).
-			Where(tableMenu+".menu_type <> ?", 3).
+			Where(tableMenu+".menu_type NOT IN ?", []int{3, 4}).
 			Where(tableRole+".deleted = ?", 0).
 			Where(tableRole+".status = ?", 1).
 			Where(tableUserRole+".user_id = ?", unitUserId).
@@ -85,6 +85,79 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 	if tmpError != nil && !helper.DbNotFound(tmpError) {
 		return menuAuthList, tmpError
 	}
+	return
+}
+
+/**
+ * 页面-获取角色可选权限列表
+ */
+func GetRoleMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, RoleModel itf.RoleItf](unitIds []string, menuModel MenuModel, roleMenuModel RoleMenuModel, roleModel RoleModel) (dataList []base_model.UnitMenu, err error) {
+	dataList = make([]base_model.UnitMenu, 0)
+	if len(unitIds) == 0 {
+		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%v", unitIds)
+		global.Log.Error(str)
+		return dataList, errors.New(str)
+	}
+
+	tableMenu := menuModel.TableName()
+	tableRoleMenu := roleMenuModel.TableName()
+	tableRole := roleModel.TableName()
+	tableStruct := struct {
+		TableMenu     string
+		TableRoleMenu string
+		TableUserRole string
+		TableRole     string
+	}{
+		TableMenu:     tableMenu,
+		TableRoleMenu: tableRoleMenu,
+		TableRole:     tableRole,
+	}
+
+	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title`, tableStruct)
+	joinMenuStr, err2 := helper.ParseStringTpl(`inner join {{.TableMenu}} on {{.TableMenu}}.id = {{.TableRoleMenu}}.menu_id`, tableStruct)
+	joinRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleMenu}}.role_id`, tableStruct)
+	if err != nil {
+		return dataList, err
+	}
+	if err2 != nil {
+		return dataList, err2
+	}
+	if err4 != nil {
+		return dataList, err4
+	}
+
+	err = global.GetReadDb().
+		Model(roleMenuModel).
+		Select(selectStr).
+		Joins(joinMenuStr).
+		Joins(joinRoleStr).
+		Where(tableMenu+".unit_id in ?", unitIds).
+		Where(tableMenu+".deleted = ?", 0).
+		// Where(tableMenu+".menu_type NOT IN ?", []int{3, 4}).
+		Where(tableRole+".deleted = ?", 0).
+		Where(tableRole+".status = ?", 1).
+		Group(tableMenu + ".id").
+		Order(tableMenu + ".rank asc").
+		Find(&dataList).
+		Error
+
+	if err != nil {
+		return dataList, err
+	}
+	return
+}
+
+func GetRoleMenuIds[RoleMenuModel itf.RoleMenuItf](roleId string, roleMenuModel RoleMenuModel) (dataList []base_model.UnitRoleMenu, err error) {
+	if roleId == "" {
+		str := fmt.Sprintf("GetRoleMenuIds():获取角色权限必填参数, role_id:%s", roleId)
+		global.Log.Error(str)
+		return dataList, errors.New(str)
+	}
+
+	err = global.GetReadDb().
+		Model(roleMenuModel).
+		Where("role_id = ?", roleId).
+		Find(&dataList).Error
 	return
 }
 
@@ -136,7 +209,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 			Model(menuModel).
 			Select(selectStr).
 			Where(tableMenu+".deleted = 0").
-			Where(tableMenu+".menu_type = ?", 3).
+			Where(tableMenu+".menu_type IN ?", []int{3, 4}).
 			Where(tableMenu+".unit_id = ?", unitId).
 			Group(tableMenu + ".id").
 			Scan(&menuList).
@@ -149,7 +222,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
 			Where(tableMenu+".deleted = 0").
-			Where(tableMenu+".menu_type = ?", 3).
+			Where(tableMenu+".menu_type IN ?", []int{3, 4}).
 			Where(tableUserRole+".user_id = ?", unitUserId).
 			Where(tableUserRole + ".deleted = 0").
 			Where(tableRole + ".status = 1").
@@ -172,7 +245,7 @@ func GetUnitPermissions[MenuModel itf.MenuItf](unitId string, menuModel MenuMode
 		Select(tableMenuName+".*").
 		Where(tableMenuName+".unit_id = ?", unitId).
 		Where(tableMenuName+".deleted = ?", 0).
-		Where(tableMenuName+".menu_type = ?", 3).
+		Where(tableMenuName+".menu_type IN ?", []int{3, 4}).
 		Find(&menuList).Error
 	return
 }
