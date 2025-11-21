@@ -55,14 +55,11 @@ func (m *PlatUserProfile) GetEmergencyTel() string {
 func (m *PlatUserProfile) GetAddress() string {
 	return m.Address
 }
-func (m *PlatUserProfile) GetEMail() string {
-	return m.EMail
+func (m *PlatUserProfile) GetEmail() string {
+	return m.Email
 }
 func (m *PlatUserProfile) GetSource() string {
 	return m.Source
-}
-func (m *PlatUserProfile) GetHeadimgurl() string {
-	return m.Headimgurl
 }
 func (m *PlatUserProfile) GetValidDateBegin() *time.Time {
 	return m.ValidDateBegin

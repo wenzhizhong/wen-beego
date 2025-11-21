@@ -202,3 +202,33 @@ func (c *RoleController) RoleMenuIds() {
 	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }
+
+// 保存角色菜单
+// @Summary 保存角色菜单
+// @Description 保存角色菜单
+// @Tags 系统管理-角色
+// @Accept application/json
+// @Produce application/json
+// @Param reqDto body role_dto.RoleMenuSaveDto true "保存角色菜单参数"
+// @Success 200 {object} dto.RespDataDto
+// @Router /admin_plat/system-role/role-menu-save [post]
+
+func (c *RoleController) RoleMenuSave() {
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	roleMenuSaveDto, err1 := helper.GetReqBody[role_dto.RoleMenuSaveDto](c.Ctx)
+	if err != nil || err1 != nil {
+		err = helper.Ternary(err != nil, err, err1)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+
+	err = c.roleService.RoleMenuSave(baseParamDto, roleMenuSaveDto)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", nil)
+	c.ServeJSON()
+}

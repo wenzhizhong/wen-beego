@@ -26,9 +26,17 @@ func (s *RoleService) Del(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRo
 	return s.commonSystemRole.DelUnitRole(baseParamDto, roleDto)
 }
 
+// 获取角色可选菜单
 func (s *RoleService) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string) (dataList interface{}, err error) {
 	return s.commonSystemRole.GetRoleMenu(baseParamDto, selectUnitIds)
 }
+
+// 获取角色已选菜单
 func (s *RoleService) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dataList interface{}, err error) {
 	return s.commonSystemRole.GetRoleMenuIds(baseParamDto, roleId)
+}
+
+// 保存角色所选菜单
+func (s *RoleService) RoleMenuSave(baseParamDto dto.BaseParamDto, roleMenuSaveDto role_dto.RoleMenuSaveDto) (err error) {
+	return s.commonSystemRole.RoleMenuSave(baseParamDto, roleMenuSaveDto)
 }

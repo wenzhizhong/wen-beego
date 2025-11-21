@@ -20,7 +20,7 @@ func GetUnitDeptList[UnitModel itf.UnitItf, UnitDeptModel itf.DeptItf, UnitUserM
 
 	subQuery := global.GetReadDb().
 		Model(unitUserModel).
-		Select(tableUnitUserName+".id AS principal_id, "+tableUnitUserName+".name AS principal, "+tableUnitUserName+".phone, "+tableUserProfileName+".e_mail AS email").
+		Select(tableUnitUserName+".id AS principal_id, "+tableUnitUserName+".name AS principal, "+tableUnitUserName+".phone, "+tableUserProfileName+".email").
 		Joins("INNER JOIN "+tableUserProfileName+" ON "+tableUserProfileName+".id = "+tableUnitUserName+".id").
 		Where(tableUnitUserName+".deleted = 0").
 		Where(tableUserProfileName+".deleted = 0").

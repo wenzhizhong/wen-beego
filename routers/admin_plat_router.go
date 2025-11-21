@@ -66,6 +66,12 @@ func init() {
 		beego.NSCtrlPost("/system-role/del", (*adminSystem.RoleController).Del),
 		beego.NSCtrlGet("/system-role/role-menu", (*adminSystem.RoleController).RoleMenu),
 		beego.NSCtrlGet("/system-role/role-menu-ids", (*adminSystem.RoleController).RoleMenuIds),
+		beego.NSCtrlPost("/system-role/role-menu-save", (*adminSystem.RoleController).RoleMenuSave),
+
+		beego.NSCtrlGet("/system-user/get", (*adminSystem.UserController).GetUserList),
+		beego.NSCtrlPost("/system-user/add", (*adminSystem.UserController).Add),
+		beego.NSCtrlPost("/system-user/edit", (*adminSystem.UserController).Edit),
+		beego.NSCtrlPost("/system-user/del", (*adminSystem.UserController).Del),
 	)
 
 	// 请求前、后处理

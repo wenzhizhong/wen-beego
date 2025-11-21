@@ -20,9 +20,8 @@ type UserProfileItf interface {
 	GetEmergencyName() string
 	GetEmergencyTel() string
 	GetAddress() string
-	GetEMail() string
+	GetEmail() string
 	GetSource() string
-	GetHeadimgurl() string
 	GetValidDateBegin() *time.Time
 	GetValidDateEnd() *time.Time
 	GetSchooling() string

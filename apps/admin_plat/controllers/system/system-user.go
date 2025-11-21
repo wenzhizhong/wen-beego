@@ -22,7 +22,7 @@ type UserController struct {
 // @Produce application/json
 // @Param data body dto.GetUserListDto true "请求参数"
 // @Success 200 {object} dto.GetUserListDto "返回结果"
-// @Router /admin_plat/system-user/getUserList [get]
+// @Router /admin_plat/system-user/get [get]
 
 func (c *UserController) GetUserList() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -41,6 +41,7 @@ func (c *UserController) GetUserList() {
 	userDto := page_dto.SystemUserListReqDto{}
 	userDto.BaseParamDto = baseParamDto
 	userDto.ReqDataListDto = reqDataListDto
+	userDto.SelectUnitIds = c.GetStrings("selectUnitIds")
 
 	data, err := c.UserService.GetUserList(userDto)
 	if err != nil {
@@ -50,4 +51,11 @@ func (c *UserController) GetUserList() {
 	}
 	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
+}
+
+func (c *UserController) Add() {
+}
+func (c *UserController) Edit() {
+}
+func (c *UserController) Del() {
 }

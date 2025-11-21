@@ -37,6 +37,7 @@ type UserLoginInfoDto struct {
 	UserInfo struct {
 		models.User
 		models.UserProfile
+		Email             string   `json:"email"`
 		Expires           int64    `json:"expires"`
 		AccessToken       string   `json:"accessToken"`
 		RefreshToken      string   `json:"refreshToken"`

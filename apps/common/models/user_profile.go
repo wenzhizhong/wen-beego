@@ -19,9 +19,8 @@ type UserProfile struct {
 	EmergencyName     string    `json:"emergency_name" gorm:"size:50;comment:紧急联系人姓名"`
 	EmergencyTel      string    `json:"emergency_tel" gorm:"size:100;comment:紧急联系人电话"`
 	Address           string    `json:"address" gorm:"size:200;comment:通讯地址"`
-	EMail             string    `json:"e_mail" gorm:"size:50;comment:邮箱"`
+	Email             string    `json:"email" gorm:"size:50;comment:邮箱"`
 	Source            string    `json:"source" gorm:"not null;default:'微信';comment:来源：微信,web,其它,app"`
-	Headimgurl        string    `json:"headimgurl" gorm:"size:500;comment:头像"`
 	ValidDateBegin    time.Time `json:"valid_date_begin" gorm:"comment:身份证有效期开始时间"`
 	ValidDateEnd      time.Time `json:"valid_date_end" gorm:"comment:身份证有效期截止时间"`
 	Schooling         string    `json:"schooling" gorm:"size:100;comment:学历"`

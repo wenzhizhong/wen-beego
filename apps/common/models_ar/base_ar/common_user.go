@@ -38,23 +38,91 @@ func GetUserOfUnitById[UnitUserModel itf.UnitUserItf](userId string, unitId stri
 		Take(&userData)
 	return userData, result.Error
 }
-func GetUserListOfUnitById[UnitUserModel itf.UnitUserItf](reqDto page_dto.SystemUserListReqDto) (userData []base_model.UnitUser, count int64, err error) {
-	var unitUserModel UnitUserModel
+
+// 页面-系统管理-获取用户列表
+func GetUserListOfUnitById[
+	UnitUserModel itf.UnitUserItf,
+	UserProfileModel itf.UserProfileItf,
+	UnitDeptModel itf.DeptItf,
+	UnitUserDeptModel itf.UserDeptItf,
+	UnitRoleModel itf.RoleItf,
+	UnitUserRoleModel itf.UserRoleItf,
+](
+	reqDto page_dto.SystemUserListReqDto,
+	unitUserModel UnitUserModel,
+	userProfileModel UserProfileModel,
+	unitDeptModel UnitDeptModel,
+	unitUserDeptModel UnitUserDeptModel,
+	unitRoleModel UnitRoleModel,
+	unitUserRoleModel UnitUserRoleModel,
+) (userData []page_dto.SystemUserListDto, count int64, err error) {
 	tableUnitUserName := unitUserModel.TableName()
-	userData = make([]base_model.UnitUser, 0)
-	if reqDto.UnitId == "" {
+	tableUnitUserProfileName := userProfileModel.TableName()
+	tableUnitDeptName := unitDeptModel.TableName()
+	tableUnitUserDeptName := unitUserDeptModel.TableName()
+	tableUnitRoleName := unitRoleModel.TableName()
+	tableUnitUserRoleName := unitUserRoleModel.TableName()
+
+	tableStruct := struct {
+		TableUser        string
+		TableUserProfile string
+		TableDept        string
+		TableUserDept    string
+		TableRole        string
+		TableUserRole    string
+	}{
+		TableUser:        tableUnitUserName,
+		TableUserProfile: tableUnitUserProfileName,
+		TableDept:        tableUnitDeptName,
+		TableUserDept:    tableUnitUserDeptName,
+		TableRole:        tableUnitRoleName,
+		TableUserRole:    tableUnitUserRoleName,
+	}
+
+	userData = make([]page_dto.SystemUserListDto, 0)
+	if len(reqDto.SelectUnitIds) <= 0 {
 		return userData, count, errors.New("GetUserListOfUnitById(): UnitId 不能为空")
 	}
-	selectStr := "*, case is_default when 1 then unit_id else '' end AS default_unit_id"
+
+	//用户部门子查询
+	selectUserDeptTpl := `{{.TableUserDept}}.user_id, string_agg({{.TableUserDept}}.dept_id, ',') AS dept_ids, string_agg({{.TableDept}}.name, ',') AS dept_names`
+	selectUserDeptStr, _ := helper.ParseStringTpl(selectUserDeptTpl, tableStruct)
+	subQueryUserDept := global.GetReadDb().
+		Model(unitUserDeptModel).
+		Select(selectUserDeptStr).
+		Joins("INNER JOIN "+tableUnitDeptName+" ON "+tableUnitDeptName+".id = "+tableUnitUserDeptName+".dept_id").
+		Where(tableUnitDeptName+".deleted = ?", 0).
+		Where(tableUnitUserDeptName+".deleted = ?", 0).
+		Group(tableUnitUserDeptName + ".user_id")
+
+	//用户角色子查询
+	selectUserRoleTpl := `{{.TableUserRole}}.user_id, string_agg({{.TableUserRole}}.role_id, ',') AS role_ids, string_agg({{.TableRole}}.role_name, ',') AS role_names`
+	selectUserRoleStr, _ := helper.ParseStringTpl(selectUserRoleTpl, tableStruct)
+	subQueryUserRole := global.GetReadDb().
+		Model(unitUserRoleModel).
+		Select(selectUserRoleStr).
+		Joins("INNER JOIN "+tableUnitRoleName+" ON "+tableUnitRoleName+".id = "+tableUnitUserRoleName+".role_id").
+		Where(tableUnitRoleName+".deleted = ?", 0).
+		Where(tableUnitUserRoleName+".deleted = ?", 0).
+		Group(tableUnitUserRoleName + ".user_id")
+
+	selectStr := "*"
 	query := global.GetReadDb().
 		Model(unitUserModel).
+		Joins("INNER JOIN "+tableUnitUserProfileName+" ON "+tableUnitUserProfileName+".id = "+tableUnitUserName+".id").
+		Joins("LEFT JOIN (?) t ON t.user_id = "+tableUnitUserName+".id", subQueryUserDept).
+		Joins("LEFT JOIN (?) t2 ON t2.user_id = "+tableUnitUserName+".id", subQueryUserRole).
 		Where(tableUnitUserName+".unit_id = ?", reqDto.UnitId).
 		Where(tableUnitUserName+".deleted = ?", 0)
 
-	err = query.Select("id").Count(&count).Error
+	err = query.Select(tableUnitUserName + ".id").Count(&count).Error
 	if err != nil {
 		return userData, count, err
 	}
+	if count == 0 {
+		return userData, count, nil
+	}
+
 	result := query.
 		Select(selectStr).
 		Limit(reqDto.PageSize).
