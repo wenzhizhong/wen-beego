@@ -85,22 +85,28 @@ func GetUserListOfUnitById[
 	}
 
 	//用户部门子查询
-	selectUserDeptTpl := `{{.TableUserDept}}.user_id, string_agg({{.TableUserDept}}.dept_id, ',') AS dept_ids, string_agg({{.TableDept}}.name, ',') AS dept_names`
+	selectUserDeptTpl := `{{.TableUserDept}}.user_id, 
+		string_agg({{.TableUserDept}}.dept_id, ',') AS dept_ids, 
+		string_agg({{.TableDept}}.name, ',') AS dept_names, 
+		COUNT(CASE WHEN {{.TableUserDept}}.dept_id IN (?) THEN 1 ELSE null END) AS count_has_id`
 	selectUserDeptStr, _ := helper.ParseStringTpl(selectUserDeptTpl, tableStruct)
 	subQueryUserDept := global.GetReadDb().
 		Model(unitUserDeptModel).
-		Select(selectUserDeptStr).
+		Select(selectUserDeptStr, reqDto.DeptIds).
 		Joins("INNER JOIN "+tableUnitDeptName+" ON "+tableUnitDeptName+".id = "+tableUnitUserDeptName+".dept_id").
 		Where(tableUnitDeptName+".deleted = ?", 0).
 		Where(tableUnitUserDeptName+".deleted = ?", 0).
 		Group(tableUnitUserDeptName + ".user_id")
 
 	//用户角色子查询
-	selectUserRoleTpl := `{{.TableUserRole}}.user_id, string_agg({{.TableUserRole}}.role_id, ',') AS role_ids, string_agg({{.TableRole}}.role_name, ',') AS role_names`
+	selectUserRoleTpl := `{{.TableUserRole}}.user_id, 
+		string_agg({{.TableUserRole}}.role_id, ',') AS role_ids, 
+		string_agg({{.TableRole}}.role_name, ',') AS role_names,
+		COUNT(CASE WHEN {{.TableUserRole}}.role_id IN (?) THEN 1 ELSE null END) AS count_has_id`
 	selectUserRoleStr, _ := helper.ParseStringTpl(selectUserRoleTpl, tableStruct)
 	subQueryUserRole := global.GetReadDb().
 		Model(unitUserRoleModel).
-		Select(selectUserRoleStr).
+		Select(selectUserRoleStr, reqDto.RoleIds).
 		Joins("INNER JOIN "+tableUnitRoleName+" ON "+tableUnitRoleName+".id = "+tableUnitUserRoleName+".role_id").
 		Where(tableUnitRoleName+".deleted = ?", 0).
 		Where(tableUnitUserRoleName+".deleted = ?", 0).
@@ -114,6 +120,13 @@ func GetUserListOfUnitById[
 		Joins("LEFT JOIN (?) t2 ON t2.user_id = "+tableUnitUserName+".id", subQueryUserRole).
 		Where(tableUnitUserName+".unit_id = ?", reqDto.UnitId).
 		Where(tableUnitUserName+".deleted = ?", 0)
+
+	if len(reqDto.DeptIds) > 0 {
+		query = query.Where("t.count_has_id>0")
+	}
+	if len(reqDto.RoleIds) > 0 {
+		query = query.Where("t2.count_has_id>0")
+	}
 
 	err = query.Select(tableUnitUserName + ".id").Count(&count).Error
 	if err != nil {
