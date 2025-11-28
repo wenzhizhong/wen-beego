@@ -2,13 +2,41 @@ package common
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware"
+	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
+
+	beego "github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego/v2/server/web/context"
 )
 
 func RunBefore() {
 	// 全局目录
 	initGlobalPath()
+	// 自定义 beego
+	customBeego()
+}
+
+func customBeego() {
+	// beego自定义配置
+	_ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
+
+	beego.InsertFilter("/*", beego.BeforeStatic, new(middleware.AccessMiddleware).LimitTimes())
+	beego.InsertFilter("/*", beego.BeforeRouter, new(middleware.AccessMiddleware).LimitTimes())
+	beego.AddViewPath(global.AppDir + "/index/views")
+	beego.AddViewPath(global.AppDir + "/admin_plat/views")
+	beego.BConfig.WebConfig.StaticDir["/static"] = global.StaticDir
+	beego.BConfig.WebConfig.StaticDir["/uploads"] = global.UploadsDir
+	if beego.BConfig.RunMode == "dev" {
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/swagger"] = global.AppDir + "/swagger"
+	}
+	beego.BConfig.RecoverFunc = beeegoRecoverFuncfunc // 自定义替换掉默认defaultRecoverPanic方法
+
+	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
 }
 
 func initGlobalPath() {
@@ -36,5 +64,24 @@ func createDir(path string) {
 	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) || !fileInfo.IsDir() {
 		os.MkdirAll(path, os.ModePerm)
+	}
+}
+
+func beeegoRecoverFuncfunc(ctx *context.Context, config *beego.Config) {
+	if err := recover(); err != nil {
+		// 记录 panic 到日志
+		runMode, _ := helper.AppRunmode()
+		stack := string(debug.Stack())
+		global.Log.Error("PANIC: %v\nStack: %s\n\n", err, stack)
+
+		// 返回错误响应。确保不会重复写入响应
+		if !ctx.ResponseWriter.Started {
+			errMsg := helper.Ternary(runMode == "dev", fmt.Sprintf("%v", stack), "Internal Server Error")
+			ctx.Output.SetStatus(500)
+			ctx.Output.JSON(map[string]interface{}{
+				"error": errMsg,
+				"code":  500,
+			}, false, false)
+		}
 	}
 }

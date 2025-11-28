@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	_ "github.com/beego/beego/v2/core/config/yaml"
-	beego "github.com/beego/beego/v2/server/web"
+	// beego "github.com/beego/beego/v2/server/web"
 )
 
 func main() {
@@ -24,9 +24,9 @@ func main() {
 		return
 	}
 
-	// beego自定义配置
-	_ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
-	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
+	// // beego自定义配置
+	// _ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
+	// fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
 
 	// 注册自己资源服务
 	cmdCommon.InitCommonSource("pathMq")

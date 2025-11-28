@@ -1,8 +1,6 @@
 package main
 
 import (
-	"WenBeego/apps/common/global"
-	"WenBeego/apps/common/middleware"
 	cmdCommon "WenBeego/cmd/common"
 	_ "WenBeego/routers"
 	"fmt"
@@ -13,23 +11,8 @@ import (
 )
 
 func main() {
-	cmdCommon.RunBefore()
-
-	// beego自定义配置
-	_ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
-	beego.InsertFilter("/*", beego.BeforeStatic, new(middleware.AccessMiddleware).LimitTimes())
-	beego.InsertFilter("/*", beego.BeforeRouter, new(middleware.AccessMiddleware).LimitTimes())
-	beego.AddViewPath(global.AppDir + "/index/views")
-	beego.AddViewPath(global.AppDir + "/admin_plat/views")
-	beego.BConfig.WebConfig.StaticDir["/static"] = global.StaticDir
-	beego.BConfig.WebConfig.StaticDir["/uploads"] = global.UploadsDir
-	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
-	if beego.BConfig.RunMode == "dev" {
-		beego.BConfig.WebConfig.DirectoryIndex = true
-		beego.BConfig.WebConfig.StaticDir["/swagger"] = global.AppDir + "/swagger"
-	}
-
 	// 注册自己资源服务
+	cmdCommon.RunBefore()
 	cmdCommon.InitCommonSource("")
 	cmdCommon.InitMqClient()
 
