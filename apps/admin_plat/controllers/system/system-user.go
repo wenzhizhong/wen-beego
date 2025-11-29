@@ -3,7 +3,10 @@ package system
 // 系统管理-内部用户管理
 import (
 	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto/user_dto"
+	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"strings"
 
 	systemService "WenBeego/apps/admin_plat/services/system"
 	commonControllers "WenBeego/apps/common/controller"
@@ -42,6 +45,8 @@ func (c *UserController) GetUserList() {
 	userDto.BaseParamDto = baseParamDto
 	userDto.ReqDataListDto = reqDataListDto
 	userDto.SelectUnitIds = c.GetStrings("selectUnitIds")
+	userDto.DeptIds = helper.Ternary(c.GetString("deptId") != "", strings.Split(c.GetString("deptId"), ","), make([]string, 0))
+	userDto.RoleIds = helper.Ternary(c.GetString("roleId") != "", strings.Split(c.GetString("roleId"), ","), make([]string, 0))
 
 	data, err := c.UserService.GetUserList(userDto)
 	if err != nil {
@@ -54,8 +59,81 @@ func (c *UserController) GetUserList() {
 }
 
 func (c *UserController) Add() {
+	c.save("add")
 }
 func (c *UserController) Edit() {
+	c.save("edit")
+}
+func (c *UserController) save(optType string) {
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	unitUserSaveDto, err0 := helper.GetReqBody[user_dto.UnitUserSaveDto](c.Ctx)
+	userDto, err1 := helper.GetReqBody[user_dto.UserDto](c.Ctx)
+	userProfileDto, err2 := helper.GetReqBody[user_dto.UserProfileDto](c.Ctx)
+	unitUserDto, err3 := helper.GetReqBody[user_dto.UnitUserDto](c.Ctx)
+	unitUserProfileDto, err4 := helper.GetReqBody[user_dto.UnitUserProfileDto](c.Ctx)
+
+	unitUserSaveDto.UserDto = userDto
+	unitUserSaveDto.UserProfileDto = userProfileDto
+	unitUserSaveDto.UnitUserDto = unitUserDto
+	unitUserSaveDto.UnitUserProfileDto = unitUserProfileDto
+
+	if err != nil || err0 != nil || err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		err = helper.Ternary(err != nil, err, err1)
+		err = helper.Ternary(err != nil, err, err2)
+		err = helper.Ternary(err != nil, err, err3)
+		err = helper.Ternary(err != nil, err, err4)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	if optType == "edit" && userDto.Id == "" {
+		c.Data["json"] = helper.Response(500, "请调用添加接口", nil)
+		c.ServeJSON()
+		return
+	}
+	if optType == "add" && userDto.Id != "" {
+		c.Data["json"] = helper.Response(500, "请调用编辑接口", nil)
+		c.ServeJSON()
+		return
+	}
+
+	data, err := c.UserService.SaveUser(baseParamDto, &unitUserSaveDto)
+	if err != nil {
+		global.Log.Error("错误 %v", err)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
+	c.ServeJSON()
 }
 func (c *UserController) Del() {
+}
+
+// 角色树形列表
+// @Summary 角色树形列表
+// @Description 角色树形列表
+// @Tags 角色
+// @Accept  json
+// @Produce  json
+// @Param   selectUnitIds query string true "selectUnitIds"
+// @Success 200 {object}
+// @Router /admin_plat/system-user/get-role-tree [get]
+func (c *UserController) GetRoleTree() {
+	tmpSelectUnitIds := c.GetString("selectUnitIds")
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	selectUnitIds := strings.Split(tmpSelectUnitIds, ",")
+	data, err := c.UserService.GetUnitRoleTree(baseParamDto, selectUnitIds)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
+	c.ServeJSON()
 }

@@ -22,3 +22,7 @@ func (s *UploadService) VueSliceUpload(userId string, unitId string, file *multi
 func (s *UploadService) VueSliceUploadCheck(userId string, unitId string, fileMd5 string, sliceIndex string, sliceTotal string) (upload_dto.UploadFileRespDto, error) {
 	return s.commonUploadService.VueSliceUploadCheck(userId, unitId, fileMd5, sliceIndex, sliceTotal)
 }
+
+func (s *UploadService) LinkSign(host, urls string) (interface{}, error) {
+	return s.commonUploadService.LinkSign(host, urls)
+}

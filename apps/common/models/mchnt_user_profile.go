@@ -58,7 +58,7 @@ func (m *MchntUserProfile) GetAddress() string {
 func (m *MchntUserProfile) GetEmail() string {
 	return m.Email
 }
-func (m *MchntUserProfile) GetSource() string {
+func (m *MchntUserProfile) GetSource() int {
 	return m.Source
 }
 func (m *MchntUserProfile) GetValidDateBegin() *time.Time {
@@ -67,14 +67,15 @@ func (m *MchntUserProfile) GetValidDateBegin() *time.Time {
 func (m *MchntUserProfile) GetValidDateEnd() *time.Time {
 	return m.ValidDateEnd
 }
+func (m *MchntUserProfile) GetGraduatedFrom() string {
+	return m.GraduatedFrom
+}
+
 func (m *MchntUserProfile) GetSchooling() string {
 	return m.Schooling
 }
 func (m *MchntUserProfile) GetDegreeNumber() string {
 	return m.DegreeNumber
-}
-func (m *MchntUserProfile) GetLearnProfessional() string {
-	return m.LearnProfessional
 }
 func (m *MchntUserProfile) GetProfessional() string {
 	return m.Professional
@@ -93,4 +94,8 @@ func (m *MchntUserProfile) GetDeletedAt() *int64 {
 }
 func (m *MchntUserProfile) GetDeleted() int {
 	return m.Deleted
+}
+
+func (m *MchntUserProfile) GetRemark() string {
+	return m.Remark
 }

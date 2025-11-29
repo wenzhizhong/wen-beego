@@ -102,11 +102,14 @@ func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDt
 		}
 
 		for uri, apiDtoArr := range itemUriMap.UriMap {
-			uuid, _ := helper.GetUuid()
+			uuid, err := helper.GetUuid()
 			pv := 0
 			uv := 0
 			permId := ""
 			modulename := helper.ParseModuleFromRoute(uri)
+			if err != nil {
+				return apiLogData, err
+			}
 			if dbPermsMap[uri].Id != "" {
 				permId = dbPermsMap[uri].Id
 			}

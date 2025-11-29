@@ -61,9 +61,9 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		newUnitId, err = doSave[*models.Plat, *models.PlatUser, *models.PlatUserProfile, *models.PlatRole, *models.PlatUserRole, *models.PlatMenu, *models.PlatRoleClassify](isAdd, baseParamDto, unitDto)
+		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Plat{}, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatRole{}, &models.PlatUserRole{}, &models.PlatMenu{}, &models.PlatRoleClassify{})
 	case "mchnt_plat":
-		newUnitId, err = doSave[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile, *models.MchntRole, *models.MchntUserRole, *models.MchntMenu, *models.MchntRoleClassify](isAdd, baseParamDto, unitDto)
+		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Mchnt{}, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntRole{}, &models.MchntUserRole{}, &models.MchntMenu{}, &models.MchntRoleClassify{})
 	default:
 		err = errors.New("unit Save：模块名称错误")
 	}
@@ -99,8 +99,14 @@ func doSave[
 	isAdd bool,
 	baseParamDto dto.BaseParamDto,
 	unitDto unit_dto.UnitDto,
+	unitModel UnitModel,
+	unitUserModel UnitUserModel,
+	unitUserProfileModel UnitUserProfileModel,
+	roleModel RoleModel,
+	unitUserRoleModel UnitUserRoleModel,
+	unitMenuModel UnitMenuModel,
+	roleClassifyModel RoleClassifyModel,
 ) (newUnitId string, err error) {
-	var unitModel UnitModel
 
 	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
 		newUnitId, err = base_ar.SaveUnit(tx, unitDto, unitModel)
@@ -110,30 +116,39 @@ func doSave[
 
 		if isAdd {
 			unitUserTableUuid := ""
-			unitUserTableUuid, err = base_ar.InsertUnitUser[UnitUserModel](tx, baseParamDto.UserId, newUnitId, 0)
+			unitUserTableUuid, err = base_ar.InsertUnitUserForCreateUnit(tx, baseParamDto.UserId, newUnitId, 0, unitUserModel)
 			if err != nil {
 				return err
 			}
 
 			userProfile := getUserProfileObj(unitUserTableUuid)
-			err = base_ar.InsertUnitUserProfile[UnitUserProfileModel](tx, userProfile)
+			err = base_ar.InsertUnitUserProfileForCreateUnit(tx, userProfile, unitUserProfileModel)
 			if err != nil {
 				return err
 			}
 
-			unitRole := getUnitRoleObj(newUnitId, baseParamDto.UserId)
+			unitRole, err := getUnitRoleObj(newUnitId, baseParamDto.UserId)
+			if err != nil {
+				return err
+			}
 			err = base_ar.InsertUnitRole[RoleModel](tx, unitRole)
 			if err != nil {
 				return err
 			}
 
-			unitRoleClassify := getUnitRoleClassifyObj(newUnitId, unitRole.Id)
+			unitRoleClassify, err := getUnitRoleClassifyObj(newUnitId, unitRole.Id)
+			if err != nil {
+				return err
+			}
 			err = base_ar.InsertUserRoleClassifies[RoleClassifyModel](tx, unitRoleClassify)
 			if err != nil {
 				return err
 			}
 
-			unitUserRole := getUnitUserRoleObj(baseParamDto.UserId, unitRole.Id)
+			unitUserRole, err := getUnitUserRoleObj(baseParamDto.UserId, unitRole.Id)
+			if err != nil {
+				return err
+			}
 			err = base_ar.InsertUnitUserRole[UnitUserRoleModel](tx, unitUserRole)
 			if err != nil {
 				return err
@@ -153,28 +168,27 @@ func doSave[
 func getUserProfileObj(unitUserId string) base_model.UnitUserProfile {
 
 	return base_model.UnitUserProfile{
-		Id:                unitUserId,
-		Avatar:            "",
-		CardType:          base_model.UNIT_CARD_TYPE_5,
-		CardNum:           "",
-		CardImages:        "",
-		Gender:            0,
-		BirthDate:         nil,
-		Constellation:     "",
-		Occupation:        "",
-		Company:           "",
-		EmergencyName:     "",
-		EmergencyTel:      "",
-		Address:           "",
-		Email:             "",
-		Source:            base_model.UNIT_USER_SOURCE_OTHER,
-		ValidDateBegin:    nil,
-		ValidDateEnd:      nil,
-		Schooling:         "",
-		DegreeNumber:      "",
-		LearnProfessional: "",
-		Professional:      "",
-		Status:            base_model.UNIT_USER_PROFILE_NORMAL,
+		Id:             unitUserId,
+		Avatar:         "",
+		CardType:       base_model.UNIT_CARD_TYPE_5,
+		CardNum:        "",
+		CardImages:     "",
+		Gender:         0,
+		BirthDate:      nil,
+		Constellation:  "",
+		Occupation:     "",
+		Company:        "",
+		EmergencyName:  "",
+		EmergencyTel:   "",
+		Address:        "",
+		Email:          "",
+		Source:         base_model.UNIT_USER_SOURCE_OTHER,
+		ValidDateBegin: nil,
+		ValidDateEnd:   nil,
+		Schooling:      "",
+		DegreeNumber:   "",
+		Professional:   "",
+		Status:         base_model.UNIT_USER_PROFILE_NORMAL,
 		// CreatedAt:    time.Now().Unix(),
 		// UpdatedAt:    0,
 		Deleted:   0,
@@ -182,9 +196,12 @@ func getUserProfileObj(unitUserId string) base_model.UnitUserProfile {
 	}
 }
 
-func getUnitRoleObj(newUnitId string, userId string) base_model.UnitRole {
-	uuid, _ := helper.GetUuid()
-	return base_model.UnitRole{
+func getUnitRoleObj(newUnitId string, userId string) (data base_model.UnitRole, err error) {
+	uuid, err := helper.GetUuid()
+	if err != nil {
+		return data, err
+	}
+	data = base_model.UnitRole{
 		Id:        uuid,
 		UnitId:    newUnitId,
 		RoleName:  "超级管理员",
@@ -197,24 +214,27 @@ func getUnitRoleObj(newUnitId string, userId string) base_model.UnitRole {
 		// UpdatedAt: ,
 		Remark: "",
 	}
+	return data, nil
 }
 
-func getUnitRoleClassifyObj(newUnitId string, roleId string) base_model.UnitRoleClassify {
-	uuid, _ := helper.GetUuid()
-	return base_model.UnitRoleClassify{
+func getUnitRoleClassifyObj(newUnitId string, roleId string) (data base_model.UnitRoleClassify, err error) {
+	uuid, err := helper.GetUuid()
+	data = base_model.UnitRoleClassify{
 		Id:      uuid,
 		RoleId:  roleId,
 		UnitId:  newUnitId,
 		Name:    "admin",
 		Deleted: 0,
 	}
+	return data, err
 }
-func getUnitUserRoleObj(userId string, roleId string) base_model.UnitUserRole {
-	uuid, _ := helper.GetUuid()
-	return base_model.UnitUserRole{
+func getUnitUserRoleObj(userId string, roleId string) (data base_model.UnitUserRole, err error) {
+	uuid, err := helper.GetUuid()
+	data = base_model.UnitUserRole{
 		Id:      uuid,
 		UserId:  userId,
 		RoleId:  roleId,
 		Deleted: 0,
 	}
+	return data, err
 }

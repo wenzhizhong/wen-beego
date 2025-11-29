@@ -37,6 +37,13 @@ func initFileLog(logType string) error {
 	beeLogger := logs.NewLogger(10000)
 	beeLogger.SetLogger(logs.AdapterMultiFile, logConfig)
 
+	// 可选：保留控制台输出
+	beeLogger.SetLogger(logs.AdapterConsole)
+	// 增强功能
+	beeLogger.EnableFuncCallDepth(true)
+	beeLogger.SetLogFuncCallDepth(3)
+	beeLogger.Async(1e3)
+
 	global.Log = beeLogger
 
 	fmt.Println("init file log done！")

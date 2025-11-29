@@ -2,6 +2,7 @@ package base_ar
 
 import (
 	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto/unit_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -11,7 +12,49 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
+
+func GetUnitUserByIdOrPhone[UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](id, phone, unitId string, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (data []unit_dto.UnitUserAllDataDto, err error) {
+	if id == "" && phone == "" {
+		return nil, errors.New("GetUnitUserByIdOrPhone(): Id 和 Phone 不能同时为空")
+	}
+	if unitId == "" {
+		return nil, errors.New("GetUnitUserByIdOrPhone(): UnitId 不能为空")
+	}
+	tableUnitUserName := unitUserModel.TableName()
+	tableUnitUserProfileName := unitUserProfileModel.TableName()
+
+	query := global.GetReadDb().
+		Model(unitUserModel).
+		Select("*").
+		Joins("INNER JOIN "+tableUnitUserProfileName+" on "+tableUnitUserProfileName+".id = "+tableUnitUserName+".id").
+		Where(tableUnitUserName+".unit_id = ?", unitId).
+		Where(tableUnitUserName + ".deleted = 0")
+		// Where("status <>", base_model.UNIT_USER_PROFILE_CANCLED).
+	if id != "" {
+		query = query.Where(tableUnitUserName+".id = ?", id)
+	} else {
+		query = query.Where(tableUnitUserName+".phone = ?", phone)
+	}
+	err = query.Find(&data).Error
+	return
+}
+
+func GetUnitUserById[UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](id string, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (data []unit_dto.UnitUserAllDataDto, err error) {
+	tableUnitUserName := unitUserModel.TableName()
+	tableUnitUserProfileName := unitUserProfileModel.TableName()
+
+	err = global.GetReadDb().
+		Model(unitUserModel).
+		Select("*").
+		Joins("INNER JOIN "+tableUnitUserProfileName+" on "+tableUnitUserProfileName+".id = "+tableUnitUserName+".id").
+		Where(tableUnitUserName+".id = ?", id).
+		Where(tableUnitUserName + ".deleted = 0").
+		// Where("status <>", base_model.UNIT_USER_PROFILE_CANCLED).
+		Find(&data).Error
+	return
+}
 
 /**
  * 获取用户
@@ -227,7 +270,7 @@ func UpdateUserDefaultUnit[UnitUserModel itf.UnitUserItf](userId string, unitId 
 }
 
 /**
- * 新增组织单位的用户
+ * 新增默认组织单位-新增其默认用户
  * UnitUserModel: models.PlatUser, models.MchntUser
  * @param userId
  * @param unitId
@@ -236,8 +279,7 @@ func UpdateUserDefaultUnit[UnitUserModel itf.UnitUserItf](userId string, unitId 
  * @return
  * @throws
  */
-func InsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, userId string, unitId string, isDefault int) (unitUserTableUuid string, err error) {
-	var unitUserModel UnitUserModel
+func InsertUnitUserForCreateUnit[UnitUserModel itf.UnitUserItf](tx *gorm.DB, userId string, unitId string, isDefault int, unitUserModel UnitUserModel) (unitUserTableUuid string, err error) {
 	tableName := unitUserModel.TableName()
 	fmt.Println(tableName)
 	unitUserTableUuid, _ = helper.GetUuid()
@@ -260,4 +302,64 @@ func InsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, userId string, u
 		return
 	}
 	return
+}
+func UpsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, saveData base_model.UnitUser, unitUserModel UnitUserModel) (unitUserTableUuid string, err error) {
+	tableName := unitUserModel.TableName()
+	fmt.Println(tableName)
+	if saveData.Id == "" {
+		unitUserTableUuid, _ = helper.GetUuid()
+		saveData.Id = unitUserTableUuid
+	} else {
+		unitUserTableUuid = saveData.Id
+	}
+
+	// user 组织单位用户
+	err = tx.Model(unitUserModel).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"unit_id", "phone", "name"}),
+		}).
+		Create(&saveData).Error
+	if err != nil {
+		return
+	}
+	return
+}
+
+// 验证组织结构
+func CheckOrgStructure[UnitUserModel itf.UnitUserItf, UnitDeptModel itf.DeptItf, UnitRoleModel itf.RoleItf](result interface{}, unitUserId, unitId, deptId, roleId string, unitUserModel UnitUserModel, unitDeptModel UnitDeptModel, unitRoleModel UnitRoleModel) (err error) {
+	tableUnitUserName := unitUserModel.TableName()
+	tableUnitDeptName := unitDeptModel.TableName()
+	tableUnitRoleName := unitRoleModel.TableName()
+
+	tableStruct := struct {
+		TableUnitUser string
+		TableUnitDept string
+		TableUnitRole string
+	}{
+		TableUnitUser: tableUnitUserName,
+		TableUnitDept: tableUnitDeptName,
+		TableUnitRole: tableUnitRoleName,
+	}
+
+	sqlTpl := `
+		SELECT 
+			SUM(existUnit) AS exist_unit,
+			SUM(existDept) AS exist_dept,
+			SUM(existRole) AS exist_role
+		FROM (
+			(SELECT count(1) existUnit, 0 as existDept, 0 as existRole FROM {{.TableUnitUser}} WHERE {{.TableUnitUser}}.id = ? AND {{.TableUnitUser}}.unit_id = ? AND {{.TableUnitUser}}.deleted = 0) UNION ALL
+			(SELECT 0 existUnit, count(1) as existDept, 0 as existRole FROM {{.TableUnitDept}} WHERE {{.TableUnitDept}}.id = ? AND {{.TableUnitDept}}.unit_id = ? AND {{.TableUnitDept}}.deleted = 0) UNION ALL
+			(SELECT 0 as existUnit, 0 as existDept, count(1) existRole FROM {{.TableUnitRole}} WHERE {{.TableUnitRole}}.id = ? AND {{.TableUnitRole}}.unit_id = ? AND {{.TableUnitRole}}.deleted = 0)
+		) AS t 
+		
+	`
+	sql, err := helper.ParseStringTpl(sqlTpl, tableStruct)
+	if err != nil {
+		return err
+	}
+
+	tmpsql := global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Statement.SQL.String()
+	fmt.Println(tmpsql)
+	return global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Scan(&result).Error
 }

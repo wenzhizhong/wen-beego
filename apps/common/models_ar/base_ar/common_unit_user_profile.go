@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 /**
@@ -42,23 +43,40 @@ func GetUserProfileOfUnitById[UnitUserModel itf.UnitUserItf, UnitUserProfileMode
 }
 
 /**
- * 新增用户信息
+ * 新增默认组织单位-新增其默认用户信息
  */
-func InsertUnitUserProfile[UnitUserProfileModel itf.UserProfileItf](tx *gorm.DB, unitUserProfileModel base_model.UnitUserProfile) (err error) {
-	if unitUserProfileModel.Id == "" {
+func InsertUnitUserProfileForCreateUnit[UnitUserProfileModel itf.UserProfileItf](tx *gorm.DB, baseUnitUserProfileModel base_model.UnitUserProfile, unitUserProfileModel UnitUserProfileModel) (err error) {
+	if baseUnitUserProfileModel.Id == "" {
 		return errors.New("新增用户信息，id 不能为空")
 	}
-	var tmpUnitUserProfileModel UnitUserProfileModel
 	err = global.GetReadDb().
-		Model(tmpUnitUserProfileModel).
-		Where("id = ?", unitUserProfileModel.Id).
-		Take(&tmpUnitUserProfileModel).Error
-	if err == nil && tmpUnitUserProfileModel.GetId() != "" {
+		Model(unitUserProfileModel).
+		Where("id = ?", baseUnitUserProfileModel.Id).
+		Take(&baseUnitUserProfileModel).Error
+	if err == nil && baseUnitUserProfileModel.Id != "" {
 		return nil
 	}
 
-	err = tx.Model(tmpUnitUserProfileModel).
-		Create(&unitUserProfileModel).Error
+	err = tx.Model(unitUserProfileModel).
+		Create(&baseUnitUserProfileModel).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 新增用户信息
+func UpsertUnitUserProfile[UnitUserProfileModel itf.UserProfileItf](tx *gorm.DB, baseUnitUserProfileModel base_model.UnitUserProfile, unitUserProfileModel UnitUserProfileModel) (err error) {
+	if baseUnitUserProfileModel.Id == "" {
+		return errors.New("新增用户信息，id 不能为空")
+	}
+
+	err = tx.Model(unitUserProfileModel).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			UpdateAll: true,
+		}).
+		Create(&baseUnitUserProfileModel).Error
 	if err != nil {
 		return err
 	}

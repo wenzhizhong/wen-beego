@@ -188,3 +188,20 @@ func (s *Upload) getSliceUploaded(fileMd5 string, userId string) ([]int64, error
 	}
 	return uploaded, nil
 }
+
+func (s *Upload) LinkSign(host, urls string) (interface{}, error) {
+	newUrlsArr := make([]string, 0)
+	data := struct {
+		List []string `json:"list"`
+	}{
+		List: newUrlsArr,
+	}
+
+	urlsArr := strings.Split(urls, ",")
+	for _, url := range urlsArr {
+		newUrl, _ := helper.LocalFileSign(host, url)
+		newUrlsArr = append(newUrlsArr, newUrl)
+	}
+	data.List = newUrlsArr
+	return newUrlsArr, nil
+}

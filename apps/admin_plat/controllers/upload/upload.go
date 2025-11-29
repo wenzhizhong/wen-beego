@@ -92,6 +92,17 @@ func (c *UploadController) VueSliceUpload() {
 	c.ServeJSON()
 }
 
+// 分片上传检查
+// @Summary 分片上传检查
+// @Description 分片上传检查
+// @Tags 上传
+// @Accept multipart/form-data
+// @Produce  json
+// @Param identifier formData string true "identifier"
+// @Param chunkNumber formData int true "chunkNumber"
+// @Param totalChunks formData int true "totalChunks"
+// @Success 200 {object} dto.Response
+// @Router /admin_plat/upload/vue-slice-upload-check
 func (c *UploadController) VueSliceUploadCheck() {
 	userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
@@ -103,6 +114,30 @@ func (c *UploadController) VueSliceUploadCheck() {
 	if err != nil {
 		c.Ctx.Output.SetStatus(210)
 		c.Data["json"] = helper.Response(500, err.Error(), data)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
+	c.ServeJSON()
+}
+
+// 私有附件-链接签名
+// @Summary 私有附件-链接签名
+// @Description 私有附件-链接签名
+// @Tags 上传
+// @Accept application/x-wwww-form-urlencoded
+// @Produce  json
+// @Param urls
+// @Success 200 {object} dto.Response
+// @Router /admin_plat/upload/link-sign [get]
+// @Security ApiKeyAuth
+func (c *UploadController) LinkSign() {
+	host := c.Ctx.Request.Host
+	urls := c.GetString("urls")
+	data, err := c.uploadService.LinkSign(host, urls)
+
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}

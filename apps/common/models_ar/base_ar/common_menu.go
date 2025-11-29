@@ -30,11 +30,19 @@ func CloneMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, oldUnitId string, newUnit
 	}
 
 	for _, item := range insertMenuData {
-		newId, _ := helper.GetUuid()
+		newId, err := helper.GetUuid()
 		menuOldIdMapNew[item.Id] = newId
+
+		if err != nil {
+			return err
+		}
 	}
 	for key, item := range insertMenuData {
-		newMenuId, _ := helper.GetUuid()
+		newMenuId, err := helper.GetUuid()
+		if err != nil {
+			return err
+		}
+
 		insertMenuData[key].Id = newMenuId
 		insertMenuData[key].UnitId = newUnitId
 		insertMenuData[key].CreatedAt = helper.GetTime()

@@ -58,7 +58,7 @@ func (m *PlatUserProfile) GetAddress() string {
 func (m *PlatUserProfile) GetEmail() string {
 	return m.Email
 }
-func (m *PlatUserProfile) GetSource() string {
+func (m *PlatUserProfile) GetSource() int {
 	return m.Source
 }
 func (m *PlatUserProfile) GetValidDateBegin() *time.Time {
@@ -67,14 +67,14 @@ func (m *PlatUserProfile) GetValidDateBegin() *time.Time {
 func (m *PlatUserProfile) GetValidDateEnd() *time.Time {
 	return m.ValidDateEnd
 }
+func (m *PlatUserProfile) GetGraduatedFrom() string {
+	return m.GraduatedFrom
+}
 func (m *PlatUserProfile) GetSchooling() string {
 	return m.Schooling
 }
 func (m *PlatUserProfile) GetDegreeNumber() string {
 	return m.DegreeNumber
-}
-func (m *PlatUserProfile) GetLearnProfessional() string {
-	return m.LearnProfessional
 }
 func (m *PlatUserProfile) GetProfessional() string {
 	return m.Professional
@@ -93,4 +93,8 @@ func (m *PlatUserProfile) GetDeletedAt() *int64 {
 }
 func (m *PlatUserProfile) GetDeleted() int {
 	return m.Deleted
+}
+
+func (m *PlatUserProfile) GetRemark() string {
+	return m.Remark
 }

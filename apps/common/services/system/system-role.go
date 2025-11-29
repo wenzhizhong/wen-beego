@@ -11,7 +11,6 @@ import (
 	"WenBeego/apps/common/models/itf"
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
-	"regexp"
 
 	"gorm.io/gorm"
 )
@@ -42,15 +41,20 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 // 保存角色列表
 func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.UnitRoleDto) (id string, err error) {
 	RoleDto.UnitId = baseParamDto.UnitId
-	re := regexp.MustCompile(`\s+`)
-	RoleDto.RoleClassifyName = re.ReplaceAllString(RoleDto.RoleClassifyName, "")
+	RoleDto.RoleClassifyName = helper.DeleteSpace(RoleDto.RoleClassifyName)
 
 	var classifyData base_model.UnitRoleClassify
 	if RoleDto.Id == "" {
-		RoleDto.Id, _ = helper.GetUuid()
+		var err1 error
+		RoleDto.Id, err1 = helper.GetUuid()
 		RoleDto.CreatedBy = baseParamDto.UnitUserId
 
-		uuid, _ := helper.GetUuid()
+		uuid := ""
+		uuid, err = helper.GetUuid()
+		if err != nil || err1 != nil {
+			err = helper.Ternary(err != nil, err, err1)
+			return
+		}
 		classifyData = base_model.UnitRoleClassify{
 			Id:      uuid,
 			RoleId:  RoleDto.Id,

@@ -28,6 +28,7 @@ var platAuthApiList = []string{
 	"/admin_plat/auth-menu/get-async-routes",
 	"/admin_plat/upload/upload",
 	"/admin_plat/upload/vue-slice-upload",
+	"/admin_plat/upload/link-sign",
 	"/admin_plat/system-dept/get-dept-tree",
 	"/admin_plat/system-dept/get-dept-principal",
 }
@@ -46,6 +47,7 @@ func init() {
 		beego.NSCtrlPost("/upload/upload", (*adminUpload.UploadController).Upload),
 		beego.NSCtrlGet("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUploadCheck),
 		beego.NSCtrlPost("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUpload),
+		beego.NSCtrlGet("/upload/link-sign", (*adminUpload.UploadController).LinkSign),
 
 		// system
 		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).Get),
@@ -72,6 +74,7 @@ func init() {
 		beego.NSCtrlPost("/system-user/add", (*adminSystem.UserController).Add),
 		beego.NSCtrlPost("/system-user/edit", (*adminSystem.UserController).Edit),
 		beego.NSCtrlPost("/system-user/del", (*adminSystem.UserController).Del),
+		beego.NSCtrlGet("/system-user/get-role-tree", (*adminSystem.UserController).GetRoleTree),
 	)
 
 	// 请求前、后处理

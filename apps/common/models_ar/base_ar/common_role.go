@@ -4,59 +4,34 @@ import (
 	"WenBeego/apps/common/dto/page_dto"
 	"WenBeego/apps/common/dto/role_dto"
 	"WenBeego/apps/common/global"
-	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-/*
-* 身份认证-获取用户角色
-* @param moduleName 模块名称
-* @param unitId 组织单位id
-* @param userId 用户id
-* @return rolesList 角色列表
- */
-func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitUserId string, userRoleModel UserRoleModel, roleModel RoleModel) (rolesList []base_model.UnitRole, err error) {
-	if unitUserId == "" {
-		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unitUserId:%s", unitUserId)
-		global.Log.Error(str)
-		return rolesList, errors.New(str)
-	}
-	tableRole := roleModel.TableName()
-	tableUserRole := userRoleModel.TableName()
-	tableStruct := struct {
-		TableRole     string
-		TableUserRole string
-	}{
-		TableRole:     tableRole,
-		TableUserRole: tableUserRole,
-	}
-	selectStr, err := helper.ParseStringTpl(`{{.TableRole}}.*`, tableStruct)
-	joinUserRoleStr, err2 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRole}}.id`, tableStruct)
-	if err != nil {
-		return rolesList, err
-	}
-	if err2 != nil {
-		return rolesList, err2
-	}
+// 页面-保存部门
+func SaveUnitRole[UnitRoleModel itf.RoleItf](tx *gorm.DB, unitRoleDto role_dto.UnitRoleDto, unitRoleModel UnitRoleModel) (id string, err error) {
+	err = tx.Model(unitRoleModel).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			UpdateAll: true,
+		}).
+		Create(&unitRoleDto).Error
+	return unitRoleDto.Id, err
+}
 
-	tmpError := global.GetReadDb().
-		Model(roleModel).
-		Select(selectStr).
-		Joins(joinUserRoleStr).
-		Where(tableUserRole+".user_id = ?", unitUserId).
-		Where(tableUserRole + ".deleted = 0").
-		Scan(&rolesList).
-		Error
-	if helper.DbNotFound(tmpError) {
-		return rolesList, nil
+// 页面-删除组织架构
+func DelUnitRole[UnitRoleModel itf.RoleItf](unitRoleData base_model.UnitRole, unitRoleModel UnitRoleModel) error {
+	if unitRoleData.Id == "" {
+		return errors.New("DelUnitRole: 参数id不能为空")
 	}
-	return
+	return global.GetWriteDb().
+		Model(unitRoleModel).
+		Where("id = ?", unitRoleData.Id).
+		Updates(unitRoleData).Error
 }
 
 /**
@@ -77,27 +52,6 @@ func InsertUnitRole[RoleModel itf.RoleItf](tx *gorm.DB, roleModel base_model.Uni
 
 	err = tx.Model(tmpUnitRole).
 		Create(&roleModel).Error
-	return
-}
-
-/**
- * 新增组织单位-初始化新增组织单位用户角色
- */
-func InsertUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleModel base_model.UnitUserRole) (err error) {
-	if userRoleModel.Id == "" {
-		return errors.New("新增用户角色，用户角色id不能为空")
-	}
-	var tmpUnitUserRole UserRoleModel
-	err = global.GetReadDb().
-		Model(tmpUnitUserRole).
-		Where("id = ?", userRoleModel.Id).
-		Take(&tmpUnitUserRole).Error
-	if err == nil && tmpUnitUserRole.GetId() != "" {
-		return nil
-	}
-
-	err = tx.Model(tmpUnitUserRole).
-		Create(&userRoleModel).Error
 	return
 }
 
@@ -142,24 +96,19 @@ func GetUnitRoleList[UnitModel itf.UnitItf, UnitRoleModel itf.RoleItf, UnitRoleC
 	return
 }
 
-// 页面-保存部门
-func SaveUnitRole[UnitRoleModel itf.RoleItf](tx *gorm.DB, unitRoleDto role_dto.UnitRoleDto, unitRoleModel UnitRoleModel) (id string, err error) {
-	err = tx.Model(unitRoleModel).
-		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "id"}},
-			UpdateAll: true,
-		}).
-		Create(&unitRoleDto).Error
-	return unitRoleDto.Id, err
-}
-
-// 页面-删除组织架构
-func DelUnitRole[UnitRoleModel itf.RoleItf](unitRoleData base_model.UnitRole, unitRoleModel UnitRoleModel) error {
-	if unitRoleData.Id == "" {
-		return errors.New("DelUnitRole: 参数id不能为空")
+// 获取组织架构树
+func GetUnitRoleTree[UnitRoleModel itf.RoleItf](selectUnitIds []string, unitRoleModel UnitRoleModel) (data []base_model.UnitRole, err error) {
+	data = make([]base_model.UnitRole, 0)
+	if len(selectUnitIds) == 0 {
+		return data, nil
 	}
-	return global.GetWriteDb().
+	// tableRoleName := unitRoleModel.TableName()
+	err = global.GetReadDb().
 		Model(unitRoleModel).
-		Where("id = ?", unitRoleData.Id).
-		Updates(unitRoleData).Error
+		Select("id,role_name,status").
+		Where("unit_id in (?)", selectUnitIds).
+		Where("deleted = 0").
+		Order("role_sort").
+		Find(&data).Error
+	return
 }
