@@ -203,5 +203,5 @@ func (s *Upload) LinkSign(host, urls string) (interface{}, error) {
 		newUrlsArr = append(newUrlsArr, newUrl)
 	}
 	data.List = newUrlsArr
-	return newUrlsArr, nil
+	return data, nil
 }

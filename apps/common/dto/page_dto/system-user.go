@@ -21,6 +21,7 @@ type SystemUserListDto struct {
 	Id string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
 	base_model.UnitUser
 	base_model.UnitUserProfile
+	UserId    string `json:"user_id" gorm:"->"`
 	DeptIds   string `json:"dept_ids" gorm:"->"`
 	DeptNames string `json:"dept_names" gorm:"->"`
 	RoleIds   string `json:"role_ids" gorm:"->"`

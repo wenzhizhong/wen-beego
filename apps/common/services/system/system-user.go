@@ -39,6 +39,10 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	}
 
 	for k, v := range data {
+		tmpId := helper.Ternary(data[k].Id != "", data[k].Id, data[k].UnitUser.Id)
+		if tmpId != "" && data[k].UnitUserProfile.Id == "" {
+			data[k].UnitUserProfile.Id = tmpId
+		}
 		data[k].AvatarLink, _ = helper.LocalFileSign(reqDto.Host, v.Avatar)
 	}
 	resultDto, err = helper.GetRespDataListDto(reqDto.PageSize, reqDto.CurrentPage, count, data)
@@ -155,11 +159,11 @@ func (s *User) doSaveUser(
 		return
 	}
 
-	err = base_ar.SaveUnitUserRole(tx, unitUserSaveDto.UnitUserRoleDto, unitUserRoleModel)
+	err = base_ar.SaveUnitUserRole(tx, unitUserSaveDto.UnitUserDto.UnitId, unitUserSaveDto.UnitUserRoleDto, unitRoleModel, unitUserRoleModel)
 	if err != nil {
 		return
 	}
-	err = base_ar.SaveUnitUserDept(tx, unitUserSaveDto.UnitUserDeptDto, unitUserDeptModel)
+	err = base_ar.SaveUnitUserDept(tx, unitUserSaveDto.UnitUserDto.UnitId, unitUserSaveDto.UnitUserDeptDto, unitDeptModel, unitUserDeptModel)
 	if err != nil {
 		return
 	}
@@ -273,7 +277,7 @@ func (s *User) checkRequestData(baseParamDto dto.BaseParamDto, unitUserSaveDto *
 
 	unitUserSaveDto.UnitUserDto.UnitId = helper.DeleteSpace(unitUserSaveDto.UnitUserDto.UnitId)
 	unitUserSaveDto.DeptId = helper.DeleteSpace(unitUserSaveDto.DeptId)
-	unitUserSaveDto.RoleId = helper.DeleteSpace(unitUserSaveDto.RoleId)
+	// unitUserSaveDto.RoleId = unitUserSaveDto.RoleId
 
 	if unitUserSaveDto.UnitUserDto.UnitId == "" {
 		err = errors.New("请选择组织单位")
@@ -283,7 +287,7 @@ func (s *User) checkRequestData(baseParamDto dto.BaseParamDto, unitUserSaveDto *
 		err = errors.New("请输入部门")
 		return
 	}
-	if unitUserSaveDto.RoleId == "" {
+	if len(unitUserSaveDto.RoleId) == 0 {
 		err = errors.New("请选择角色")
 		return
 	}
@@ -357,20 +361,21 @@ func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, un
 			tmpTableName := helper.Ternary(userAllInfoLen > 1, (&models.User{}).TableName(), unitUserModel.TableName())
 			err = fmt.Errorf("%s表存在多个相同手机号（%s），请核对数据", tmpTableName, phone)
 			return
-		} else if userAllInfoLen != unitUserAllInfoLen {
-			err = fmt.Errorf("用户表数据条数异常，请核对数据")
-			return
 		}
+		// else if userAllInfoLen != unitUserAllInfoLen {
+		// 	err = fmt.Errorf("用户表数据条数异常，请核对数据")
+		// 	return
+		// }
 	}
 
 	// 2.页面数据转换, user表unit user表数据一起提交的，这里转换
 	if isAddUnitUser {
-		if unitUserData.UnitUser.Id != "" {
+		if unitUserAllInfoLen > 0 {
 			err = errors.New("用户已存在，新增用户失败")
 			return
 		}
 	} else {
-		if unitUserData.UnitUser.Id == "" {
+		if unitUserAllInfoLen == 0 {
 			err = errors.New("用户不存在，编辑用户失败")
 			return
 		}
@@ -413,21 +418,21 @@ func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, un
 				return
 			}
 		}
-		unitUserSaveDto.UnitUserDeptDto, err = s.generateUserDeptData(unitUserSaveDto.UnitUserDto.Id, unitUserSaveDto.DeptId)
-		if err != nil {
-			return
-		}
-		unitUserSaveDto.UnitUserRoleDto, err = s.generateUserRoleData(unitUserSaveDto.UnitUserDto.Id, strings.Split(unitUserSaveDto.RoleId, ","))
-		if err != nil {
-			return
-		}
 	}
 
+	unitUserSaveDto.UnitUserDeptDto, err = s.generateUserDeptData(unitUserSaveDto.UnitUserDto.Id, unitUserSaveDto.DeptId)
+	if err != nil {
+		return
+	}
+	unitUserSaveDto.UnitUserRoleDto, err = s.generateUserRoleData(unitUserSaveDto.UnitUserDto.Id, unitUserSaveDto.RoleId)
+	if err != nil {
+		return
+	}
 	return
 }
 
 // 校验组织结构
-func (s *User) CheckOrgStructure(unitUserId, unitId, deptId, roleId string, unitUserModel itf.UnitUserItf, unitDeptModel itf.DeptItf, unitRoleModel itf.RoleItf) (err error) {
+func (s *User) CheckOrgStructure(unitUserId string, unitId string, deptId string, roleId []string, unitUserModel itf.UnitUserItf, unitDeptModel itf.DeptItf, unitRoleModel itf.RoleItf) (err error) {
 	result := struct {
 		ExistUnit int `gorm:"column:exist_unit"`
 		ExistDept int `gorm:"column:exist_dept"`

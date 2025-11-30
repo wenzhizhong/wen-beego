@@ -78,6 +78,7 @@ func (c *UserController) save(optType string) {
 	unitUserSaveDto.UnitUserProfileDto = unitUserProfileDto
 
 	if err != nil || err0 != nil || err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		err = helper.Ternary(err != nil, err, err0)
 		err = helper.Ternary(err != nil, err, err1)
 		err = helper.Ternary(err != nil, err, err2)
 		err = helper.Ternary(err != nil, err, err3)

@@ -78,13 +78,13 @@ func InsertUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleMode
 	return
 }
 
-func SaveUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleData []user_dto.UnitUserRoleDto, userRoleModel UserRoleModel) (err error) {
+func SaveUnitUserRole[RoleModel itf.RoleItf, UserRoleModel itf.UserRoleItf](tx *gorm.DB, unitId string, userRoleData []user_dto.UnitUserRoleDto, roleModel RoleModel, userRoleModel UserRoleModel) (err error) {
 	if len(userRoleData) == 0 {
 		err = errors.New("新增用户角色，用户角色数据不能为空")
 		return
 	}
 	userIds := make([]string, 0)
-	roleIds := make([]string, 0)
+	// roleIds := make([]string, 0)
 	for k, v := range userRoleData {
 		if v.Id == "" {
 			userRoleData[k].Id, err = helper.GetUuid()
@@ -96,9 +96,14 @@ func SaveUnitUserRole[UserRoleModel itf.UserRoleItf](tx *gorm.DB, userRoleData [
 			return errors.New("新增用户角色，用户id和角色id不能为空")
 		}
 		userIds = append(userIds, v.UserId)
-		roleIds = append(roleIds, v.RoleId)
+		// roleIds = append(roleIds, v.RoleId)
 	}
-	err = tx.Where("user_id IN ? AND role_id IN ? ", userIds, roleIds).Delete(&userRoleModel).Error
+
+	tableRoleName := roleModel.TableName()
+	// tableUnitUserRoleName := userRoleModel.TableName()
+	err = tx.
+		Where(fmt.Sprintf("user_id IN ? AND role_id IN (SELECT id FROM %s WHERE unit_id = ?) ", tableRoleName), userIds, unitId).
+		Delete(&userRoleModel).Error
 	if err != nil {
 		return
 	}

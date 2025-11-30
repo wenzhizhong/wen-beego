@@ -14,8 +14,8 @@ type UnitUserSaveDto struct {
 	UnitUserRoleDto    []UnitUserRoleDto
 	UnitUserDeptDto    UnitUserDeptDto
 
-	DeptId string `json:"dept_id"`
-	RoleId string `json:"role_id"`
+	DeptId string   `json:"dept_id"`
+	RoleId []string `json:"role_id"`
 }
 
 type UserDto struct {

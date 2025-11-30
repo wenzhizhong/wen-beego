@@ -38,6 +38,11 @@ func GetUnitUserByIdOrPhone[UnitUserModel itf.UnitUserItf, UnitUserProfileModel 
 		query = query.Where(tableUnitUserName+".phone = ?", phone)
 	}
 	err = query.Find(&data).Error
+
+	for i := range data {
+		data[i].UnitUser.Id = data[i].Id
+		data[i].UnitUserProfile.Id = data[i].Id
+	}
 	return
 }
 
@@ -128,7 +133,7 @@ func GetUserListOfUnitById[
 	}
 
 	//用户部门子查询
-	selectUserDeptTpl := `{{.TableUserDept}}.user_id, 
+	selectUserDeptTpl := `{{.TableUserDept}}.user_id as unit_user_id, 
 		string_agg({{.TableUserDept}}.dept_id, ',') AS dept_ids, 
 		string_agg({{.TableDept}}.name, ',') AS dept_names, 
 		COUNT(CASE WHEN {{.TableUserDept}}.dept_id IN (?) THEN 1 ELSE null END) AS count_has_id`
@@ -142,7 +147,7 @@ func GetUserListOfUnitById[
 		Group(tableUnitUserDeptName + ".user_id")
 
 	//用户角色子查询
-	selectUserRoleTpl := `{{.TableUserRole}}.user_id, 
+	selectUserRoleTpl := `{{.TableUserRole}}.user_id as unit_user_id, 
 		string_agg({{.TableUserRole}}.role_id, ',') AS role_ids, 
 		string_agg({{.TableRole}}.role_name, ',') AS role_names,
 		COUNT(CASE WHEN {{.TableUserRole}}.role_id IN (?) THEN 1 ELSE null END) AS count_has_id`
@@ -159,8 +164,8 @@ func GetUserListOfUnitById[
 	query := global.GetReadDb().
 		Model(unitUserModel).
 		Joins("INNER JOIN "+tableUnitUserProfileName+" ON "+tableUnitUserProfileName+".id = "+tableUnitUserName+".id").
-		Joins("LEFT JOIN (?) t ON t.user_id = "+tableUnitUserName+".id", subQueryUserDept).
-		Joins("LEFT JOIN (?) t2 ON t2.user_id = "+tableUnitUserName+".id", subQueryUserRole).
+		Joins("LEFT JOIN (?) t ON t.unit_user_id = "+tableUnitUserName+".id", subQueryUserDept).
+		Joins("LEFT JOIN (?) t2 ON t2.unit_user_id = "+tableUnitUserName+".id", subQueryUserRole).
 		Where(tableUnitUserName+".unit_id = ?", reqDto.UnitId).
 		Where(tableUnitUserName+".deleted = ?", 0)
 
@@ -317,7 +322,7 @@ func UpsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, saveData base_mo
 	err = tx.Model(unitUserModel).
 		Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"unit_id", "phone", "name"}),
+			DoUpdates: clause.AssignmentColumns([]string{"unit_id" /*"phone",*/, "name"}), // 手机号
 		}).
 		Create(&saveData).Error
 	if err != nil {
@@ -327,7 +332,7 @@ func UpsertUnitUser[UnitUserModel itf.UnitUserItf](tx *gorm.DB, saveData base_mo
 }
 
 // 验证组织结构
-func CheckOrgStructure[UnitUserModel itf.UnitUserItf, UnitDeptModel itf.DeptItf, UnitRoleModel itf.RoleItf](result interface{}, unitUserId, unitId, deptId, roleId string, unitUserModel UnitUserModel, unitDeptModel UnitDeptModel, unitRoleModel UnitRoleModel) (err error) {
+func CheckOrgStructure[UnitUserModel itf.UnitUserItf, UnitDeptModel itf.DeptItf, UnitRoleModel itf.RoleItf](result interface{}, unitUserId string, unitId string, deptId string, roleId []string, unitUserModel UnitUserModel, unitDeptModel UnitDeptModel, unitRoleModel UnitRoleModel) (err error) {
 	tableUnitUserName := unitUserModel.TableName()
 	tableUnitDeptName := unitDeptModel.TableName()
 	tableUnitRoleName := unitRoleModel.TableName()
@@ -350,7 +355,7 @@ func CheckOrgStructure[UnitUserModel itf.UnitUserItf, UnitDeptModel itf.DeptItf,
 		FROM (
 			(SELECT count(1) existUnit, 0 as existDept, 0 as existRole FROM {{.TableUnitUser}} WHERE {{.TableUnitUser}}.id = ? AND {{.TableUnitUser}}.unit_id = ? AND {{.TableUnitUser}}.deleted = 0) UNION ALL
 			(SELECT 0 existUnit, count(1) as existDept, 0 as existRole FROM {{.TableUnitDept}} WHERE {{.TableUnitDept}}.id = ? AND {{.TableUnitDept}}.unit_id = ? AND {{.TableUnitDept}}.deleted = 0) UNION ALL
-			(SELECT 0 as existUnit, 0 as existDept, count(1) existRole FROM {{.TableUnitRole}} WHERE {{.TableUnitRole}}.id = ? AND {{.TableUnitRole}}.unit_id = ? AND {{.TableUnitRole}}.deleted = 0)
+			(SELECT 0 as existUnit, 0 as existDept, count(1) existRole FROM {{.TableUnitRole}} WHERE {{.TableUnitRole}}.id IN ? AND {{.TableUnitRole}}.unit_id = ? AND {{.TableUnitRole}}.deleted = 0)
 		) AS t 
 		
 	`
