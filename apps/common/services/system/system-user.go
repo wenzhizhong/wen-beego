@@ -509,3 +509,16 @@ func (s *User) generateUserRoleData(unitUserId string, roleIds []string) (data [
 	}
 	return
 }
+
+// 删除组织单位用户
+func (s *User) DelUnitUser(baseParamDto dto.BaseParamDto, ids []string) error {
+
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		return base_ar.DelUnitUser(ids, &models.PlatUser{}, &models.PlatUserProfile{})
+	case "mchnt_plat":
+		return base_ar.DelUnitUser(ids, &models.MchntUser{}, &models.MchntUserProfile{})
+	default:
+		return errors.New("DelUnitUser:模块名称错误")
+	}
+}

@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// 通过id或者手机号，获取组织单位用户
 func GetUnitUserByIdOrPhone[UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](id, phone, unitId string, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (data []unit_dto.UnitUserAllDataDto, err error) {
 	if id == "" && phone == "" {
 		return nil, errors.New("GetUnitUserByIdOrPhone(): Id 和 Phone 不能同时为空")
@@ -46,6 +47,7 @@ func GetUnitUserByIdOrPhone[UnitUserModel itf.UnitUserItf, UnitUserProfileModel 
 	return
 }
 
+// 通过id获取组织单位用户
 func GetUnitUserById[UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](id string, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (data []unit_dto.UnitUserAllDataDto, err error) {
 	tableUnitUserName := unitUserModel.TableName()
 	tableUnitUserProfileName := unitUserProfileModel.TableName()
@@ -367,4 +369,25 @@ func CheckOrgStructure[UnitUserModel itf.UnitUserItf, UnitDeptModel itf.DeptItf,
 	tmpsql := global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Statement.SQL.String()
 	fmt.Println(tmpsql)
 	return global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Scan(&result).Error
+}
+
+// 删除组织单位用户
+
+func DelUnitUser[UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](ids []string, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (err error) {
+	upUnitUserData := map[string]interface{}{
+		"deleted": 1,
+	}
+	upUnitUserProfileData := map[string]interface{}{
+		"deleted":    1,
+		"deleted_at": helper.GetTimestamp(),
+	}
+	err = global.WriteDb.Transaction(func(tx *gorm.DB) (err error) {
+		err = tx.Model(unitUserModel).Where("id IN ?", ids).Updates(upUnitUserData).Error
+		if err != nil {
+			return
+		}
+		err = tx.Model(unitUserProfileModel).Where("id IN ?", ids).Updates(upUnitUserProfileData).Error
+		return
+	})
+	return
 }

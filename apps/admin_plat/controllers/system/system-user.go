@@ -58,9 +58,26 @@ func (c *UserController) GetUserList() {
 	c.ServeJSON()
 }
 
+// 新增组织单位用户
+// @Summary 新增组织单位用户
+// @Description 新增组织单位用户
+// @Tags 组织单位用户
+// @Accept  json
+// @Param   userDto body user_dto.UnitUserSaveDto
+// @Success 200 {object} helper.Response
+// @Router /admin_plat/system-user/add [post]
 func (c *UserController) Add() {
 	c.save("add")
 }
+
+// 编辑组织单位用户
+// @Summary 编辑组织单位用户
+// @Description 编辑组织单位用户
+// @Tags 组织单位用户
+// @Accept  json
+// @Param   userDto body user_dto.UnitUserSaveDto
+// @Success 200 {object} helper.Response
+// @Router /admin_plat/system-user/edit[post]
 func (c *UserController) Edit() {
 	c.save("edit")
 }
@@ -108,7 +125,37 @@ func (c *UserController) save(optType string) {
 	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }
+
+// 删除组织单位用户
+// @Summary 删除组织单位用户
+// @Description 删除组织单位用户
+// @Tags 用户管理
+// @Accept  json
+// @Produce  json
+// @Param   unitUserId query string true "组织单位用户ID"
+// @Success 200 {object} helper.Response "{"code": 200, "data": [...]}"
+// @Router /admin_plat/system-user/del [post]
 func (c *UserController) Del() {
+	type reqStruct struct {
+		Id []string `json:"id"`
+	}
+
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	req, err0 := helper.GetReqBody[*reqStruct](c.Ctx)
+	if err != nil || err0 != nil {
+		err = helper.Ternary(err != nil, err, err0)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	err = c.UserService.DelUnitUser(baseParamDto, req.Id)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", nil)
+	c.ServeJSON()
 }
 
 // 角色树形列表
