@@ -20,7 +20,10 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 		global.Log.Error(str)
 		return menuAuthList, errors.New(str)
 	}
-	isAdmin := helper.IsAdmin(moduleName, unitUserId)
+	isAdmin, err := helper.IsAdmin(moduleName, unitUserId)
+	if err != nil {
+		return menuAuthList, err
+	}
 
 	tableMenu := menuModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()
@@ -157,7 +160,10 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 		global.Log.Error(str)
 		return menuList, errors.New(str)
 	}
-	isAdmin := helper.IsAdmin(moduleName, unitUserId)
+	isAdmin, err := helper.IsAdmin(moduleName, unitUserId)
+	if err != nil {
+		return menuList, err
+	}
 
 	tableMenu := menuModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()

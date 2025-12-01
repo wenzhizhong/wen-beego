@@ -5,6 +5,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/middleware/captcha_store"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"crypto/md5"
 	"encoding/hex"
@@ -174,19 +175,68 @@ func ParseStringTpl(tpl string, data any) (str string, err error) {
 
 // 判断是否是管理员
 
-func IsAdmin(moduleName string, unitUserId string) bool {
+func IsAdmin(moduleName string, unitUserId string) (bool, error) {
 	switch moduleName {
 	case "admin_plat":
 		return getAdminData(unitUserId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
 	case "admin_mchnt":
 		return getAdminData(unitUserId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
 	default:
-		return false
+		return false, errors.New("IsAdmin():模块名称错误")
 	}
+}
+func CheckUserHasUnit(moduleName, userId string, requiredUnitIds []string) (bool, error) {
+	unitIdsLen := len(requiredUnitIds)
+	if unitIdsLen == 0 {
+		return false, errors.New("CheckUserHasUnit(): requiredUnitIds 不能为空")
+	}
+	var unitModel itf.UnitItf
+	var unitUserModel itf.UnitUserItf
+	tableUnitName := unitModel.TableName()
+	tableUnitUserName := unitUserModel.TableName()
+	dataList := make([]base_model.Unit, 0)
+
+	switch moduleName {
+	case "admin_plat":
+		unitModel = &models.Plat{}
+		unitUserModel = &models.PlatUser{}
+
+	case "admin_mchnt":
+		unitModel = &models.Mchnt{}
+		unitUserModel = &models.MchntUser{}
+	default:
+		return false, errors.New("CheckUserHasUnit(): 位置模块" + moduleName)
+	}
+	err := global.GetReadDb().
+		Model(unitModel).
+		Select(tableUnitName+".id").
+		Where(tableUnitUserName+".user_id = ?", userId).
+		Where(tableUnitUserName+".deleted = ?", 0).
+		Where(tableUnitName+".deleted = ?", 0).
+		Find(dataList).Error
+	if err != nil || len(dataList) == 0 {
+		return false, err
+	}
+
+	dataListMap := make(map[string]bool)
+	for _, v := range dataList {
+		dataListMap[v.Id] = true
+	}
+	notExistsUnit := make([]string, 0)
+	for _, v := range requiredUnitIds {
+		if _, ok := dataListMap[v]; !ok {
+			notExistsUnit = append(notExistsUnit, v)
+		}
+	}
+	if len(notExistsUnit) > 0 {
+		return false, errors.New("您没有以下项目权限：" + strings.Join(notExistsUnit, "、"))
+	}
+
+	return true, nil
 }
 
 // 获取管理员用户
-func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, UserRoleModel itf.UserRoleItf](unitUserId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) bool {
+func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, UserRoleModel itf.UserRoleItf](unitUserId string, roleClassify RoleClassifyModel, role RoleModel, userRoleModel UserRoleModel) (bool, error) {
 	tableClassify := roleClassify.TableName()
 	tableRole := role.TableName()
 	tableUserRole := userRoleModel.TableName()
@@ -203,7 +253,10 @@ func getAdminData[RoleClassifyModel itf.RoleClassifyItf, RoleModel itf.RoleItf, 
 		Where(tableRole+".deleted = ?", 0).
 		Take(roleClassify).
 		Error
-	return err == nil
+	if err != nil && !DbNotFound(err) {
+		return false, err
+	}
+	return roleClassify.GetId() != "", nil
 }
 
 // 获取uuid
