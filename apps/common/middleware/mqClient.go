@@ -43,7 +43,7 @@ func (mq *MqClient) GetNewBaseSignature() (*tasks.Signature, error) {
 	signature := &tasks.Signature{}
 	signature.UUID = fmt.Sprintf("task_%v", uuid)
 	signature.RetryCount = 3
-	signature.IgnoreWhenTaskNotRegistered = runMode != "prod"
+	signature.IgnoreWhenTaskNotRegistered = runMode == "prod"
 	return signature, nil
 }
 
