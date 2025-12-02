@@ -29,8 +29,6 @@ var platAuthApiList = []string{
 	"/admin_plat/upload/upload",
 	"/admin_plat/upload/vue-slice-upload",
 	"/admin_plat/upload/link-sign",
-	"/admin_plat/system-dept/get-dept-tree",
-	"/admin_plat/system-dept/get-dept-principal",
 }
 
 func init() {
