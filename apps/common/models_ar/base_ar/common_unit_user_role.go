@@ -20,6 +20,7 @@ import (
 * @return rolesList 角色列表
  */
 func GetUserRole[UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitUserId string, userRoleModel UserRoleModel, roleModel RoleModel) (rolesList []base_model.UnitRole, err error) {
+	rolesList = make([]base_model.UnitRole, 0)
 	if unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unitUserId:%s", unitUserId)
 		global.Log.Error(str)

@@ -44,7 +44,7 @@ func (c *RoleController) Get() {
 	roleDto.RoleName = c.GetString("role_name")
 	roleDto.Status, _ = c.GetInt("status")
 	roleDto.RoleClassifyName = c.GetString("role_classify_name")
-	roleDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{})
+	roleDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 
 	data, err := c.roleService.GetUnitRoleList(roleDto)
 	if err != nil {
@@ -159,7 +159,7 @@ func (c *RoleController) Del() {
 // @Router /admin_plat/system-role/role-menu [get]
 func (c *RoleController) RoleMenu() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
-	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{})
+	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()

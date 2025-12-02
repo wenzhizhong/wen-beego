@@ -77,7 +77,7 @@ func TestRedis(t *testing.T) {
 
 }
 
-func Test(t *testing.T) {
+func TestTernary(t *testing.T) {
 	data1 := helper.Ternary(true, "data_true", "data_false")
 	fmt.Println("data1=", data1+"1")
 	fmt.Println("data1 type=", reflect.TypeOf(data1))
@@ -88,4 +88,12 @@ func Test(t *testing.T) {
 	fmt.Println("data2=", data2)
 	fmt.Println("data2=", *data2)
 	fmt.Println("data2 type=", reflect.TypeOf(*data2))
+}
+
+func TestCheckUserHasUnit(t *testing.T) {
+	unitIds := []string{
+		"019a6bf0-02a7-733e-822b-4901c2c1c394",
+	}
+	res, err1 := helper.CheckUserHasUnit("admin_plat", "019917fa-ee48-7ac5-bdec-3bb11a2d54d9", unitIds)
+	fmt.Println(res, err1)
 }

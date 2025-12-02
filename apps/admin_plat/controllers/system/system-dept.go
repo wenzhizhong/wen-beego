@@ -42,7 +42,7 @@ func (c *DeptController) Get() {
 	deptDto.BaseParamDto = baseParamDto
 	deptDto.ReqDataListDto = reqDataListDto
 	deptDto.Name = c.GetString("name")
-	deptDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{})
+	deptDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 
 	data, err := c.deptService.GetUnitDeptList(deptDto)
 	if err != nil {
@@ -64,14 +64,13 @@ func (c *DeptController) Get() {
 // @Success 200 {object}
 // @Router /admin_plat/system-dept/get-dept-tree [get]
 func (c *DeptController) GetUnitDeptTree() {
-	tmpSelectUnitIds := c.GetString("selectUnitIds")
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	selectUnitIds := strings.Split(tmpSelectUnitIds, ",")
 	data, err := c.deptService.GetUnitDeptTree(baseParamDto, selectUnitIds)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
@@ -92,8 +91,8 @@ func (c *DeptController) GetUnitDeptTree() {
 // @Success 200 {object}
 // @Router /admin_plat/system-dept/get-dept-principal [get]
 func (c *DeptController) GetUnitDeptPrincipal() {
-	tmpSelectUnitIds := c.GetString("selectUnitIds")
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
@@ -109,7 +108,7 @@ func (c *DeptController) GetUnitDeptPrincipal() {
 	deptPrincipalDto := page_dto.SystemDeptPrincipalReqDto{}
 	deptPrincipalDto.BaseParamDto = baseParamDto
 	deptPrincipalDto.ReqDataListDto = reqDataListDto
-	deptPrincipalDto.SelectUnitIds = strings.Split(tmpSelectUnitIds, ",")
+	deptPrincipalDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	deptPrincipalDto.Keyword = c.GetString("keyword")
 
 	data, err := c.deptService.GetUnitDeptPrincipal(baseParamDto, deptPrincipalDto)

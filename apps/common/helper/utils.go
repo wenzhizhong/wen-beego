@@ -192,28 +192,31 @@ func CheckUserHasUnit(moduleName, userId string, requiredUnitIds []string) (bool
 	}
 	var unitModel itf.UnitItf
 	var unitUserModel itf.UnitUserItf
-	tableUnitName := unitModel.TableName()
-	tableUnitUserName := unitUserModel.TableName()
+	tableUnitName := ""
+	tableUnitUserName := ""
 	dataList := make([]base_model.Unit, 0)
 
 	switch moduleName {
 	case "admin_plat":
 		unitModel = &models.Plat{}
 		unitUserModel = &models.PlatUser{}
-
 	case "admin_mchnt":
 		unitModel = &models.Mchnt{}
 		unitUserModel = &models.MchntUser{}
 	default:
 		return false, errors.New("CheckUserHasUnit(): 位置模块" + moduleName)
 	}
+	tableUnitName = unitModel.TableName()
+	tableUnitUserName = unitUserModel.TableName()
+
 	err := global.GetReadDb().
 		Model(unitModel).
 		Select(tableUnitName+".id").
+		Joins("inner join "+tableUnitUserName+" on "+tableUnitUserName+".unit_id = "+tableUnitName+".id").
 		Where(tableUnitUserName+".user_id = ?", userId).
 		Where(tableUnitUserName+".deleted = ?", 0).
 		Where(tableUnitName+".deleted = ?", 0).
-		Find(dataList).Error
+		Find(&dataList).Error
 	if err != nil || len(dataList) == 0 {
 		return false, err
 	}

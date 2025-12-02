@@ -44,7 +44,7 @@ func (c *UserController) GetUserList() {
 	userDto := page_dto.SystemUserListReqDto{}
 	userDto.BaseParamDto = baseParamDto
 	userDto.ReqDataListDto = reqDataListDto
-	userDto.SelectUnitIds = c.GetStrings("selectUnitIds")
+	userDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	userDto.DeptIds = helper.Ternary(c.GetString("deptId") != "", strings.Split(c.GetString("deptId"), ","), make([]string, 0))
 	userDto.RoleIds = helper.Ternary(c.GetString("roleId") != "", strings.Split(c.GetString("roleId"), ","), make([]string, 0))
 
@@ -168,14 +168,13 @@ func (c *UserController) Del() {
 // @Success 200 {object}
 // @Router /admin_plat/system-user/get-role-tree [get]
 func (c *UserController) GetRoleTree() {
-	tmpSelectUnitIds := c.GetString("selectUnitIds")
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	selectUnitIds := strings.Split(tmpSelectUnitIds, ",")
 	data, err := c.UserService.GetUnitRoleTree(baseParamDto, selectUnitIds)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)

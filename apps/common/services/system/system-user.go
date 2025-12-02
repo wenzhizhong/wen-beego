@@ -26,6 +26,11 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	data := make([]page_dto.SystemUserListDto, 0)
 	var count int64 = 0
 
+	if res, err1 := helper.CheckUserHasUnit(reqDto.ModuleName, reqDto.UserId, reqDto.SelectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetUserList：用户没有组织单位权限"))
+		return
+	}
+
 	switch reqDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUserListOfUnitById(reqDto, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatDept{}, &models.PlattUserDept{}, &models.PlatRole{}, &models.PlatUserRole{})
@@ -52,6 +57,11 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 // 获取可选角色树
 func (s *User) GetUnitRoleTree(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
 	dataList := make([]base_model.UnitRole, 0)
+
+	if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, selectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetUserList：用户没有组织单位权限"))
+		return
+	}
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":

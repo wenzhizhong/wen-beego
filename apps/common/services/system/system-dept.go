@@ -19,6 +19,11 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 	data := make([]base_model.UnitDept, 0)
 	var count int64 = 0
 
+	if res, err1 := helper.CheckUserHasUnit(deptDto.ModuleName, deptDto.UserId, deptDto.SelectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitDeptList：用户没有组织单位权限"))
+		return
+	}
+
 	switch deptDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Plat{}, &models.PlatDept{}, &models.PlatUser{}, &models.PlatUserProfile{})
@@ -35,6 +40,11 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 }
 func (s *Dept) GetUnitDeptTree(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
 	dataList := make([]base_model.UnitDept, 0)
+
+	if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, selectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitDeptTree：用户没有组织单位权限"))
+		return
+	}
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
@@ -61,6 +71,11 @@ func (s *Dept) GetUnitDeptPrincipal(baseParamDto dto.BaseParamDto, deptPrincipal
 	var count int64
 	var data interface{}
 
+	if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, deptPrincipalDto.SelectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitDeptPrincipal：用户没有组织单位权限"))
+		return
+	}
+
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.PlatUser{}, &models.PlatUserProfile{})
@@ -78,7 +93,25 @@ func (s *Dept) GetUnitDeptPrincipal(baseParamDto dto.BaseParamDto, deptPrincipal
 
 // 保存组织架构列表
 func (s *Dept) SaveUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitDeptDto) (id string, err error) {
-	deptDto.UnitId = baseParamDto.UnitId
+	// deptDto.UnitId = baseParamDto.UnitId
+	if deptDto.UnitId == "" {
+		err = errors.New("请选择组织单位")
+		return
+	}
+	if deptDto.Name == "" {
+		err = errors.New("请输入部门名称")
+		return
+	}
+	if deptDto.PrincipalId == "" {
+		err = errors.New("请选择部门负责人")
+		return
+	}
+
+	if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, []string{deptDto.UnitId}); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("SaveUnitDept：用户没有组织单位权限"))
+		return
+	}
+
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		id, err = base_ar.SaveUnitDept(deptDto, &models.PlatDept{})

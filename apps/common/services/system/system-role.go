@@ -23,6 +23,11 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 	data := make([]base_model.UnitRole, 0)
 	var count int64 = 0
 
+	if res, err1 := helper.CheckUserHasUnit(RoleDto.ModuleName, RoleDto.UserId, RoleDto.SelectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitRoleList：用户没有组织单位权限"))
+		return
+	}
+
 	switch RoleDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitRoleList(RoleDto, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{})
@@ -39,15 +44,28 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 }
 
 // 保存角色列表
-func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.UnitRoleDto) (id string, err error) {
-	RoleDto.UnitId = baseParamDto.UnitId
-	RoleDto.RoleClassifyName = helper.DeleteSpace(RoleDto.RoleClassifyName)
+func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRoleDto) (id string, err error) {
+	roleDto.RoleName = helper.DeleteSpace(roleDto.RoleName)
+	roleDto.RoleClassifyName = helper.DeleteSpace(roleDto.RoleClassifyName)
+	if roleDto.RoleName == "" {
+		err = errors.New("请输入角色名称")
+		return
+	}
+	if roleDto.RoleClassifyName == "" {
+		err = errors.New("请输入角色分类名称")
+		return
+	}
+
+	if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, []string{roleDto.UnitId}); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("SaveUnitRole：用户没有组织单位权限"))
+		return
+	}
 
 	var classifyData base_model.UnitRoleClassify
-	if RoleDto.Id == "" {
+	if roleDto.Id == "" {
 		var err1 error
-		RoleDto.Id, err1 = helper.GetUuid()
-		RoleDto.CreatedBy = baseParamDto.UnitUserId
+		roleDto.Id, err1 = helper.GetUuid()
+		roleDto.CreatedBy = baseParamDto.UnitUserId
 
 		uuid := ""
 		uuid, err = helper.GetUuid()
@@ -57,24 +75,24 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.Unit
 		}
 		classifyData = base_model.UnitRoleClassify{
 			Id:      uuid,
-			RoleId:  RoleDto.Id,
-			UnitId:  RoleDto.UnitId,
-			Name:    RoleDto.RoleClassifyName,
+			RoleId:  roleDto.Id,
+			UnitId:  roleDto.UnitId,
+			Name:    roleDto.RoleClassifyName,
 			Deleted: 0,
 		}
 	} else {
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
-			classifyData, err = base_ar.GetRoleClassifyByRoleId(RoleDto.Id, &models.PlatRoleClassify{})
+			classifyData, err = base_ar.GetRoleClassifyByRoleId(roleDto.Id, &models.PlatRoleClassify{})
 		case "mchnt_plat":
-			classifyData, err = base_ar.GetRoleClassifyByRoleId(RoleDto.Id, &models.MchntRoleClassify{})
+			classifyData, err = base_ar.GetRoleClassifyByRoleId(roleDto.Id, &models.MchntRoleClassify{})
 		default:
 			err = errors.New("模块名称错误")
 		}
 
-		RoleDto.UpdatedBy = baseParamDto.UnitUserId
-		classifyData.Name = RoleDto.RoleClassifyName
-		classifyData.UnitId = RoleDto.UnitId
+		roleDto.UpdatedBy = baseParamDto.UnitUserId
+		classifyData.Name = roleDto.RoleClassifyName
+		classifyData.UnitId = roleDto.UnitId
 	}
 	if err != nil {
 		return
@@ -83,10 +101,10 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.Unit
 	err = global.WriteDb.Transaction(func(tx *gorm.DB) (err error) {
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
-			id, err = base_ar.SaveUnitRole(tx, RoleDto, &models.PlatRole{})
+			id, err = base_ar.SaveUnitRole(tx, roleDto, &models.PlatRole{})
 			base_ar.InsertUserRoleClassifies[*models.PlatRoleClassify](tx, classifyData)
 		case "mchnt_plat":
-			id, err = base_ar.SaveUnitRole(tx, RoleDto, &models.MchntRole{})
+			id, err = base_ar.SaveUnitRole(tx, roleDto, &models.MchntRole{})
 			base_ar.InsertUserRoleClassifies[*models.MchntRoleClassify](tx, classifyData)
 		default:
 			err = errors.New("模块名称错误")
@@ -98,10 +116,10 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.Unit
 }
 
 // 删除角色列表
-func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.UnitRoleDto) (err error) {
+func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRoleDto) (err error) {
 	timestamp := helper.GetTimestamp()
 	updateData := base_model.UnitRole{}
-	updateData.Id = RoleDto.Id
+	updateData.Id = roleDto.Id
 	updateData.UpdatedAt = timestamp
 	updateData.Deleted = 1
 
@@ -117,6 +135,11 @@ func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, RoleDto role_dto.UnitR
 }
 
 func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
+	if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, selectUnitIds); !res {
+		err = helper.Ternary(err1 != nil, err1, errors.New("GetRoleMenu：用户没有组织单位权限"))
+		return
+	}
+
 	var dataList interface{}
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
