@@ -64,10 +64,6 @@ func (s *CommonAuth) GetCatpcha(cpatchaType string) (data interface{}, err error
 		"id":   id,
 		"b64s": b64s,
 	}
-	if err != nil {
-		return
-	}
-
 	return
 }
 

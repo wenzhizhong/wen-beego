@@ -328,6 +328,15 @@ func (s *User) checkRequestData(baseParamDto dto.BaseParamDto, unitUserSaveDto *
 func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, unitUserModel itf.UnitUserItf, unitUserProfileModel itf.UserProfileItf) (userData user_dto.UserAllDataDto, unitUserData unit_dto.UnitUserAllDataDto, err error) {
 	isAddUnitUser := unitUserSaveDto.UnitUserDto.Id == ""
 
+	if isAddUnitUser {
+		if unitUserSaveDto.UserDto.Password == "" {
+			err = errors.New("密码不能为空")
+			return
+		}
+		if err = helper.CheckPasswordRule(unitUserSaveDto.UserDto.Password); err != nil {
+			return
+		}
+	}
 	tmpPwd, err1 := helper.GenerateCryptPassword(unitUserSaveDto.UserDto.Password)
 	unitUserSaveDto.UserDto.Password = helper.Ternary(isAddUnitUser, tmpPwd, "")
 	unitUserSaveDto.UserProfileDto.Deleted = 0

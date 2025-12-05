@@ -97,3 +97,8 @@ func TestCheckUserHasUnit(t *testing.T) {
 	res, err1 := helper.CheckUserHasUnit("admin_plat", "019917fa-ee48-7ac5-bdec-3bb11a2d54d9", unitIds)
 	fmt.Println(res, err1)
 }
+
+func TestGenerateCryptPassword(t *testing.T) {
+	password, err := helper.GenerateCryptPassword("123456")
+	fmt.Println(password, err)
+}

@@ -148,7 +148,7 @@ func GetRoleMenuIds[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf](roleId
 		Select(tableRoleMenuName+".*").
 		Joins("inner join "+tableMenuName+" on "+tableMenuName+".id = "+tableRoleMenuName+".menu_id").
 		Where(tableRoleMenuName+".role_id = ?", roleId).
-		Where(tableMenuName+".menu_type IN ?", operateMenuTypeArr).
+		// Where(tableMenuName+".menu_type IN ?", operateMenuTypeArr).
 		Where(tableMenuName+".deleted = ?", 0).
 		Find(&dataList).Error
 	return
