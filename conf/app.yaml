@@ -65,6 +65,12 @@ branca:
     key: rxN07JpyV3ZIWltza6EcUvP9uRjw1eKF
     exp: 86400
     expRemark: 24*60*60
+  admin_mchnt:
+    iss: wenBeegoAdminMchnt
+    aud: wenBeegoAdminMchntUi
+    key: Uz4IhHSkEuWMmN98gL6YPBZJqDtvf12K
+    exp: 86400
+    expRemark: 24*60*60
 queue:
   type: redis
   default_queue: wen_beego_tasks
