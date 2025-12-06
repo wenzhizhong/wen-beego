@@ -401,7 +401,7 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, unitUs
 	}
 
 	for _, permission := range permissions {
-		perms = append(perms, permission.Path)
+		perms = append(perms, permission.Auths)
 	}
 
 	return perms, err
