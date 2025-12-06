@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/dto/unit_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
@@ -71,6 +72,8 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 		global.Log.Error(err.Error())
 		return
 	}
+	// 清空用户权限认证缓存
+	business_store.ClearAumid()
 
 	result = make(map[string]string)
 	result["id"] = newUnitId

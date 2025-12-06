@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/dto/role_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
@@ -112,6 +113,9 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.Unit
 		return
 	})
 
+	// 清空用户权限认证缓存
+	business_store.ClearAumid()
+
 	return
 }
 
@@ -212,6 +216,8 @@ func (s *Role) RoleMenuSave(baseParamDto dto.BaseParamDto, roleMenuSaveDto role_
 		}
 		return
 	})
+	// 清空用户权限认证缓存
+	business_store.ClearAumid()
 	return
 }
 

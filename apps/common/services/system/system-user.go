@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/dto/user_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
@@ -137,6 +138,9 @@ func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto
 		unitUserId, err = s.doSaveUser(tx, isAddUnitUser, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
 		return
 	})
+
+	// 清空用户权限认证缓存
+	business_store.ClearAumid()
 
 	data = struct {
 		UnitUserId string `json:"unitUserId"`
