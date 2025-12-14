@@ -5,9 +5,6 @@ import (
 	"WenBeego/apps/common/helper"
 	"context"
 	"strconv"
-	"strings"
-
-	"github.com/beego/beego/v2/client/cache/redis"
 )
 
 const aumid_expired = 2 * 60
@@ -103,23 +100,52 @@ func SetAumidUrp(moduleName, unitUserId, unitId, value string) error {
 
 // 清空认证缓存
 func ClearAumid() error {
-	if redisCache, ok := global.Redis.(*redis.Cache); ok {
-		for _, prefix := range ALL_AUMID_PRIFIXS {
-			key, _ := helper.GetCustomRedisKey(prefix)
-			keys, err := redisCache.Scan(redis.DefaultKey + ":" + key + ":*")
+	// if redisCache, ok := global.Redis.(*redis.Cache); ok {
+	// 	for _, prefix := range ALL_AUMID_PRIFIXS {
+	// 		key, _ := helper.GetCustomRedisKey(prefix)
+	// 		keys, err := redisCache.Scan(redis.DefaultKey + ":" + key + ":*")
+	// 		if err != nil {
+	// 			global.Log.Error("redisCache.Scan error:", err)
+	// 			continue
+	// 		}
+	// 		for _, k := range keys {
+	// 			k = strings.Replace(k, redis.DefaultKey+":", "", -1)
+	// 			err = redisCache.Delete(context.Background(), k)
+	// 			if err != nil {
+	// 				global.Log.Error("redisCache.Delete error:", err)
+	// 				continue
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// return nil
+
+	var allKeys []string
+	for _, prefix := range ALL_AUMID_PRIFIXS {
+		key, _ := helper.GetCustomRedisKey(prefix)
+		var cursor uint64
+		for {
+			// 1. 使用 SCAN 迭代获取一批 key
+			var keys []string
+			var err error
+			keys, cursor, err = global.RedisCache.Scan(context.Background(), cursor, key+":*", 100).Result()
 			if err != nil {
-				global.Log.Error("redisCache.Scan error:", err)
-				continue
+				return err
 			}
-			for _, k := range keys {
-				k = strings.Replace(k, redis.DefaultKey+":", "", -1)
-				err = redisCache.Delete(context.Background(), k)
-				if err != nil {
-					global.Log.Error("redisCache.Delete error:", err)
-					continue
-				}
+
+			allKeys = append(allKeys, keys...)
+
+			// 2. 如果游标为0，表示迭代结束
+			if cursor == 0 {
+				break
 			}
 		}
+	}
+
+	// 3. 删除所有收集到的 key
+	if len(allKeys) > 0 {
+		_, err := global.RedisCache.Del(context.Background(), allKeys...).Result()
+		return err
 	}
 	return nil
 }

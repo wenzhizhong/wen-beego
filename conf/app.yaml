@@ -29,12 +29,14 @@ pgsql_read:
 redis:
   host: 127.0.0.1
   port: 6379
+  username: ""
   password: ""
-  maxIdle: ""
-  timeout: 
+  maxIdle: "10"
+  timeout: 0
   dbNum: 0
   key: ""
   skipEmptyPrefix: ""
+  remark: "key:前缀，"
 
 log:
   level: debug

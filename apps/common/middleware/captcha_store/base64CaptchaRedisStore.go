@@ -15,30 +15,23 @@ type Base64CaptchaRedisStore struct {
 var _ base64Captcha.Store = (*Base64CaptchaRedisStore)(nil)
 
 func (r *Base64CaptchaRedisStore) Set(id string, value string) error {
-	return global.Redis.Put(context.Background(), getCacheKey(id), value, r.Expiration)
+	// return global.RedisCache.Put(context.Background(), getCacheKey(id), value, r.Expiration)
+	return global.RedisCache.Set(context.Background(), getCacheKey(id), value, r.Expiration).Err()
 }
 
 func (r *Base64CaptchaRedisStore) Get(id string, clear bool) string {
-	val, err := global.Redis.Get(context.Background(), getCacheKey(id))
+	// val, err := global.RedisCache.Get(context.Background(), getCacheKey(id))
+	val, err := global.RedisCache.Get(context.Background(), getCacheKey(id)).Result()
 	if err != nil {
 		global.Log.Error("redis get error:", err)
 		return ""
 	}
-	if val == nil {
-		return ""
-	}
 
-	// 先断言为 []byte，再转换为 string
-	byteVal, ok := val.([]byte)
-	if !ok {
-		global.Log.Error("failed to assert value to []byte")
-		return ""
-	}
 	if clear {
-		global.Redis.Delete(context.Background(), getCacheKey(id))
+		global.RedisCache.Del(context.Background(), getCacheKey(id))
 	}
 
-	return string(byteVal)
+	return val
 }
 
 func (r *Base64CaptchaRedisStore) Verify(id, answer string, clear bool) bool {
@@ -48,7 +41,7 @@ func (r *Base64CaptchaRedisStore) Verify(id, answer string, clear bool) bool {
 	}
 
 	if clear {
-		global.Redis.Delete(context.Background(), getCacheKey(id))
+		global.RedisCache.Del(context.Background(), getCacheKey(id))
 	}
 
 	return val == answer

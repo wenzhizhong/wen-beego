@@ -16,20 +16,15 @@ import (
 )
 
 func main() {
+	// 注册自己资源服务
 	cmdCommon.RunBefore()
+	cmdCommon.InitCommonSource("pathMq")
 
 	tasks := routers.GetMqTasks()
 	if len(tasks) == 0 {
-		fmt.Println("No task……")
+		fmt.Println("No mq task……")
 		return
 	}
-
-	// // beego自定义配置
-	// _ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
-	// fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
-
-	// 注册自己资源服务
-	cmdCommon.InitCommonSource("pathMq")
 
 	// 启动mq服务
 	mqServer, err := (&middleware.MqServer{}).NewMq()
