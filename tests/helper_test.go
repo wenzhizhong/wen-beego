@@ -2,6 +2,7 @@ package tests
 
 import (
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware/captcha"
 	"fmt"
 	"reflect"
 	"testing"
@@ -29,12 +30,12 @@ func TestCheckPasswordRule(t *testing.T) {
 }
 
 func TestGetCapture(t *testing.T) {
-	id, b64s, answer, err := helper.GetCaptcha("string")
+	id, b64s, answer, err := captcha.GetCaptcha("string")
 	fmt.Printf("id:%s\nb64s:%s\nanswer:%s\nerr:%v\n", id, b64s, answer, err)
 }
 
 func TestVeriryCapture(t *testing.T) {
-	fmt.Println(helper.VerifyCaptcha("string", "htDcENyykTRc1NH6x23y", "7650"))
+	fmt.Println(captcha.VerifyCaptcha("string", "htDcENyykTRc1NH6x23y", "7650"))
 }
 
 func TestIsPhone(t *testing.T) {

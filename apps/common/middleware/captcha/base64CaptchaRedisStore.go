@@ -1,7 +1,8 @@
-package captcha_store
+package captcha
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
 	"context"
 	"time"
 
@@ -47,5 +48,6 @@ func (r *Base64CaptchaRedisStore) Verify(id, answer string, clear bool) bool {
 	return val == answer
 }
 func getCacheKey(id string) string {
-	return "captcha:" + id
+	key, _ := helper.GetCustomRedisKey("captcha:" + id)
+	return key
 }

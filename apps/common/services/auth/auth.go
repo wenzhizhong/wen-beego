@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware/captcha"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models_ar"
@@ -59,7 +60,7 @@ func (s *CommonAuth) Register(data auth_dto.RegisterDto, moduleName string) (log
 
 // 获取验证码
 func (s *CommonAuth) GetCatpcha(cpatchaType string) (data interface{}, err error) {
-	id, b64s, _, err := helper.GetCaptcha(cpatchaType)
+	id, b64s, _, err := captcha.GetCaptcha(cpatchaType)
 	data = map[string]interface{}{
 		"id":   id,
 		"b64s": b64s,
@@ -150,7 +151,7 @@ func (s *CommonAuth) checkAuthCode(authCode string, authCodeId string, authCodeT
 		if authCode == "" {
 			return errors.New("验证码不能为空")
 		}
-		if !helper.VerifyCaptcha(authCodeType, authCodeId, authCode) {
+		if !captcha.VerifyCaptcha(authCodeType, authCodeId, authCode) {
 			return errors.New("验证码错误")
 		}
 	case "sms":
