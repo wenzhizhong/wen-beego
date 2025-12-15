@@ -13,7 +13,7 @@ type MchntCron struct {
 }
 
 func (m *MchntCron) TableName() string {
-	return `mchnt_cron`
+	return `mchnt_crontab`
 }
 
 func (m *MchntCron) GetID() string {

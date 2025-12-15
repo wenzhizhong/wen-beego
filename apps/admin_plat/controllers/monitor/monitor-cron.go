@@ -38,7 +38,8 @@ func (c *CronController) Get() {
 		c.ServeJSON()
 		return
 	}
-	c.Data["json"] = helper.Response(200, "success", data)
+
+	c.Data["json"] = helper.Response(200, "success", *data)
 	c.ServeJSON()
 }
 

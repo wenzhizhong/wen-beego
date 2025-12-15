@@ -13,7 +13,7 @@ type PlatCron struct {
 }
 
 func (m *PlatCron) TableName() string {
-	return `plat_cron`
+	return `plat_crontab`
 }
 
 func (m *PlatCron) GetID() string {

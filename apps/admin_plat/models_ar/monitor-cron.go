@@ -61,6 +61,7 @@ func (ar *PlatCronAr) Delete(id string) (err error) {
 func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []models.PlatCron, count int64, err error) {
 	data = make([]models.PlatCron, 0)
 	query := global.GetReadDb().
+		Model(&models.PlatCron{}).
 		Where("deleted = ?", 0)
 
 	err = query.Count(&count).Error
