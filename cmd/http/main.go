@@ -15,6 +15,9 @@ func main() {
 	cmdCommon.RunBefore()
 	cmdCommon.InitCommonSource("")
 	cmdCommon.InitMqClient()
+	cronManager := cmdCommon.InitCrontabTask()
+	cronManager.Start()
+	defer cronManager.Stop()
 
 	// 启动服务
 	httpport, _ := beego.AppConfig.DIY("httpport")

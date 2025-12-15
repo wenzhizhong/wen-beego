@@ -2,6 +2,7 @@ package routers
 
 import (
 	adminAuth "WenBeego/apps/admin_plat/controllers/auth"
+	adminMonitor "WenBeego/apps/admin_plat/controllers/monitor"
 	adminSystem "WenBeego/apps/admin_plat/controllers/system"
 	adminUpload "WenBeego/apps/admin_plat/controllers/upload"
 	"WenBeego/apps/common/middleware"
@@ -73,6 +74,8 @@ func init() {
 		beego.NSCtrlPost("/system-user/edit", (*adminSystem.UserController).Edit),
 		beego.NSCtrlPost("/system-user/del", (*adminSystem.UserController).Del),
 		beego.NSCtrlGet("/system-user/get-role-tree", (*adminSystem.UserController).GetRoleTree),
+
+		beego.NSCtrlGet("/monitor-cron/get", (*adminMonitor.CronController).Get),
 	)
 
 	// 请求前、后处理
