@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/middleware"
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/middleware/crontab"
+	"WenBeego/apps/common/middleware/database"
 )
 
 // 初始化公共资源数据
@@ -20,7 +21,7 @@ func InitCommonSource(logType string) {
 		panic(err)
 	}
 	// 注册数据库中间件
-	err = middleware.InitDb()
+	err = database.InitDb()
 	if err != nil {
 		global.Log.Error(err.Error())
 		panic(err)
