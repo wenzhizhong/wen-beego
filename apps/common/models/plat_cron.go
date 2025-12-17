@@ -52,3 +52,7 @@ func (m *PlatCron) GetUpdatedAt() *time.Time {
 func (m *PlatCron) GetDeleted() int {
 	return m.Deleted
 }
+
+func (m *PlatCron) GetRemark() string {
+	return m.Remark
+}

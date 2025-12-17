@@ -17,4 +17,5 @@ type UnitCronItf interface {
 	GetUpdatedBy() *string
 	GetUpdatedAt() *time.Time
 	GetDeleted() int
+	GetRemark() string
 }

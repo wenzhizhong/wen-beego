@@ -12,5 +12,5 @@ type BirthNotice struct {
 func (c *BirthNotice) Notice() {
 	fmt.Println("birth notice .....")
 	global.Log.Info("birth notice .....")
-
+	panic("==== panic test ===")
 }

@@ -11,6 +11,7 @@ import (
 	"WenBeego/apps/common/models"
 	"WenBeego/routers/crontab_task"
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -37,12 +38,40 @@ func (c *CronService) StopTask(baseParamDto dto.BaseParamDto, data cron_dto.Unit
 	err := c.UpdateTaskStatus(baseParamDto, data, 0)
 	return err
 }
+func (c *CronService) DelTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+	err := global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		cronDetail, err := c.platCronAr.GetCronById(baseParamDto.UnitId, data.Id)
+		if err != nil || cronDetail.Id == "" {
+			err = helper.Ternary(err != nil, err, fmt.Errorf("任务不存在"))
+			return err
+		}
+
+		err = c.platCronAr.Delete(tx, baseParamDto.UnitId, data.Id)
+		if err != nil {
+			return err
+		}
+
+		list := crontab_task.GetCronTasks()
+		for _, item := range list {
+			if item.Name != cronDetail.NameEn {
+				continue
+			}
+			crontab.GetCronManager().RemoveTask(item.Name)
+			break
+		}
+		return nil
+	})
+	return err
+}
 
 func (c *CronService) saveAndAddTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
 	if data.Name == "" {
 		return fmt.Errorf("请选择任务")
 	}
 	data.UnitId = baseParamDto.UnitId
+	data.Group = strings.TrimSpace(data.Group)
+	data.Remark = strings.TrimSpace(data.Remark)
+	data.CronExpr = strings.TrimSpace(data.CronExpr)
 
 	isCreate := data.Id == ""
 	list := crontab_task.GetCronTasks()
@@ -64,8 +93,11 @@ func (c *CronService) saveAndAddTask(baseParamDto dto.BaseParamDto, data cron_dt
 			if err != nil {
 				return err
 			}
+			if data.Status == 0 {
+				return nil
+			}
 
-			crontab.GetCronManager().RemoveTask(data.Name)
+			crontab.GetCronManager().RemoveTask(item.Name)
 			err = crontab.GetCronManager().AddSafeTask(data.CronExpr, item.CallBack, item.Name)
 			return err
 		})
@@ -110,7 +142,12 @@ func (c *CronService) UpdateTaskStatus(baseParamDto dto.BaseParamDto, data cron_
 }
 
 func (c *CronService) GetAvaibleCronList() (interface{}, error) {
-	return crontab_task.GetCronTasks(), nil
+	data := struct {
+		List interface{} `json:"list"`
+	}{
+		List: crontab_task.GetCronTasks(),
+	}
+	return data, nil
 }
 
 func (c *CronService) GetCronList(reqDto *page_dto.MonitorCronListReqDto) (*dto.RespDataListDto, error) {
@@ -135,7 +172,7 @@ func (c *CronService) checkUnitCronDto(baseParamDto dto.BaseParamDto, data *cron
 			return err
 		}
 
-		exists, err1 := c.platCronAr.GetCronByName(baseParamDto.UnitId, data.NameEn, "")
+		exists, err1 := c.platCronAr.GetCronByNameEn(baseParamDto.UnitId, data.NameEn, "")
 		if err1 != nil {
 			return err1
 		}
@@ -148,7 +185,7 @@ func (c *CronService) checkUnitCronDto(baseParamDto dto.BaseParamDto, data *cron
 			return err
 		}
 
-		exists, err1 := c.platCronAr.GetCronByName(baseParamDto.UnitId, data.NameEn, data.Id)
+		exists, err1 := c.platCronAr.GetCronByNameEn(baseParamDto.UnitId, data.NameEn, data.Id)
 		if err1 != nil {
 			return err1
 		}

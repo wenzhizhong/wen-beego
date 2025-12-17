@@ -76,6 +76,11 @@ func init() {
 		beego.NSCtrlGet("/system-user/get-role-tree", (*adminSystem.UserController).GetRoleTree),
 
 		beego.NSCtrlGet("/monitor-cron/get", (*adminMonitor.CronController).Get),
+		beego.NSCtrlGet("/monitor-cron/get-avaible", (*adminMonitor.CronController).GetAvaibleCronList),
+		beego.NSCtrlPost("/monitor-cron/add", (*adminMonitor.CronController).Add),
+		beego.NSCtrlPost("/monitor-cron/edit", (*adminMonitor.CronController).Edit),
+		beego.NSCtrlPost("/monitor-cron/del", (*adminMonitor.CronController).Del),
+		beego.NSCtrlPost("/monitor-cron/change-status", (*adminMonitor.CronController).ChangeStatus),
 	)
 
 	// 请求前、后处理

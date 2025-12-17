@@ -38,7 +38,7 @@ func (ar *PlatCronAr) Insert(tx *gorm.DB, data cron_dto.UnitCronDto) (err error)
 	if err != nil {
 		return err
 	}
-	return tx.Create(&data).Error
+	return tx.Model(&models.PlatCron{}).Create(&data).Error
 }
 
 func (ar *PlatCronAr) Update(tx *gorm.DB, data cron_dto.UnitCronDto) (err error) {
@@ -46,23 +46,33 @@ func (ar *PlatCronAr) Update(tx *gorm.DB, data cron_dto.UnitCronDto) (err error)
 	if err != nil {
 		return err
 	}
-	return global.GetWriteDb().Model(&data).Omit("created_at", "created_by", "deleted").Updates(&data).Error
+	return global.GetWriteDb().
+		Model(&models.PlatCron{}).
+		Omit("unit_id", "created_at", "created_by", "deleted").
+		Where("id = ?", data.Id).
+		Updates(&data).Error
 
 }
 
-func (ar *PlatCronAr) Delete(id string) (err error) {
+func (ar *PlatCronAr) Delete(tx *gorm.DB, unit_id, id string) (err error) {
 	if id == "" {
 		return fmt.Errorf("PlatCronAr Delete(): Id 不能为空")
 	}
-	return global.GetWriteDb().Model(&models.PlatCron{}).Where("id = ?", id).Update("deleted", 1).Error
+	return tx.Model(&models.PlatCron{}).Where("unit_id = ? AND id = ?", unit_id, id).Update("deleted", 1).Error
 }
 
 // 获取计划任务列表
 func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []models.PlatCron, count int64, err error) {
 	data = make([]models.PlatCron, 0)
+
+	platCronMdoel := &models.PlatCron{}
+	platUserModel := &models.PlatUser{}
+	tablePlatCronName := platCronMdoel.TableName()
+	tablePlatUserName := platUserModel.TableName()
+
 	query := global.GetReadDb().
-		Model(&models.PlatCron{}).
-		Where("deleted = ?", 0)
+		Model(platCronMdoel).
+		Where(tablePlatCronName+".deleted = ?", 0)
 
 	err = query.Count(&count).Error
 	if err != nil {
@@ -72,25 +82,35 @@ func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []mo
 		return
 	}
 
-	err = query.Limit(req.PageSize).Offset(req.Offset).Find(&data).Error
+	err = query.Select(tablePlatCronName + ".*, STRING_AGG(distinct creater.name,'') AS created_by_name, STRING_AGG(distinct updater.name,'') AS updated_by_name").
+		Joins("LEFT JOIN " + tablePlatUserName + " AS creater ON creater.id=" + tablePlatCronName + ".created_by").
+		Joins("LEFT JOIN " + tablePlatUserName + " AS updater ON updater.id=" + tablePlatCronName + ".updated_by").
+		Limit(req.PageSize).
+		Offset(req.Offset).
+		Group(tablePlatCronName + ".id").
+		Order(tablePlatCronName + ".created_at desc").
+		Find(&data).Error
 
 	return
 }
 
 func (ar *PlatCronAr) GetCronById(unit_id, id string) (data base_model.UnitCron, err error) {
 	query := global.GetReadDb().
+		Select("*, '' AS created_by_name, '' AS updated_by_name").
 		Model(&models.PlatCron{}).
 		Where("deleted = 0 AND unit_id = ? AND id = ?", unit_id, id)
 
 	err = query.Take(&data).Error
 	return
 }
-func (ar *PlatCronAr) GetCronByName(unit_id, name, id string) (data []models.PlatCron, err error) {
+func (ar *PlatCronAr) GetCronByNameEn(unit_id, nameEn, id string) (data []models.PlatCron, err error) {
 	query := global.GetReadDb().
 		Model(&models.PlatCron{}).
-		Where("deleted = 0 AND \"unit_id\" = ? AND \"name\" = ?", unit_id, name)
+		// Where("deleted = 0 AND \"unit_id\" = ? AND \"name_en\" = ?", unit_id, nameEn)
+		Where("deleted = 0 AND \"name_en\" = ?", nameEn)
 	if id != "" {
-		query = query.Or("deleted = 0 AND unit_id = ? AND id = ?", unit_id, id)
+		// query = query.Or("deleted = 0 AND unit_id = ? AND id = ?", unit_id, id)
+		query = query.Or("deleted = 0 AND id = ?", id)
 	}
 	err = query.Find(&data).Error
 	return
