@@ -37,10 +37,19 @@ func GetCronManager() *CronManager {
 func (cm *CronManager) AddSafeTask(spec string, unsafeCmd func(), taskID string) error {
 	safeCmd := func() {
 		defer func() {
+			result := true
+			errMsg := ""
 			if r := recover(); r != nil {
+				result = false
 				// 记录日志或做其他处理
 				traceStr := cm.GetTraceStr()
-				global.Log.Error("Crontab Task %s panicked: %v\ntrace:\n%s\n", taskID, r, traceStr)
+				errMsg = fmt.Sprintf("Crontab Task %s panicked: %v\ntrace:\n%s\n", taskID, r, traceStr)
+				global.Log.Error(errMsg)
+			}
+
+			err := (&models_ar.PlatCronLogAr{}).Insert(taskID, result, errMsg)
+			if err != nil {
+				global.Log.Error("insert crontab log error: %v", err)
 			}
 		}()
 		unsafeCmd()
