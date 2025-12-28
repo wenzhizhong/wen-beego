@@ -6,21 +6,45 @@ import (
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
+	"fmt"
 )
 
 type PlatCronLogAr struct {
 }
 
 // 插入定时任务日志
-func (ar *PlatCronLogAr) Insert(cronId string, result bool, remark string) (err error) {
+func (ar *PlatCronLogAr) Insert(cronNameEn string, result bool, remark string) (err error) {
+	if cronNameEn == "" {
+		return
+	}
+
+	// 获取定时任务信息
+	crontabInfo := &models.PlatCron{}
+	err = global.GetReadDb().Model(&models.PlatCron{}).
+		Select("id").
+		Where("name_en = ?", cronNameEn).
+		Find(crontabInfo).Error
+	if err != nil {
+		return
+	}
+	if crontabInfo.GetID() == "" {
+		err = fmt.Errorf("定时任务[%s]不存在", cronNameEn)
+		return
+	}
+
+	// 新增
 	uuid, err := helper.GetUuid()
 	if err != nil {
 		return err
 	}
+	if remark != "" {
+		remark = remark[:512]
+	}
+
 	createdAt := helper.GetTimestamp()
 	platCronLog := base_model.UnitCronLog{
 		Id:        uuid,
-		CrontabId: cronId,
+		CrontabId: crontabInfo.GetID(),
 		Result:    result,
 		Remark:    remark,
 		CreatedAt: createdAt,
