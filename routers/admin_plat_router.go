@@ -81,6 +81,7 @@ func init() {
 		beego.NSCtrlPost("/monitor-cron/edit", (*adminMonitor.CronController).Edit),
 		beego.NSCtrlPost("/monitor-cron/del", (*adminMonitor.CronController).Del),
 		beego.NSCtrlPost("/monitor-cron/change-status", (*adminMonitor.CronController).ChangeStatus),
+		beego.NSCtrlGet("/monitor-cron-log/get", (*adminMonitor.CronLogController).Get),
 	)
 
 	// 请求前、后处理

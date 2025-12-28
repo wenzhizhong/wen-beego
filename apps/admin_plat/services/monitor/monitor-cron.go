@@ -21,32 +21,32 @@ type CronService struct {
 	platCronAr models_ar.PlatCronAr
 }
 
-func (c *CronService) AddTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
-	return c.saveAndAddTask(baseParamDto, data)
+func (s *CronService) AddTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+	return s.saveAndAddTask(baseParamDto, data)
 }
-func (c *CronService) UpdateTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
-	return c.saveAndAddTask(baseParamDto, data)
+func (s *CronService) UpdateTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+	return s.saveAndAddTask(baseParamDto, data)
 }
 
-func (c *CronService) StartTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
-	err := c.UpdateTaskStatus(baseParamDto, data, 1)
+func (s *CronService) StartTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+	err := s.UpdateTaskStatus(baseParamDto, data, 1)
 	return err
 }
 
-func (c *CronService) StopTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+func (s *CronService) StopTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
 	crontab.GetCronManager().Stop()
-	err := c.UpdateTaskStatus(baseParamDto, data, 0)
+	err := s.UpdateTaskStatus(baseParamDto, data, 0)
 	return err
 }
-func (c *CronService) DelTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+func (s *CronService) DelTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
 	err := global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		cronDetail, err := c.platCronAr.GetCronById(baseParamDto.UnitId, data.Id)
+		cronDetail, err := s.platCronAr.GetCronById(baseParamDto.UnitId, data.Id)
 		if err != nil || cronDetail.Id == "" {
 			err = helper.Ternary(err != nil, err, fmt.Errorf("任务不存在"))
 			return err
 		}
 
-		err = c.platCronAr.Delete(tx, baseParamDto.UnitId, data.Id)
+		err = s.platCronAr.Delete(tx, baseParamDto.UnitId, data.Id)
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func (c *CronService) DelTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitC
 	return err
 }
 
-func (c *CronService) saveAndAddTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
+func (s *CronService) saveAndAddTask(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto) error {
 	if data.Name == "" {
 		return fmt.Errorf("请选择任务")
 	}
@@ -79,16 +79,16 @@ func (c *CronService) saveAndAddTask(baseParamDto dto.BaseParamDto, data cron_dt
 		if item.Name != data.NameEn {
 			continue
 		}
-		err := c.checkUnitCronDto(baseParamDto, &data)
+		err := s.checkUnitCronDto(baseParamDto, &data)
 		if err != nil {
 			return err
 		}
 
 		err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
 			if isCreate {
-				err = c.platCronAr.Insert(tx, data)
+				err = s.platCronAr.Insert(tx, data)
 			} else {
-				err = c.platCronAr.Update(tx, data)
+				err = s.platCronAr.Update(tx, data)
 			}
 			if err != nil {
 				return err
@@ -106,8 +106,8 @@ func (c *CronService) saveAndAddTask(baseParamDto dto.BaseParamDto, data cron_dt
 	return nil
 }
 
-func (c *CronService) UpdateTaskStatus(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto, status int) error {
-	cronDetail, err := c.platCronAr.GetCronById(baseParamDto.UnitId, data.Id)
+func (s *CronService) UpdateTaskStatus(baseParamDto dto.BaseParamDto, data cron_dto.UnitCronDto, status int) error {
+	cronDetail, err := s.platCronAr.GetCronById(baseParamDto.UnitId, data.Id)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *CronService) UpdateTaskStatus(baseParamDto dto.BaseParamDto, data cron_
 	}
 
 	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		err = c.platCronAr.Update(tx, tmpData)
+		err = s.platCronAr.Update(tx, tmpData)
 		if err != nil {
 			return err
 		}
@@ -141,7 +141,7 @@ func (c *CronService) UpdateTaskStatus(baseParamDto dto.BaseParamDto, data cron_
 	return err
 }
 
-func (c *CronService) GetAvaibleCronList() (interface{}, error) {
+func (s *CronService) GetAvaibleCronList() (interface{}, error) {
 	data := struct {
 		List interface{} `json:"list"`
 	}{
@@ -150,15 +150,15 @@ func (c *CronService) GetAvaibleCronList() (interface{}, error) {
 	return data, nil
 }
 
-func (c *CronService) GetCronList(reqDto *page_dto.MonitorCronListReqDto) (*dto.RespDataListDto, error) {
-	data, count, err := c.platCronAr.GetCronList(*reqDto)
+func (s *CronService) GetCronList(reqDto *page_dto.MonitorCronListReqDto) (*dto.RespDataListDto, error) {
+	data, count, err := s.platCronAr.GetCronList(*reqDto)
 	res := &dto.RespDataListDto{}
 	res.List = data
 	res.Total = count
 	return res, err
 }
 
-func (c *CronService) checkUnitCronDto(baseParamDto dto.BaseParamDto, data *cron_dto.UnitCronDto) error {
+func (s *CronService) checkUnitCronDto(baseParamDto dto.BaseParamDto, data *cron_dto.UnitCronDto) error {
 	var err error
 
 	isCreate := data.Id == ""
@@ -167,12 +167,12 @@ func (c *CronService) checkUnitCronDto(baseParamDto dto.BaseParamDto, data *cron
 		data.Id, _ = helper.GetUuid()
 		data.CreatedBy = baseParamDto.UnitUserId
 
-		err = c.platCronAr.CheckUnitCronDtoEmpty(data)
+		err = s.platCronAr.CheckUnitCronDtoEmpty(data)
 		if err != nil {
 			return err
 		}
 
-		exists, err1 := c.platCronAr.GetCronByNameEn(baseParamDto.UnitId, data.NameEn, "")
+		exists, err1 := s.platCronAr.GetCronByNameEn(baseParamDto.UnitId, data.NameEn, "")
 		if err1 != nil {
 			return err1
 		}
@@ -180,12 +180,12 @@ func (c *CronService) checkUnitCronDto(baseParamDto dto.BaseParamDto, data *cron
 			return fmt.Errorf("任务名称已存在")
 		}
 	} else {
-		err = c.platCronAr.CheckUnitCronDtoEmpty(data)
+		err = s.platCronAr.CheckUnitCronDtoEmpty(data)
 		if err != nil {
 			return err
 		}
 
-		exists, err1 := c.platCronAr.GetCronByNameEn(baseParamDto.UnitId, data.NameEn, data.Id)
+		exists, err1 := s.platCronAr.GetCronByNameEn(baseParamDto.UnitId, data.NameEn, data.Id)
 		if err1 != nil {
 			return err1
 		}
