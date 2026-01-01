@@ -3,6 +3,7 @@ package models_ar
 import (
 	"WenBeego/apps/common/dto/page_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 )
 
@@ -14,10 +15,14 @@ func (ar *PlatCronLogAr) GetList(pageReq page_dto.MonitorCronLogListReqDto) (dat
 
 	query := global.GetReadDb().Model(&models.PlatCronLog{})
 	if pageReq.NameEn != "" {
-		query.Where("name_en = ?", pageReq.NameEn)
+		query = query.Where("name_en = ?", pageReq.NameEn)
 	}
 	if pageReq.CreatedAt != nil {
-		query.Where("created_at = ?", pageReq.CreatedAt.Unix())
+		tmpBeginTime := pageReq.CreatedAt.Format("2006-01-02") + " 00:00:00"
+		tmpEndTime := pageReq.CreatedAt.Format("2006-01-02") + " 23:59:59"
+		beginTime := helper.GetTimestamp(tmpBeginTime)
+		endTime := helper.GetTimestamp(tmpEndTime)
+		query = query.Where("created_at BETWEEN ? AND ?", beginTime, endTime)
 	}
 
 	err = query.Count(&total).Error

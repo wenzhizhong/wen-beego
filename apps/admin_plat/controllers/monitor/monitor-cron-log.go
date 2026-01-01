@@ -5,6 +5,7 @@ import (
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto/page_dto"
 	"WenBeego/apps/common/helper"
+	"time"
 )
 
 type CronLogController struct {
@@ -29,8 +30,20 @@ func (c *CronLogController) Get() {
 		c.ServeJSON()
 		return
 	}
+	createdAtStr := c.GetString("created_at")
+	createdAt := time.Time{}
+	if createdAtStr != "" {
+		createdAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
+		if err != nil {
+			c.Data["json"] = helper.Response(500, err.Error(), nil)
+			c.ServeJSON()
+			return
+		}
+	}
 	req := &page_dto.MonitorCronLogListReqDto{
 		ReqDataListDto: reqDataListDto,
+		NameEn:         c.GetString("name_en"),
+		CreatedAt:      helper.Ternary(createdAtStr != "", &createdAt, nil),
 	}
 
 	data, err := c.cronLogService.GetCronLogList(req)
