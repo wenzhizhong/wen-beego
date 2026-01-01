@@ -155,6 +155,9 @@ func (s *CronService) GetCronList(reqDto *page_dto.MonitorCronListReqDto) (*dto.
 	res := &dto.RespDataListDto{}
 	res.List = data
 	res.Total = count
+	res.PageSize = reqDto.PageSize
+	res.CurrentPage = reqDto.CurrentPage
+
 	return res, err
 }
 
