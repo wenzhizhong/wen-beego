@@ -13,8 +13,8 @@ func (ar *PlatCronLogAr) GetList(pageReq page_dto.MonitorCronLogListReqDto) (dat
 	data = make([]models.PlatCronLog, 0)
 
 	query := global.GetReadDb().Model(&models.PlatCronLog{})
-	if pageReq.CrontabId != "" {
-		query.Where("crontab_id = ?", pageReq.CrontabId)
+	if pageReq.NameEn != "" {
+		query.Where("name_en = ?", pageReq.NameEn)
 	}
 	if pageReq.CreatedAt != nil {
 		query.Where("created_at = ?", pageReq.CreatedAt.Unix())
@@ -27,7 +27,10 @@ func (ar *PlatCronLogAr) GetList(pageReq page_dto.MonitorCronLogListReqDto) (dat
 	if total == 0 {
 		return
 	}
-	err = query.Offset(pageReq.Offset).Limit(pageReq.PageSize).Find(&data).Error
+	err = query.Order("created_at desc").
+		Offset(pageReq.Offset).
+		Limit(pageReq.PageSize).
+		Find(&data).Error
 	if err != nil {
 		return
 	}

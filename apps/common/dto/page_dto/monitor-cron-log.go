@@ -8,7 +8,7 @@ import (
 type MonitorCronLogListReqDto struct {
 	dto.ReqDataListDto
 
-	CrontabId string
+	NameEn    string
 	CreatedAt *time.Time
 }
 type MonitorCronLogListRespDto struct {

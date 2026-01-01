@@ -16,5 +16,5 @@ type CronLogService struct {
 func (s *CronLogService) GetCronLogList(reqDto *page_dto.MonitorCronLogListReqDto) (*dto.RespDataListDto, error) {
 	data, count, err := s.platCronLogAr.GetList(*reqDto)
 
-	return &dto.RespDataListDto{List: data, Total: count}, err
+	return &dto.RespDataListDto{List: data, Total: count, PageSize: reqDto.PageSize, CurrentPage: reqDto.CurrentPage}, err
 }

@@ -46,7 +46,7 @@ func (ar *PlatCronLogAr) Insert(cronNameEn string, result bool, remark string) (
 	createdAt := helper.GetTimestamp()
 	platCronLog := base_model.UnitCronLog{
 		Id:        uuid,
-		CrontabId: crontabInfo.GetID(),
+		NameEn:    cronNameEn,
 		Result:    result,
 		Remark:    remark,
 		CreatedAt: createdAt,
