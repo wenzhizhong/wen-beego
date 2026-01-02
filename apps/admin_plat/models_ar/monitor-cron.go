@@ -48,6 +48,7 @@ func (ar *PlatCronAr) Update(tx *gorm.DB, data cron_dto.UnitCronDto) (err error)
 	}
 	return global.GetWriteDb().
 		Model(&models.PlatCron{}).
+		Select("*").
 		Omit("unit_id", "created_at", "created_by", "deleted").
 		Where("id = ?", data.Id).
 		Updates(&data).Error

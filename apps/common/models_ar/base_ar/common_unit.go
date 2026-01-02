@@ -158,6 +158,7 @@ func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unit
 	} else {
 		err = tx.Model(unitModel).
 			Where("id = ?", unitDto.Id).
+			Select("*").
 			Omit("deleted", "created_at", "deleted_at").
 			Updates(&unitDto).Error
 	}
