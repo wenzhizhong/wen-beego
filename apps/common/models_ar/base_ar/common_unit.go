@@ -14,6 +14,22 @@ import (
 )
 
 /**
+ * 获取所有组织单位
+ */
+func GetAll[UnitModel itf.UnitItf](unitModel UnitModel, fields string) ([]base_model.UnitMenu, error) {
+	if fields == "" {
+		fields = "*"
+	}
+	listData := []base_model.UnitMenu{}
+	result := global.GetReadDb().
+		Model(unitModel).
+		Select(fields).
+		Where(unitModel.TableName() + ".deleted = 0").
+		Find(&listData)
+	return listData, result.Error
+}
+
+/**
  * 获取用户组织列表
  * @param {string} userId 用户ID
  * @param {models.ModelInterface} unitModel models.Plat, models.Mchnt

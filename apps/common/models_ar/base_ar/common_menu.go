@@ -24,7 +24,7 @@ func CloneMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, oldUnitId string, newUnit
 		return errors.New("克隆菜单，新组织单位id 不能为空")
 	}
 
-	err = global.GetReadDb().Model(unitMenuModel).Where("clone = 1 and unit_id = ?", oldUnitId).Find(&insertMenuData).Error
+	err = global.GetReadDb().Model(unitMenuModel).Where("deleted = 0 and clone = 1 and unit_id = ?", oldUnitId).Find(&insertMenuData).Error
 	if err != nil {
 		return err
 	}
@@ -56,5 +56,28 @@ func CloneMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, oldUnitId string, newUnit
 	if err != nil {
 		return err
 	}
+	return
+}
+
+func GetMenuListByTitle[UnitMenuModel itf.MenuItf](unitIds []string, title string) (data []base_model.UnitMenu, err error) {
+	var unitMenuModel UnitMenuModel
+	data = make([]base_model.UnitMenu, 0)
+
+	if len(unitIds) == 0 {
+		return data, errors.New("GetMenuListByTitle():unitIds不能为空")
+	}
+	if title == "" {
+		return data, errors.New("GetMenuListByTitle(): title不能为空")
+	}
+
+	err = global.GetReadDb().
+		Model(unitMenuModel).
+		Select("id").
+		Where("deleted = 0 and title = ? and unit_id in ?", title, unitIds).
+		Find(&data).Error
+	if err != nil {
+		return data, err
+	}
+
 	return
 }
