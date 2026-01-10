@@ -14,7 +14,7 @@ import (
 
 var operateMenuTypeArr = []int{base_model.UNIT_MENU_TYPE_BUTTON, base_model.UNIT_MENU_TYPE_OTHER_API}
 
-func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+func GetUserMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuMapModel MenuMapModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_dto.RoleMenuDto, err error) {
 	if unitId == "" || unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, unitUserId:%s", unitId, unitUserId)
 		global.Log.Error(str)
@@ -26,36 +26,36 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 	}
 
 	tableMenu := menuModel.TableName()
+	tableMenuMap := menuMapModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()
 	tableUserRole := userRoleModel.TableName()
 	tableRole := roleModel.TableName()
 	tableStruct := struct {
 		TableMenu     string
+		TableMenuMap  string
 		TableRoleMenu string
 		TableUserRole string
 		TableRole     string
 	}{
 		TableMenu:     tableMenu,
+		TableMenuMap:  tableMenuMap,
 		TableRoleMenu: tableRoleMenu,
 		TableUserRole: tableUserRole,
 		TableRole:     tableRole,
 	}
 
-	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.*`, tableStruct)
+	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.*, ANY_VALUE({{.TableMenuMap}}.unit_id) AS unit_id`, tableStruct)
 	joinMenuStr, err2 := helper.ParseStringTpl(`inner join {{.TableMenu}} on {{.TableMenu}}.id = {{.TableRoleMenu}}.menu_id`, tableStruct)
-	joinUserRoleStr, err3 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRoleMenu}}.role_id`, tableStruct)
-	joinRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleMenu}}.role_id`, tableStruct)
-	if err != nil {
+	joinMenuMapStr, err3 := helper.ParseStringTpl(`inner join {{.TableMenuMap}} on {{.TableMenuMap}}.menu_id = {{.TableMenu}}.id`, tableStruct)
+	joinUserRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRoleMenu}}.role_id`, tableStruct)
+	joinRoleStr, err5 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleMenu}}.role_id`, tableStruct)
+
+	if err != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
+		err = helper.Ternary(err2 != nil, err2, err)
+		err = helper.Ternary(err3 != nil, err3, err)
+		err = helper.Ternary(err4 != nil, err4, err)
+		err = helper.Ternary(err5 != nil, err5, err)
 		return menuAuthList, err
-	}
-	if err2 != nil {
-		return menuAuthList, err2
-	}
-	if err3 != nil {
-		return menuAuthList, err3
-	}
-	if err4 != nil {
-		return menuAuthList, err4
 	}
 
 	var tmpError error
@@ -63,7 +63,9 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 		tmpError = global.GetReadDb().
 			Model(menuModel).
 			Select(selectStr).
-			Where(tableMenu+".unit_id = ?", unitId).
+			Joins(joinMenuMapStr).
+			Where(tableMenuMap+".unit_id = ?", unitId).
+			Where(tableMenuMap+".deleted = ?", 0).
 			Where(tableMenu+".deleted = ?", 0).
 			Where(tableMenu+".menu_type NOT IN ?", operateMenuTypeArr).
 			Group(tableMenu + ".id").
@@ -75,9 +77,11 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 			Model(roleMenuModel).
 			Select(selectStr).
 			Joins(joinMenuStr).
+			Joins(joinMenuMapStr).
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
-			Where(tableMenu+".unit_id = ?", unitId).
+			Where(tableMenuMap+".unit_id = ?", unitId).
+			Where(tableMenuMap+".deleted = ?", 0).
 			Where(tableMenu+".deleted = ?", 0).
 			Where(tableMenu+".menu_type NOT IN ?", operateMenuTypeArr).
 			Where(tableRole+".deleted = ?", 0).
@@ -98,7 +102,7 @@ func GetUserMenu[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleM
 /**
  * 页面-获取角色可选权限列表
  */
-func GetRoleMenu[MenuModel itf.MenuItf](unitIds []string, menuModel MenuModel) (dataList []base_model.UnitMenu, err error) {
+func GetRoleMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf](unitIds []string, menuModel MenuModel, menuMapModel MenuMapModel) (dataList []base_model.UnitMenu, err error) {
 	dataList = make([]base_model.UnitMenu, 0)
 	if len(unitIds) == 0 {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%v", unitIds)
@@ -107,10 +111,13 @@ func GetRoleMenu[MenuModel itf.MenuItf](unitIds []string, menuModel MenuModel) (
 	}
 
 	tableMenu := menuModel.TableName()
+	tableMenuMap := menuMapModel.TableName()
 	tableStruct := struct {
-		TableMenu string
+		TableMenu    string
+		TableMenuMap string
 	}{
-		TableMenu: tableMenu,
+		TableMenu:    tableMenu,
+		TableMenuMap: tableMenuMap,
 	}
 
 	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title`, tableStruct)
@@ -121,7 +128,8 @@ func GetRoleMenu[MenuModel itf.MenuItf](unitIds []string, menuModel MenuModel) (
 	err = global.GetReadDb().
 		Model(menuModel).
 		Select(selectStr).
-		Where(tableMenu+".unit_id in ?", unitIds).
+		Where(tableMenuMap+".unit_id in ?", unitIds).
+		Where(tableMenuMap+".deleted = 0").
 		Where(tableMenu+".deleted = ?", 0).
 		Group(tableMenu + ".id").
 		Order(tableMenu + ".rank asc").
@@ -134,27 +142,30 @@ func GetRoleMenu[MenuModel itf.MenuItf](unitIds []string, menuModel MenuModel) (
 	return
 }
 
-func GetRoleMenuIds[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf](roleId string, menuModel MenuModel, roleMenuModel RoleMenuModel) (dataList []base_model.UnitRoleMenu, err error) {
+func GetRoleMenuIds[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuModel itf.RoleMenuItf](roleId string, menuModel MenuModel, menuMapModel MenuMapModel, roleMenuModel RoleMenuModel) (dataList []base_model.UnitRoleMenu, err error) {
 	if roleId == "" {
 		str := fmt.Sprintf("GetRoleMenuIds():获取角色权限必填参数, role_id:%s", roleId)
 		global.Log.Error(str)
 		return dataList, errors.New(str)
 	}
 	tableMenuName := menuModel.TableName()
+	tableMenuMapName := menuMapModel.TableName()
 	tableRoleMenuName := roleMenuModel.TableName()
 
 	err = global.GetReadDb().
 		Model(roleMenuModel).
 		Select(tableRoleMenuName+".*").
 		Joins("inner join "+tableMenuName+" on "+tableMenuName+".id = "+tableRoleMenuName+".menu_id").
+		Joins("inner join "+tableMenuMapName+" on "+tableMenuMapName+".menu_id = "+tableRoleMenuName+".menu_id").
 		Where(tableRoleMenuName+".role_id = ?", roleId).
 		// Where(tableMenuName+".menu_type IN ?", operateMenuTypeArr).
 		Where(tableMenuName+".deleted = ?", 0).
+		Where(tableMenuMapName+".deleted = ?", 0).
 		Find(&dataList).Error
 	return
 }
 
-func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuList []base_model.UnitMenu, err error) {
+func GetUserPermissions[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuMapModel MenuMapModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuList []base_model.UnitMenu, err error) {
 	if unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, unitUserId)
 		global.Log.Error(str)
@@ -166,37 +177,36 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 	}
 
 	tableMenu := menuModel.TableName()
+	tableMenuMap := menuMapModel.TableName()
 	tableRoleMenu := roleMenuModel.TableName()
 	tableUserRole := userRoleModel.TableName()
 	tableRole := roleModel.TableName()
 	tableStruct := struct {
 		TableMenu     string
+		TableMenuMap  string
 		TableRoleMenu string
 		TableUserRole string
 		TableRole     string
 	}{
 		TableMenu:     tableMenu,
+		TableMenuMap:  tableMenuMap,
 		TableRoleMenu: tableRoleMenu,
 		TableUserRole: tableUserRole,
 		TableRole:     tableRole,
 	}
 
-	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.*`, tableStruct)
+	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.*, ANY_VALUE({{.TableMenuMap}}.unit_id) AS unit_id`, tableStruct)
 	joinMenuStr, err2 := helper.ParseStringTpl(`inner join {{.TableMenu}} on {{.TableMenu}}.id = {{.TableRoleMenu}}.menu_id`, tableStruct)
-	joinUserRoleStr, err3 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRoleMenu}}.role_id`, tableStruct)
-	joinRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleMenu}}.role_id`, tableStruct)
+	joinMenuMapStr, err3 := helper.ParseStringTpl(`inner join {{.TableMenuMap}} on {{.TableMenuMap}}.menu_id = {{.TableMenu}}.id`, tableStruct)
+	joinUserRoleStr, err4 := helper.ParseStringTpl(`inner join {{.TableUserRole}} on {{.TableUserRole}}.role_id = {{.TableRoleMenu}}.role_id`, tableStruct)
+	joinRoleStr, err5 := helper.ParseStringTpl(`inner join {{.TableRole}} on {{.TableRole}}.id = {{.TableRoleMenu}}.role_id`, tableStruct)
 
-	if err != nil {
+	if err != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil {
+		err = helper.Ternary(err2 != nil, err2, err)
+		err = helper.Ternary(err3 != nil, err3, err)
+		err = helper.Ternary(err4 != nil, err4, err)
+		err = helper.Ternary(err5 != nil, err5, err)
 		return menuList, err
-	}
-	if err2 != nil {
-		return menuList, err2
-	}
-	if err3 != nil {
-		return menuList, err3
-	}
-	if err4 != nil {
-		return menuList, err4
 	}
 
 	var tmpError error
@@ -204,9 +214,11 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 		tmpError = global.GetReadDb().
 			Model(menuModel).
 			Select(selectStr).
+			Joins(joinMenuMapStr).
 			Where(tableMenu+".deleted = 0").
 			Where(tableMenu+".menu_type IN ?", operateMenuTypeArr).
-			Where(tableMenu+".unit_id = ?", unitId).
+			Where(tableMenuMap+".unit_id = ?", unitId).
+			Where(tableMenuMap + ".deleted = 0").
 			Group(tableMenu + ".id").
 			Scan(&menuList).
 			Error
@@ -215,6 +227,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 			Model(roleMenuModel).
 			Select(selectStr).
 			Joins(joinMenuStr).
+			Joins(joinMenuMapStr).
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
 			Where(tableMenu+".deleted = 0").
@@ -223,6 +236,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, RoleMenuModel itf.RoleMenuItf, Us
 			Where(tableUserRole + ".deleted = 0").
 			Where(tableRole + ".status = 1").
 			Where(tableRole + ".deleted = 0").
+			Where(tableMenuMap + ".deleted = 0").
 			Group(tableMenu + ".id").
 			Scan(&menuList).
 			Error

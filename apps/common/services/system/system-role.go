@@ -147,9 +147,9 @@ func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string
 	var dataList interface{}
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{})
+		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
 	case "mchnt_plat":
-		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{})
+		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntMenuMap{})
 	default:
 		err = errors.New("GetRoleMenu：模块名称错误")
 	}
@@ -168,9 +168,9 @@ func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dat
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatRoleMenu{})
+		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
 	case "mchnt_plat":
-		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntRoleMenu{})
+		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{})
 	default:
 		err = errors.New("GetRoleMenuIds：模块名称错误")
 	}

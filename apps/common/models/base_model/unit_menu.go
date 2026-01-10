@@ -7,7 +7,7 @@ import (
 type UnitMenu struct {
 	Id              string    `json:"id" gorm:"column:id;primaryKey;comment:ID"`
 	ParentId        string    `json:"parentId" gorm:"column:parent_id;comment:上级ID"`
-	UnitId          string    `json:"unitId" gorm:"column:unit_id;comment:组织单位ID"`
+	UnitId          string    `json:"unitId" gorm:"->"`
 	MenuType        int       `json:"menuType" gorm:"column:menu_type;not null;comment: 菜单类型:0代表菜单、1代表iframe、2代表外链、3代表按钮、4所需额外接口"`
 	Title           string    `json:"title" gorm:"column:title;size:255;comment: 菜单标题"`
 	Name            string    `json:"name" gorm:"column:name;size:255;comment:	菜单名称"`

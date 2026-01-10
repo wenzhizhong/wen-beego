@@ -62,9 +62,9 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Plat{}, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatRole{}, &models.PlatUserRole{}, &models.PlatMenu{}, &models.PlatRoleClassify{})
+		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Plat{}, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatRole{}, &models.PlatUserRole{}, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleClassify{})
 	case "mchnt_plat":
-		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Mchnt{}, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntRole{}, &models.MchntUserRole{}, &models.MchntMenu{}, &models.MchntRoleClassify{})
+		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Mchnt{}, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntRole{}, &models.MchntUserRole{}, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleClassify{})
 	default:
 		err = errors.New("unit Save：模块名称错误")
 	}
@@ -97,6 +97,7 @@ func doSave[
 	RoleModel itf.RoleItf,
 	UnitUserRoleModel itf.UserRoleItf,
 	UnitMenuModel itf.MenuItf,
+	UnitMenuMapModel itf.MenuMapItf,
 	RoleClassifyModel itf.RoleClassifyItf,
 ](
 	isAdd bool,
@@ -108,6 +109,7 @@ func doSave[
 	roleModel RoleModel,
 	unitUserRoleModel UnitUserRoleModel,
 	unitMenuModel UnitMenuModel,
+	unitMenuMapModel UnitMenuMapModel,
 	roleClassifyModel RoleClassifyModel,
 ) (newUnitId string, err error) {
 
@@ -157,7 +159,8 @@ func doSave[
 				return err
 			}
 
-			err = base_ar.CloneMenu[UnitMenuModel](tx, baseParamDto.UnitId, newUnitId)
+			// err = base_ar.CloneMenu[UnitMenuModel](tx, baseParamDto.UnitId, newUnitId)
+			err = base_ar.CloneMenuMap[UnitMenuModel, UnitMenuMapModel](tx, baseParamDto.UnitId, newUnitId)
 			if err != nil {
 				return err
 			}
