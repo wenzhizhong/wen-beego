@@ -1,5 +1,12 @@
 package base_ar
 
+import (
+	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models/itf"
+	"errors"
+)
+
 // import (
 // 	"WenBeego/apps/common/global"
 // 	"WenBeego/apps/common/helper"
@@ -58,3 +65,26 @@ package base_ar
 // 	}
 // 	return
 // }
+
+func GetMenuListByTitle[UnitMenuModel itf.MenuItf](unitIds []string, title string) (data []base_model.UnitMenu, err error) {
+	var unitMenuModel UnitMenuModel
+	data = make([]base_model.UnitMenu, 0)
+
+	if len(unitIds) == 0 {
+		return data, errors.New("GetMenuListByTitle():unitIds不能为空")
+	}
+	if title == "" {
+		return data, errors.New("GetMenuListByTitle(): title不能为空")
+	}
+
+	err = global.GetReadDb().
+		Model(unitMenuModel).
+		Select("id").
+		Where("deleted = 0 and title = ? and unit_id in ?", title, unitIds).
+		Find(&data).Error
+	if err != nil {
+		return data, err
+	}
+
+	return
+}

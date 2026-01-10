@@ -75,8 +75,16 @@ func init() {
 		beego.NSCtrlPost("/system-user/del", (*adminSystem.UserController).Del),
 		beego.NSCtrlGet("/system-user/get-role-tree", (*adminSystem.UserController).GetRoleTree),
 
+		beego.NSCtrlGet("/system-menu/get-plat", (*adminSystem.MenuPlatController).Get),
+		beego.NSCtrlPost("/system-menu/add-plat", (*adminSystem.MenuPlatController).Add),
+		beego.NSCtrlPost("/system-menu/edit-plat", (*adminSystem.MenuPlatController).Edit),
+		beego.NSCtrlPost("/system-menu/del-plat", (*adminSystem.MenuPlatController).Del),
+		beego.NSCtrlGet("/system-menu/get-mchnt", (*adminSystem.MenuMchntController).Get),
+		beego.NSCtrlPost("/system-menu/add-mchnt", (*adminSystem.MenuMchntController).Add),
+		beego.NSCtrlPost("/system-menu/edit-mchnt", (*adminSystem.MenuMchntController).Edit),
+		beego.NSCtrlPost("/system-menu/del-mchnt", (*adminSystem.MenuMchntController).Del),
+
 		beego.NSCtrlGet("/monitor-cron/get", (*adminMonitor.CronController).Get),
-		beego.NSCtrlGet("/monitor-cron/get-avaible", (*adminMonitor.CronController).GetAvaibleCronList),
 		beego.NSCtrlPost("/monitor-cron/add", (*adminMonitor.CronController).Add),
 		beego.NSCtrlPost("/monitor-cron/edit", (*adminMonitor.CronController).Edit),
 		beego.NSCtrlPost("/monitor-cron/del", (*adminMonitor.CronController).Del),
