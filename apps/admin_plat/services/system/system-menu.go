@@ -185,13 +185,16 @@ func (s *MenuService) getAllUnitIds(baseParamDto dto.BaseParamDto, menuDto menu_
 	return
 }
 
-func (s *MenuService) GetAllMenu(baseParamDto dto.BaseParamDto, platformType string) (data []base_model.UnitMenu, err error) {
-	data = make([]base_model.UnitMenu, 0)
-	switch platformType {
-	case "admin_plat":
-
-	case "admin_mchnt":
-
+// 系统管理-商户菜单管理-商户单位树形
+func (s *MenuService) MchntUnitList(baseParamDto dto.BaseParamDto) (data interface{}, err error) {
+	tmpData, err := base_ar.GetAllUnit(&models.Mchnt{}, "*")
+	for _, item := range tmpData {
+		item.LogoLink, _ = helper.LocalFileSign(baseParamDto.Host, item.Logo)
 	}
-	return
+	data = struct {
+		List any `json:"list"`
+	}{
+		List: tmpData,
+	}
+	return data, err
 }

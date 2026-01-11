@@ -121,13 +121,16 @@ func GetRoleMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf](unitIds []s
 	}
 
 	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title`, tableStruct)
-	if err != nil {
+	joinStr, err2 := helper.ParseStringTpl(`INNER JOIN {{.TableMenuMap}} ON {{.TableMenuMap}}.menu_id={{.TableMenu}}.id`, tableStruct)
+	if err != nil || err2 != nil {
+		err = helper.Ternary(err2 != nil, err2, err)
 		return dataList, err
 	}
 
 	err = global.GetReadDb().
 		Model(menuModel).
 		Select(selectStr).
+		Joins(joinStr).
 		Where(tableMenuMap+".unit_id in ?", unitIds).
 		Where(tableMenuMap+".deleted = 0").
 		Where(tableMenu+".deleted = ?", 0).

@@ -41,6 +41,7 @@ func (c *MenuMchntController) Get() {
 	pageDto.BaseParamDto = baseParamDto
 	pageDto.ReqDataListDto = reqDataListDto
 	pageDto.Title = c.GetString("title")
+	pageDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", []string{c.GetString("selectUnitIds")}, []string{})
 
 	data, err := c.menuService.GetMenuList(pageDto, "admin_mchnt")
 	if err != nil {
@@ -143,5 +144,31 @@ func (c *MenuMchntController) Del() {
 		return
 	}
 	c.Data["json"] = helper.Response(200, "success", nil)
+	c.ServeJSON()
+}
+
+// 系统管理-商户菜单管理-商户单位树形
+// @Summary 商户菜单管理-商户单位树形
+// @Description 商户菜单管理-商户单位树形
+// @Tags 系统管理-商户菜单管理
+// @Accept application/json
+// @Produce application/json
+// @Success 200 {object} dto.Response
+// @Router /admin_plat/system-menu/mchnt-unit-list [get]
+
+func (c *MenuMchntController) MchntUnitList() {
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	data, err := c.menuService.MchntUnitList(baseParamDto)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }

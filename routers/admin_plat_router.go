@@ -83,6 +83,7 @@ func init() {
 		beego.NSCtrlPost("/system-menu/add-mchnt", (*adminSystem.MenuMchntController).Add),
 		beego.NSCtrlPost("/system-menu/edit-mchnt", (*adminSystem.MenuMchntController).Edit),
 		beego.NSCtrlPost("/system-menu/del-mchnt", (*adminSystem.MenuMchntController).Del),
+		beego.NSCtrlGet("/system-menu/mchnt-unit-list", (*adminSystem.MenuMchntController).MchntUnitList),
 
 		beego.NSCtrlGet("/monitor-cron/get", (*adminMonitor.CronController).Get),
 		beego.NSCtrlPost("/monitor-cron/add", (*adminMonitor.CronController).Add),
