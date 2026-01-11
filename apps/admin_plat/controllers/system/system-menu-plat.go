@@ -41,6 +41,7 @@ func (c *MenuPlatController) Get() {
 	pageDto.BaseParamDto = baseParamDto
 	pageDto.ReqDataListDto = reqDataListDto
 	pageDto.Title = c.GetString("title")
+	pageDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", []string{c.GetString("selectUnitIds")}, []string{baseParamDto.UnitId})
 
 	data, err := c.menuService.GetMenuList(pageDto, "admin_plat")
 	if err != nil {

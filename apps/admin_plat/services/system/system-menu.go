@@ -34,9 +34,9 @@ func (s *MenuService) GetMenuList(pageDto page_dto.SystemMenuListReqDto, platfor
 
 	switch platformType {
 	case "admin_plat":
-		list, count, err = s.commonPlatMenuAr.GetMenuList(pageDto)
+		list, count, err = base_ar.GetPageMenuList(pageDto, &models.PlatMenu{}, &models.PlatMenuMap{})
 	case "admin_mchnt":
-		list, count, err = s.commonMchntMenuAr.GetMenuList(pageDto)
+		list, count, err = base_ar.GetPageMenuList(pageDto, &models.MchntMenu{}, &models.MchntMenuMap{})
 	}
 
 	resultDto.List = list
@@ -52,49 +52,54 @@ func (s *MenuService) Save(baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuD
 		err = errors.New("Save():参数错误")
 		return
 	}
-	global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		err = s.doSave(tx, baseParamDto, menuDto, platformType, menuDto.UnitId)
+	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		err = s.doSave(tx, baseParamDto, &menuDto, platformType, menuDto.UnitId)
 		if err != nil {
 			return err
 		}
-		err = s.doSaveOfAsync(tx, baseParamDto, menuDto, platformType)
+		err = s.doAsyncMenuMap(tx, baseParamDto, menuDto, platformType)
 		return err
 	})
 	// data = make(map[string]string)
 	// data["id"] = menuDto.Id
 	return
 }
-func (s *MenuService) doSave(tx *gorm.DB, baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDto, platformType string, unitId string) (err error) {
+func (s *MenuService) doSave(tx *gorm.DB, baseParamDto dto.BaseParamDto, menuDto *menu_dto.MenuDto, platformType string, unitId string) (err error) {
 	menuDto.UnitId = unitId
-	err = s.checkMenuDto(&menuDto, platformType)
+	err = s.checkMenuDto(menuDto, platformType)
 	if err != nil {
 		return err
 	}
 
 	switch platformType {
 	case "admin_plat":
-		err = s.commonPlatMenuAr.Save(tx, &menuDto)
+		err = base_ar.SaveMenu(tx, menuDto, &models.PlatMenu{})
 	case "admin_mchnt":
-		err = s.commonMchntMenuAr.Save(tx, &menuDto)
+		err = base_ar.SaveMenu(tx, menuDto, &models.MchntMenu{})
 	}
 
 	return
 }
-func (s *MenuService) doSaveOfAsync(tx *gorm.DB, baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDto, platformType string) (err error) {
-	if menuDto.AsyncToAll != "1" {
-		return
+func (s *MenuService) doAsyncMenuMap(tx *gorm.DB, baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDto, platformType string) (err error) {
+	userUnitIds := []string{menuDto.UnitId}
+	if menuDto.AsyncToAll == "1" {
+		unitIdsMap := make(map[string]bool, 0)
+		unitIdsMap, err = s.getAllUnitIds(baseParamDto, menuDto, platformType)
+		userUnitIds = helper.GetMapKeys(unitIdsMap)
 	}
-	userUnitIds := make([]string, 0)
-	userUnitIds, err = s.getAllUnitIds(baseParamDto, menuDto, platformType)
 	if err != nil {
 		return
 	}
+	if len(userUnitIds) == 0 {
+		err = errors.New("doAsyncMenuMap():没有找到组织单位")
+		return
+	}
 
-	for _, unitId := range userUnitIds {
-		err = s.doSave(tx, baseParamDto, menuDto, platformType, unitId)
-		if err != nil {
-			return err
-		}
+	switch platformType {
+	case "admin_plat":
+		err = base_ar.RefreshUnitMenuMap(tx, userUnitIds, menuDto.Id, &models.Plat{}, &models.PlatMenu{}, &models.PlatMenuMap{})
+	case "admin_mchnt":
+		err = base_ar.RefreshUnitMenuMap(tx, userUnitIds, menuDto.Id, &models.Mchnt{}, &models.MchntMenu{}, &models.MchntMenuMap{})
 	}
 
 	return
@@ -105,40 +110,12 @@ func (s *MenuService) Del(baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDt
 	if menuDto.Id == "" {
 		return errors.New("Del():参数错误")
 	}
-	menuIds := []string{menuDto.Id}
-	userUnitIds := make([]string, 0)
-	userUnitIds, err = s.getAllUnitIds(baseParamDto, menuDto, platformType)
-	if err != nil {
-		return
-	}
-
-	meunList := make([]base_model.UnitMenu, 0)
 	switch platformType {
 	case "admin_plat":
-		meunList, err = base_ar.GetMenuListByTitle[*models.PlatMenu](userUnitIds, menuDto.Title)
+		err = base_ar.DelMenu(menuDto.Id, &models.PlatMenu{})
 	case "admin_mchnt":
-		meunList, err = base_ar.GetMenuListByTitle[*models.MchntMenu](userUnitIds, menuDto.Title)
+		err = base_ar.DelMenu(menuDto.Id, &models.MchntMenu{})
 	}
-	if err != nil {
-		return
-	}
-	for _, v := range meunList {
-		if v.Id != menuDto.Id {
-			menuIds = append(menuIds, v.Id)
-		}
-	}
-
-	global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		for _, menuId := range menuIds {
-			switch platformType {
-			case "admin_plat":
-				err = s.commonPlatMenuAr.Del(menuId)
-			case "admin_mchnt":
-				err = s.commonMchntMenuAr.Del(menuId)
-			}
-		}
-		return nil
-	})
 	return
 }
 
@@ -172,11 +149,14 @@ func (s *MenuService) checkMenuRepeat(id, unitId, title string, platformType str
 	menuList := make([]base_model.UnitMenu, 0)
 	switch platformType {
 	case "admin_plat":
-		menuList, err = s.commonPlatMenuAr.GetMenuListByTitle(unitId, title)
+		menuList, err = base_ar.GetMenuListByTitle(title, &models.PlatMenu{})
 	case "admin_mchnt":
-		menuList, err = s.commonMchntMenuAr.GetMenuListByTitle(unitId, title)
+		menuList, err = base_ar.GetMenuListByTitle(title, &models.MchntMenu{})
 	}
-	if len(menuList) > 2 || (len(menuList) > 0 && menuList[0].Id != id) {
+	addExists := (len(menuList) > 0 && id == "")
+	editExists := (len(menuList) > 0 && id != "" && menuList[0].Id != id)
+
+	if len(menuList) > 2 || editExists || addExists {
 		return errors.New("菜单名称重复")
 	}
 
@@ -184,33 +164,23 @@ func (s *MenuService) checkMenuRepeat(id, unitId, title string, platformType str
 }
 
 // 如果要同步菜单前，获取其他组织单位ids
-func (s *MenuService) getAllUnitIds(baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDto, platformType string) (data []string, err error) {
-	data = make([]string, 0)
-	userHasUnitIds := make(map[string]bool, 0)
+func (s *MenuService) getAllUnitIds(baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDto, platformType string) (data map[string]bool, err error) {
+	data = make(map[string]bool)
 
-	if menuDto.AsyncToAll == "1" {
-		fields := "id, pid, name"
-		tmpUnitList := make([]base_model.UnitMenu, 0)
-		switch platformType {
-		case "admin_plat":
-			tmpUnitList, err = base_ar.GetAll(&models.Plat{}, fields)
-		case "admin_mchnt":
-			tmpUnitList, err = base_ar.GetAll(&models.Mchnt{}, fields)
-		}
-		if err != nil {
-			return data, err
-		}
-
-		for _, item := range tmpUnitList {
-			if menuDto.UnitId == item.Id {
-				continue
-			}
-			userHasUnitIds[item.Id] = true
-		}
+	fields := "id, pid, name"
+	tmpUnitList := make([]base_model.Unit, 0)
+	switch platformType {
+	case "admin_plat":
+		tmpUnitList, err = base_ar.GetAllUnit(&models.Plat{}, fields)
+	case "admin_mchnt":
+		tmpUnitList, err = base_ar.GetAllUnit(&models.Mchnt{}, fields)
 	}
-	data = helper.GetMapKeys(userHasUnitIds)
-	if len(data) == 0 {
-		err = errors.New("没有找到用户组织单位列表")
+	if err != nil {
+		return data, err
+	}
+
+	for _, item := range tmpUnitList {
+		data[item.Id] = true
 	}
 	return
 }

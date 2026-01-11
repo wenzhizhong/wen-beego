@@ -160,7 +160,7 @@ func doSave[
 			}
 
 			// err = base_ar.CloneMenu[UnitMenuModel](tx, baseParamDto.UnitId, newUnitId)
-			err = base_ar.CloneMenuMap[UnitMenuModel, UnitMenuMapModel](tx, baseParamDto.UnitId, newUnitId)
+			err = base_ar.CreateNewUnitMenuMap[UnitMenuModel, UnitMenuMapModel](tx, newUnitId)
 			if err != nil {
 				return err
 			}

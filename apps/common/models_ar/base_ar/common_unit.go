@@ -16,11 +16,11 @@ import (
 /**
  * 获取所有组织单位
  */
-func GetAll[UnitModel itf.UnitItf](unitModel UnitModel, fields string) ([]base_model.UnitMenu, error) {
+func GetAllUnit[UnitModel itf.UnitItf](unitModel UnitModel, fields string) ([]base_model.Unit, error) {
 	if fields == "" {
 		fields = "*"
 	}
-	listData := []base_model.UnitMenu{}
+	listData := []base_model.Unit{}
 	result := global.GetReadDb().
 		Model(unitModel).
 		Select(fields).
