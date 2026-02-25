@@ -199,6 +199,13 @@ func (a *PlatMenuViewAr) GetRoleMenu(unitIds []string, menuModel models.PlatMenu
 		return dataList, errors.New(str)
 	}
 
+	platAr := PlatAr{}
+	unitInfo, err1 := platAr.GetById(unitIds[0])
+	if err1 != nil {
+		err = err1
+		return
+	}
+
 	tableMenu := menuModel.TableName()
 	tableMenuMap := menuMapModel.TableName()
 	tableStruct := struct {
@@ -210,24 +217,36 @@ func (a *PlatMenuViewAr) GetRoleMenu(unitIds []string, menuModel models.PlatMenu
 	}
 
 	selectStr, err := helper.ParseStringTpl(`DISTINCT ON ({{.TableMenu}}.id) {{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title,{{.TableMenu}}.rank`, tableStruct)
-	joinStr, err2 := helper.ParseStringTpl(`INNER JOIN {{.TableMenuMap}} ON {{.TableMenuMap}}.menu_id={{.TableMenu}}.id`, tableStruct)
-	if err != nil || err2 != nil {
+	selectStr2, err2 := helper.ParseStringTpl(`{{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title,{{.TableMenu}}.rank`, tableStruct)
+	joinStr, err3 := helper.ParseStringTpl(`INNER JOIN {{.TableMenuMap}} ON {{.TableMenuMap}}.menu_id={{.TableMenu}}.id`, tableStruct)
+	if err != nil || err2 != nil || err3 != nil {
 		err = helper.Ternary(err2 != nil, err2, err)
+		err = helper.Ternary(err3 != nil, err3, err)
 		return dataList, err
 	}
 
-	subQuery := global.GetReadDb().
-		Model(menuModel).
-		Select(selectStr).
-		Joins(joinStr).
-		Where(tableMenuMap+".unit_id in ?", unitIds).
-		Where(tableMenuMap+".deleted = 0").
-		Where(tableMenu+".deleted = ?", 0)
-	err = global.GetReadDb().
-		Table("(?) tmp", subQuery).
-		Order("rank asc").
-		Find(&dataList).
-		Error
+	if unitInfo.IsOfficial {
+		err = global.GetReadDb().
+			Model(menuModel).
+			Select(selectStr2).
+			Where("deleted = 0").
+			Order("rank asc").
+			Scan(&dataList).
+			Error
+	} else {
+		subQuery := global.GetReadDb().
+			Model(menuModel).
+			Select(selectStr).
+			Joins(joinStr).
+			Where(tableMenuMap+".unit_id in ?", unitIds).
+			Where(tableMenuMap+".deleted = 0").
+			Where(tableMenu+".deleted = ?", 0)
+		err = global.GetReadDb().
+			Table("(?) tmp", subQuery).
+			Order("rank asc").
+			Find(&dataList).
+			Error
+	}
 
 	if err != nil {
 		return dataList, err

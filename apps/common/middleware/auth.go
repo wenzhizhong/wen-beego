@@ -34,7 +34,7 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 
 		// 验证:是否是官方平台
 		isOfficial := false
-		isOfficial, err = checkIsOfficial(ctx, moduleName, brancaData.SubUnit)
+		isOfficial, err = checkIsOfficial(moduleName, brancaData.SubUnit)
 		if err != nil {
 			return
 		}
@@ -148,7 +148,7 @@ func checkAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool
 }
 
 // 检测是否是官方平台
-func checkIsOfficial(ctx *beecontext.Context, moduleName, unitId string) (bool, error) {
+func checkIsOfficial(moduleName, unitId string) (bool, error) {
 	service := &framework.AuthMiddlewate{}
 	isOfficial, err := service.CheckIsOfficial(moduleName, unitId)
 	return isOfficial, err
