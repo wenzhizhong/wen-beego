@@ -32,6 +32,14 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		ctx.Input.SetData("unitUserId", brancaData.SubUnitUser) // （plat_user表/mchnt_user表，用户所在单位组织）
 		ctx.Input.SetData("unitId", brancaData.SubUnit)
 
+		// 验证:是否是官方平台
+		isOfficial := false
+		isOfficial, err = checkIsOfficial(ctx, moduleName, brancaData.SubUnit)
+		if err != nil {
+			return
+		}
+		ctx.Input.SetData("isOfficial", isOfficial)
+
 		// 验证:认证后基础api,通过则不校验权限
 		isValid := checkBaseAuthApi(ctx, tmpAuthApiListMap)
 		if isValid {
@@ -137,4 +145,11 @@ func checkAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool
 	service := &framework.AuthMiddlewate{}
 	status, err := service.CheckAuthAdminStatus(moduleName, brancaData)
 	return status, err
+}
+
+// 检测是否是官方平台
+func checkIsOfficial(ctx *beecontext.Context, moduleName, unitId string) (bool, error) {
+	service := &framework.AuthMiddlewate{}
+	isOfficial, err := service.CheckIsOfficial(moduleName, unitId)
+	return isOfficial, err
 }

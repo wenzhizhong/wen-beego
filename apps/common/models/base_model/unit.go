@@ -22,6 +22,7 @@ type Unit struct {
 	Sort              int    `json:"sort" gorm:"type:int4;default:0;comment:排序"`
 	DefaultUnitId     string `json:"default_unit_id" gorm:"->"`
 	DefaultUnitUserId string `json:"default_unit_user_id" gorm:"->"`
+	IsOfficial        bool   `json:"isOfficial" gorm:"type:bool;default:false;comment:是否官方平台"`
 }
 
 var UNIT_STATUS_UNREVIEWED = 0

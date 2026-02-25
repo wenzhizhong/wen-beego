@@ -161,6 +161,7 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 
 func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel) (id string, err error) {
 	if unitDto.Id == "" {
+		unitDto.IsOfficial = false
 		unitDto.Id, err = helper.GetUuid()
 		if err != nil {
 			return
@@ -175,7 +176,7 @@ func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unit
 		err = tx.Model(unitModel).
 			Where("id = ?", unitDto.Id).
 			Select("*").
-			Omit("deleted", "created_at", "deleted_at").
+			Omit("is_official", "deleted", "created_at", "deleted_at").
 			Updates(&unitDto).Error
 	}
 	if err != nil {

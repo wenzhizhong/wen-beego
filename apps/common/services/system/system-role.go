@@ -10,6 +10,7 @@ import (
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
+	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 
@@ -17,6 +18,7 @@ import (
 )
 
 type Role struct {
+	PlatMenuViewAr models_ar.PlatMenuViewAr
 }
 
 // 获取角色列表
@@ -147,7 +149,8 @@ func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string
 	var dataList interface{}
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
+		// dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
+		dataList, err = s.PlatMenuViewAr.GetRoleMenu(selectUnitIds, models.PlatMenuView{}, models.PlatMenuMap{})
 	case "mchnt_plat":
 		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntMenuMap{})
 	default:

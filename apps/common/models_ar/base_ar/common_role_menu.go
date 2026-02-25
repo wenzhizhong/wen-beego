@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var operateMenuTypeArr = []int{base_model.UNIT_MENU_TYPE_BUTTON, base_model.UNIT_MENU_TYPE_OTHER_API}
+var OperateMenuTypeArr = []int{base_model.UNIT_MENU_TYPE_BUTTON, base_model.UNIT_MENU_TYPE_OTHER_API}
 
 func GetUserMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuMapModel MenuMapModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_dto.RoleMenuDto, err error) {
 	if unitId == "" || unitUserId == "" {
@@ -67,7 +67,7 @@ func GetUserMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuMod
 			Where(tableMenuMap+".unit_id = ?", unitId).
 			Where(tableMenuMap+".deleted = ?", 0).
 			Where(tableMenu+".deleted = ?", 0).
-			Where(tableMenu+".menu_type NOT IN ?", operateMenuTypeArr).
+			Where(tableMenu+".menu_type NOT IN ?", OperateMenuTypeArr).
 			Group(tableMenu + ".id").
 			Order(tableMenu + ".rank asc").
 			Scan(&menuAuthList).
@@ -83,7 +83,7 @@ func GetUserMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuMod
 			Where(tableMenuMap+".unit_id = ?", unitId).
 			Where(tableMenuMap+".deleted = ?", 0).
 			Where(tableMenu+".deleted = ?", 0).
-			Where(tableMenu+".menu_type NOT IN ?", operateMenuTypeArr).
+			Where(tableMenu+".menu_type NOT IN ?", OperateMenuTypeArr).
 			Where(tableRole+".deleted = ?", 0).
 			Where(tableRole+".status = ?", 1).
 			Where(tableUserRole+".user_id = ?", unitUserId).
@@ -161,7 +161,7 @@ func GetRoleMenuIds[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenu
 		Joins("inner join "+tableMenuName+" on "+tableMenuName+".id = "+tableRoleMenuName+".menu_id").
 		Joins("inner join "+tableMenuMapName+" on "+tableMenuMapName+".menu_id = "+tableRoleMenuName+".menu_id").
 		Where(tableRoleMenuName+".role_id = ?", roleId).
-		// Where(tableMenuName+".menu_type IN ?", operateMenuTypeArr).
+		// Where(tableMenuName+".menu_type IN ?", OperateMenuTypeArr).
 		Where(tableMenuName+".deleted = ?", 0).
 		Where(tableMenuMapName+".deleted = ?", 0).
 		Find(&dataList).Error
@@ -219,7 +219,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, Role
 			Select(selectStr).
 			Joins(joinMenuMapStr).
 			Where(tableMenu+".deleted = 0").
-			Where(tableMenu+".menu_type IN ?", operateMenuTypeArr).
+			Where(tableMenu+".menu_type IN ?", OperateMenuTypeArr).
 			Where(tableMenuMap+".unit_id = ?", unitId).
 			Where(tableMenuMap + ".deleted = 0").
 			Group(tableMenu + ".id").
@@ -234,7 +234,7 @@ func GetUserPermissions[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, Role
 			Joins(joinRoleStr).
 			Joins(joinUserRoleStr).
 			Where(tableMenu+".deleted = 0").
-			Where(tableMenu+".menu_type IN ?", operateMenuTypeArr).
+			Where(tableMenu+".menu_type IN ?", OperateMenuTypeArr).
 			Where(tableUserRole+".user_id = ?", unitUserId).
 			Where(tableUserRole + ".deleted = 0").
 			Where(tableRole + ".status = 1").
@@ -258,7 +258,7 @@ func GetUnitPermissions[MenuModel itf.MenuItf](unitId string, menuModel MenuMode
 		Select(tableMenuName+".*").
 		Where(tableMenuName+".unit_id = ?", unitId).
 		Where(tableMenuName+".deleted = ?", 0).
-		Where(tableMenuName+".menu_type IN ?", operateMenuTypeArr).
+		Where(tableMenuName+".menu_type IN ?", OperateMenuTypeArr).
 		Find(&menuList).Error
 	return
 }
