@@ -59,9 +59,11 @@ func GetBaseParamDto(ctx *beecontext.Context, moduleName string) (dto.BaseParamD
 	tmpUserId := ctx.Input.GetData("userId")
 	tmpUnitId := ctx.Input.GetData("unitId")
 	tmpUnitUserId := ctx.Input.GetData("unitUserId")
+	tmpIsOfficial := ctx.Input.GetData("isOfficial")
 	userId := tmpUserId.(string)
 	unitId := tmpUnitId.(string)
 	unitUserId := tmpUnitUserId.(string)
+	isOfficial := tmpIsOfficial.(bool)
 
 	data := dto.BaseParamDto{}
 	if moduleName == "" {
@@ -78,6 +80,7 @@ func GetBaseParamDto(ctx *beecontext.Context, moduleName string) (dto.BaseParamD
 	data.UnitId = unitId
 	data.UserId = userId
 	data.UnitUserId = unitUserId
+	data.IsOfficial = isOfficial
 	return data, nil
 }
 

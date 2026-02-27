@@ -7,6 +7,7 @@ type BaseParamDto struct {
 	UnitId     string
 	UserId     string
 	UnitUserId string
+	IsOfficial bool
 }
 
 //  响应参数

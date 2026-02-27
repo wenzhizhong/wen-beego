@@ -85,8 +85,25 @@ func ParseStringTpl(tpl string, data any) (str string, err error) {
 	return result.String(), nil
 }
 
-// 判断是否是管理员
+// 判断是否是官方平台id
+func IsOfficial(moduleName, unitId string) (bool, error) {
+	switch moduleName {
+	case "admin_plat":
+		platModel := models.Plat{}
+		err := global.GetReadDb().Where("id = ?", unitId).Take(&platModel).Error
+		if err == nil {
+			return platModel.IsOfficial, nil
+		}
+		if !DbNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	default:
+		return false, nil
+	}
+}
 
+// 判断是否是管理员
 func IsAdmin(moduleName string, unitUserId string) (bool, error) {
 	switch moduleName {
 	case "admin_plat":

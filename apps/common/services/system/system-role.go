@@ -171,7 +171,8 @@ func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dat
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
+		// dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
+		dataList, err = s.PlatMenuViewAr.GetRoleMenuIds(baseParamDto, roleId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{})
 	case "mchnt_plat":
 		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{})
 	default:

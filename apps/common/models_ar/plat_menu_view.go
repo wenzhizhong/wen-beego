@@ -1,6 +1,7 @@
 package models_ar
 
 import (
+	"WenBeego/apps/common/dto"
 	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
@@ -111,6 +112,39 @@ func (a *PlatMenuViewAr) GetUserMenu(moduleName string, unitId string, unitUserI
 	return
 }
 
+func (a *PlatMenuViewAr) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string, menuModel models.PlatMenuView, menuMapModel models.PlatMenuMapView, roleMenuModel models.PlatRoleMenu) (dataList []base_model.UnitRoleMenu, err error) {
+	if roleId == "" {
+		str := fmt.Sprintf("GetRoleMenuIds():获取角色权限必填参数, role_id:%s", roleId)
+		global.Log.Error(str)
+		return dataList, errors.New(str)
+	}
+
+	tableMenuName := menuModel.TableName()
+	tableMenuMapName := menuMapModel.TableName()
+	tableRoleMenuName := roleMenuModel.TableName()
+
+	// if baseParamDto.IsOfficial {
+	// 	err = global.GetReadDb().
+	// 		Model(roleMenuModel).
+	// 		Select(tableRoleMenuName+".*").
+	// 		Where(tableRoleMenuName+".role_id = ?", roleId).
+	// 		Find(&dataList).Error
+	// } else {
+
+	err = global.GetReadDb().
+		Model(roleMenuModel).
+		Select(tableRoleMenuName+".*").
+		Joins("inner join "+tableMenuName+" on "+tableMenuName+".id = "+tableRoleMenuName+".menu_id").
+		Joins("inner join "+tableMenuMapName+" on "+tableMenuMapName+".menu_id = "+tableRoleMenuName+".menu_id").
+		Where(tableRoleMenuName+".role_id = ?", roleId).
+		// Where(tableMenuName+".menu_type IN ?", OperateMenuTypeArr).
+		Where(tableMenuName+".deleted = ?", 0).
+		Where(tableMenuMapName+".deleted = ?", 0).
+		Find(&dataList).Error
+
+	// }
+	return
+}
 func (a *PlatMenuViewAr) GetUserPermissions(moduleName string, unitId string, unitUserId string, menuModel models.PlatMenuView, menuMapModel models.PlatMenuMap, roleMenuModel models.PlatRoleMenu, userRoleModel models.PlatUserRole, roleModel models.PlatRole) (menuList []base_model.UnitMenu, err error) {
 	if unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, classifyName:%s", unitId, unitUserId)
@@ -199,8 +233,7 @@ func (a *PlatMenuViewAr) GetRoleMenu(unitIds []string, menuModel models.PlatMenu
 		return dataList, errors.New(str)
 	}
 
-	platAr := PlatAr{}
-	unitInfo, err1 := platAr.GetById(unitIds[0])
+	isOfficial, err1 := helper.IsOfficial(global.ADMIN_PLAT, unitIds[0])
 	if err1 != nil {
 		err = err1
 		return
@@ -225,7 +258,7 @@ func (a *PlatMenuViewAr) GetRoleMenu(unitIds []string, menuModel models.PlatMenu
 		return dataList, err
 	}
 
-	if unitInfo.IsOfficial {
+	if isOfficial {
 		err = global.GetReadDb().
 			Model(menuModel).
 			Select(selectStr2).

@@ -294,20 +294,3 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, unitUserId 
 	}
 	return true, nil
 }
-
-// 验证是否是官方平台
-func (s *AuthMiddlewate) CheckIsOfficial(moduleName string, unitId string) (isOfficial bool, err error) {
-	switch moduleName {
-	case "admin_plat":
-		platAr := models_ar.PlatAr{}
-		unitInfo, err1 := platAr.GetById(unitId)
-		if err1 != nil {
-			err = err1
-			return
-		}
-		isOfficial = unitInfo.IsOfficial
-	default:
-		err = errors.New("未知的模块名称")
-	}
-	return
-}
