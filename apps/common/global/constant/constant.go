@@ -1,4 +1,4 @@
-package global
+package constant
 
 var ADMIN = "admin"
 var USER = "user"

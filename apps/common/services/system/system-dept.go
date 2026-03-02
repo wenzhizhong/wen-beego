@@ -38,6 +38,22 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 	resultDto = dto.RespDataListDto{Total: count, List: data}
 	return
 }
+func (s *Dept) GetUnitDeptListForAdminPlat(deptDto page_dto.SystemDeptListReqDto) (resultDto dto.RespDataListDto, err error) {
+	data := make([]base_model.UnitDept, 0)
+	var count int64 = 0
+
+	// if res, err1 := helper.CheckUserHasUnit(deptDto.ModuleName, deptDto.UserId, deptDto.SelectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitDeptList：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Mchnt{}, &models.MchntDept{}, &models.MchntUser{}, &models.MchntUserProfile{})
+	if err != nil {
+		return
+	}
+	resultDto = dto.RespDataListDto{Total: count, List: data}
+	return
+}
 func (s *Dept) GetUnitDeptTree(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
 	dataList := make([]base_model.UnitDept, 0)
 
@@ -54,6 +70,26 @@ func (s *Dept) GetUnitDeptTree(baseParamDto dto.BaseParamDto, selectUnitIds []st
 	default:
 		err = errors.New("GetUnitDeptTree:模块名称错误")
 	}
+	if err != nil {
+		return
+	}
+
+	data = struct {
+		List interface{} `json:"list"`
+	}{
+		List: dataList,
+	}
+	return
+}
+func (s *Dept) GetUnitDeptTreeForAdminPlat(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
+	dataList := make([]base_model.UnitDept, 0)
+
+	// if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, selectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitDeptTree：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.MchntDept{})
 	if err != nil {
 		return
 	}
@@ -84,6 +120,22 @@ func (s *Dept) GetUnitDeptPrincipal(baseParamDto dto.BaseParamDto, deptPrincipal
 	default:
 		err = errors.New("GetUnitDeptPrincipal:模块名称错误")
 	}
+	if err != nil {
+		return
+	}
+	resultDto = dto.RespDataListDto{Total: count, List: data}
+	return
+}
+func (s *Dept) GetUnitDeptPrincipalForAdminPlat(baseParamDto dto.BaseParamDto, deptPrincipalDto page_dto.SystemDeptPrincipalReqDto) (resultDto interface{}, err error) {
+	var count int64
+	var data interface{}
+
+	// if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, deptPrincipalDto.SelectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitDeptPrincipal：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.MchntUser{}, &models.MchntUserProfile{})
 	if err != nil {
 		return
 	}
@@ -122,6 +174,14 @@ func (s *Dept) SaveUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.Unit
 	}
 	return
 }
+func (s *Dept) SaveUnitDeptForAdminPlat(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitDeptDto) (id string, err error) {
+	// deptDto.UnitId = baseParamDto.UnitId
+	if true {
+		err = errors.New("平台没有操作权限")
+		return
+	}
+	return
+}
 
 // 删除组织架构列表
 func (s *Dept) DelUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitDeptDto) (err error) {
@@ -139,6 +199,13 @@ func (s *Dept) DelUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitD
 		err = base_ar.DelUnitDept(updateData, &models.MchntDept{})
 	default:
 		err = errors.New("模块名称错误")
+	}
+	return
+}
+func (s *Dept) DelUnitDeptForAdminPlat(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitDeptDto) (err error) {
+	if true {
+		err = errors.New("平台没有操作权限")
+		return
 	}
 	return
 }

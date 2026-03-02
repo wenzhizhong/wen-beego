@@ -49,6 +49,28 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto
 	resultDto, err = helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
 	return
 }
+func (s *Unit) GetUnitListForAdminPlat(unitDto page_dto.SystemUnitListReqDto) (resultDto dto.RespDataListDto, err error) {
+	data := make([]base_model.Unit, 0)
+	var count int64 = 0
+
+	data, count, err = base_ar.GetUnitListForAdminPlat(unitDto, &models.Mchnt{}, &models.MchntUser{})
+	if err != nil {
+		return
+	}
+	for k, v := range data {
+		tmpLogo, err1 := helper.LocalFileSign(unitDto.Host, v.Logo)
+		tmpPath, err2 := helper.LocalFileSign(unitDto.Host, v.License)
+		if err1 != nil || err2 != nil {
+			errStr := helper.Ternary(err1 != nil, err1.Error(), err2.Error())
+			global.Log.Error(errStr)
+			continue
+		}
+		data[k].LogoLink = tmpLogo
+		data[k].LicenseLink = tmpPath
+	}
+	resultDto, err = helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
+	return
+}
 
 // 系统管理-保存用户
 func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (result map[string]string, err error) {
@@ -79,6 +101,13 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 	result["id"] = newUnitId
 	return
 }
+
+func (s *Unit) SaveForAdminPlat(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (result map[string]string, err error) {
+	if true {
+		return result, errors.New("平台没有操作权限")
+	}
+	return
+}
 func (s *Unit) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err error) {
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
@@ -87,6 +116,12 @@ func (s *Unit) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err
 		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Mchnt{})
 	default:
 		err = errors.New("Unit Del:模块名称错误")
+	}
+	return
+}
+func (s *Unit) DelForAdminPlat(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err error) {
+	if true {
+		return errors.New("平台没有操作权限")
 	}
 	return
 }

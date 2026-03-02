@@ -55,6 +55,31 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	return
 }
 
+func (s *User) GetUserListForAdminPlat(reqDto page_dto.SystemUserListReqDto) (resultDto dto.RespDataListDto, err error) {
+	data := make([]page_dto.SystemUserListDto, 0)
+	var count int64 = 0
+
+	// if res, err1 := helper.CheckUserHasUnit(reqDto.ModuleName, reqDto.UserId, reqDto.SelectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetUserList：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	data, count, err = base_ar.GetUserListOfUnitById(reqDto, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntDept{}, &models.MchntUserDept{}, &models.MchntRole{}, &models.MchntUserRole{})
+	if err != nil {
+		return
+	}
+
+	for k, v := range data {
+		tmpId := helper.Ternary(data[k].Id != "", data[k].Id, data[k].UnitUser.Id)
+		if tmpId != "" && data[k].UnitUserProfile.Id == "" {
+			data[k].UnitUserProfile.Id = tmpId
+		}
+		data[k].AvatarLink, _ = helper.LocalFileSign(reqDto.Host, v.Avatar)
+	}
+	resultDto, err = helper.GetRespDataListDto(reqDto.PageSize, reqDto.CurrentPage, count, data)
+	return
+}
+
 // 获取可选角色树
 func (s *User) GetUnitRoleTree(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
 	dataList := make([]base_model.UnitRole, 0)
@@ -72,6 +97,26 @@ func (s *User) GetUnitRoleTree(baseParamDto dto.BaseParamDto, selectUnitIds []st
 	default:
 		err = errors.New("GetUnitRoleTree:模块名称错误")
 	}
+	if err != nil {
+		return
+	}
+
+	data = struct {
+		List interface{} `json:"list"`
+	}{
+		List: dataList,
+	}
+	return
+}
+func (s *User) GetUnitRoleTreeForAdminPlat(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
+	dataList := make([]base_model.UnitRole, 0)
+
+	// if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, selectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetUserList：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	dataList, err = base_ar.GetUnitRoleTree(selectUnitIds, &models.MchntRole{})
 	if err != nil {
 		return
 	}
@@ -146,6 +191,12 @@ func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto
 		UnitUserId string `json:"unitUserId"`
 	}{
 		UnitUserId: unitUserId,
+	}
+	return
+}
+func (s *User) SaveUserForAdminPlat(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto.UnitUserSaveDto) (data interface{}, err error) {
+	if true {
+		return data, errors.New("平台没有操作权限")
 	}
 	return
 }
@@ -544,4 +595,11 @@ func (s *User) DelUnitUser(baseParamDto dto.BaseParamDto, ids []string) error {
 	default:
 		return errors.New("DelUnitUser:模块名称错误")
 	}
+}
+
+func (s *User) DelUnitUserForAdminPlat(baseParamDto dto.BaseParamDto, ids []string) error {
+	if true {
+		return errors.New("平台没有操作权限")
+	}
+	return nil
 }

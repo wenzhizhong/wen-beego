@@ -45,6 +45,22 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 	resultDto = dto.RespDataListDto{Total: count, List: data, PageSize: RoleDto.PageSize, CurrentPage: RoleDto.CurrentPage}
 	return
 }
+func (s *Role) GetUnitRoleListForAdminPlat(RoleDto page_dto.SystemRoleListReqDto) (resultDto dto.RespDataListDto, err error) {
+	data := make([]base_model.UnitRole, 0)
+	var count int64 = 0
+
+	// if res, err1 := helper.CheckUserHasUnit(RoleDto.ModuleName, RoleDto.UserId, RoleDto.SelectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetUnitRoleList：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	data, count, err = base_ar.GetUnitRoleList(RoleDto, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{})
+	if err != nil {
+		return
+	}
+	resultDto = dto.RespDataListDto{Total: count, List: data, PageSize: RoleDto.PageSize, CurrentPage: RoleDto.CurrentPage}
+	return
+}
 
 // 保存角色列表
 func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRoleDto) (id string, err error) {
@@ -120,6 +136,13 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.Unit
 
 	return
 }
+func (s *Role) SaveUnitRoleForAdminPlat(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRoleDto) (id string, err error) {
+	if true {
+		err = errors.New("平台没有操作权限")
+		return
+	}
+	return
+}
 
 // 删除角色列表
 func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRoleDto) (err error) {
@@ -136,6 +159,13 @@ func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitR
 		err = base_ar.DelUnitRole(updateData, &models.MchntRole{})
 	default:
 		err = errors.New("模块名称错误")
+	}
+	return
+}
+func (s *Role) DelUnitRoleForAdminPlat(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitRoleDto) (err error) {
+	if true {
+		err = errors.New("平台没有操作权限")
+		return
 	}
 	return
 }
@@ -165,6 +195,23 @@ func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string
 
 	return
 }
+func (s *Role) GetRoleMenuForAdminPlat(baseParamDto dto.BaseParamDto, selectUnitIds []string) (data interface{}, err error) {
+	// if res, err1 := helper.CheckUserHasUnit(baseParamDto.ModuleName, baseParamDto.UserId, selectUnitIds); !res {
+	// 	err = helper.Ternary(err1 != nil, err1, errors.New("GetRoleMenu：用户没有组织单位权限"))
+	// 	return
+	// }
+
+	var dataList interface{}
+	dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntMenuMap{})
+	if err != nil {
+		return
+	}
+	data = struct {
+		List interface{} `json:"list"`
+	}{List: dataList}
+
+	return
+}
 func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (data interface{}, err error) {
 
 	dataList := make([]base_model.UnitRoleMenu, 0)
@@ -178,6 +225,23 @@ func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dat
 	default:
 		err = errors.New("GetRoleMenuIds：模块名称错误")
 	}
+	if err != nil {
+		return
+	}
+	tmpData := make([]string, 0)
+	for _, v := range dataList {
+		tmpData = append(tmpData, v.MenuId)
+	}
+	data = struct {
+		List []string `json:"list"`
+	}{List: tmpData}
+
+	return
+}
+func (s *Role) GetRoleMenuIdsForAdminPlat(baseParamDto dto.BaseParamDto, roleId string) (data interface{}, err error) {
+
+	dataList := make([]base_model.UnitRoleMenu, 0)
+	dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{})
 	if err != nil {
 		return
 	}
@@ -222,6 +286,13 @@ func (s *Role) RoleMenuSave(baseParamDto dto.BaseParamDto, roleMenuSaveDto role_
 	})
 	// 清空用户权限认证缓存
 	business_store.ClearAumid()
+	return
+}
+func (s *Role) RoleMenuSaveForAdminPlat(baseParamDto dto.BaseParamDto, roleMenuSaveDto role_dto.RoleMenuSaveDto) (err error) {
+	if true {
+		err = errors.New("平台没有操作权限")
+		return
+	}
 	return
 }
 

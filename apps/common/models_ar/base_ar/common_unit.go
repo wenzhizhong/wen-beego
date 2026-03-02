@@ -158,6 +158,58 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 	err = query.Select(selectStr).Order(tableUnitName + ".created_by," + tableUnitName + ".sort").Find(&listData).Error
 	return
 }
+func GetUnitListForAdminPlat[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []base_model.Unit, count int64, err error) {
+	tableUnitName := unitModel.TableName()
+	tableUnitUserName := unitUserModel.TableName()
+
+	unitDto.Name = strings.TrimSpace(unitDto.Name)
+	unitDto.Code = strings.TrimSpace(unitDto.Code)
+
+	tableStruct := struct {
+		TableUnit     string
+		TableUserUnit string
+	}{
+		TableUnit:     tableUnitName,
+		TableUserUnit: tableUnitUserName,
+	}
+
+	selectStr, err := helper.ParseStringTpl(`{{.TableUnit}}.*`, tableStruct)
+	joinStr, err2 := helper.ParseStringTpl(`inner join {{.TableUserUnit}} on {{.TableUserUnit}}.unit_id = {{.TableUnit}}.id`, tableStruct)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err2 != nil {
+		return nil, 0, err2
+	}
+
+	query := global.GetReadDb().
+		Model(unitModel).
+		Joins(joinStr).
+		// Where(tableUnitUserName+".user_id = ?", unitDto.UserId).
+		Where(tableUnitUserName + ".deleted = 0").
+		Where(tableUnitName + ".deleted = 0")
+
+	if unitDto.Name != "" {
+		query = query.Where(tableUnitName+".name like ?", "%"+unitDto.Name+"%")
+	}
+	if unitDto.Code != "" {
+		query = query.Where(tableUnitName+".code like ?", "%"+unitDto.Code+"%")
+	}
+	if unitDto.Status != -1 {
+		query = query.Where(tableUnitName+".status = ?", unitDto.Status)
+	}
+
+	err = query.Select(tableUnitName + ".id").Count(&count).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	if count == 0 {
+		return nil, 0, nil
+	}
+
+	err = query.Select(selectStr).Order(tableUnitName + ".created_by," + tableUnitName + ".sort").Find(&listData).Error
+	return
+}
 
 func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel) (id string, err error) {
 	if unitDto.Id == "" {

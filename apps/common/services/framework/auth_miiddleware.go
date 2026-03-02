@@ -259,7 +259,7 @@ func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, unitUserId 
 		switch moduleName {
 		case "admin_plat":
 			// permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-			permissions, err = s.PlatMenuViewAr.GetUserPermissions(moduleName, unitId, unitUserId, models.PlatMenuView{}, models.PlatMenuMap{}, models.PlatRoleMenu{}, models.PlatUserRole{}, models.PlatRole{})
+			permissions, err = s.PlatMenuViewAr.GetUserPermissions(moduleName, unitId, unitUserId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{}, models.PlatUserRole{}, models.PlatRole{})
 		case "admin_mchnt":
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		default:

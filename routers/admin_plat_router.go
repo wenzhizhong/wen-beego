@@ -5,6 +5,7 @@ import (
 	adminMonitor "WenBeego/apps/admin_plat/controllers/monitor"
 	adminSystem "WenBeego/apps/admin_plat/controllers/system"
 	adminUpload "WenBeego/apps/admin_plat/controllers/upload"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/middleware"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -32,9 +33,9 @@ var platAuthApiList = []string{
 	"/admin_plat/upload/link-sign",
 }
 
-func init() {
-	ns := beego.NewNamespace("/admin_plat",
-		// auth
+func platAuthSlices() []beego.LinkNamespace {
+	return []beego.LinkNamespace{
+		// auth begin
 		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
 		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
 		beego.NSCtrlPost("/auth/refresh-token", (*adminAuth.AuthController).RefreshToken),
@@ -47,8 +48,12 @@ func init() {
 		beego.NSCtrlGet("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUploadCheck),
 		beego.NSCtrlPost("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUpload),
 		beego.NSCtrlGet("/upload/link-sign", (*adminUpload.UploadController).LinkSign),
-
-		// system
+		// auth end
+	}
+}
+func platSystemSlices() []beego.LinkNamespace {
+	return []beego.LinkNamespace{
+		// system begin
 		beego.NSCtrlGet("/system-unit/get", (*adminSystem.UnitController).Get),
 		beego.NSCtrlPost("/system-unit/add", (*adminSystem.UnitController).Add),
 		beego.NSCtrlPost("/system-unit/edit", (*adminSystem.UnitController).Edit),
@@ -91,6 +96,15 @@ func init() {
 		beego.NSCtrlPost("/monitor-cron/del", (*adminMonitor.CronController).Del),
 		beego.NSCtrlPost("/monitor-cron/change-status", (*adminMonitor.CronController).ChangeStatus),
 		beego.NSCtrlGet("/monitor-cron-log/get", (*adminMonitor.CronLogController).Get),
+		// system end
+	}
+}
+
+func init() {
+	allNamespaces := append(commonSlices(constant.ADMIN_PLAT), platAuthSlices()...)
+	allNamespaces = append(allNamespaces, platSystemSlices()...)
+	ns := beego.NewNamespace("/admin_plat",
+		allNamespaces...,
 	)
 
 	// 请求前、后处理
