@@ -244,8 +244,8 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
         ```
         import "WenBeego/apps/common/global"
 
-        global.GetReadDb() // 获取读数据库，gorm.DB实例
-        global.GetWriteDb() // 获取写数据库，gorm.DB实例
+        global.GetReadDb().Model(menuModel). Select(selectStr). Joins(joinStr). Where(tableMenuMap+".unit_id in ?", unitIds). Where(tableMenuMap+".deleted = 0"). Where("xxxxx"). Order("xxx asc"). Find(&dataList) // 获取读数据库，即gorm.DB实例
+        global.GetWriteDb().Create(&data) // 获取写数据库，即gorm.DB实例
         ```
 
         6. mq示例, 直接调用已封装好的函数：
