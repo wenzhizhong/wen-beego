@@ -21,6 +21,23 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
     - 运行http服务：go run cmd/http/main.go； 
     - 运行mq服务：go run cmd/mq/main.go；
 
+### 项目目录结构：
+- apps/admin_plat：平台端
+- apps/admin_mchnt：商户端
+- apps/cron_task：定时任务
+- apps/common：公共模块
+- apps/mq_task：mq任务消费模块
+- apps/swagger：swagger文档
+- routers/crontab_task/router.go：定时任务路由
+- routers/admin_plat_router.go：平台端路由
+- routers/admin_mchnt_router.go：商户端路由
+- routers/mq_task_router.go：mq任务路由
+- 详细目录，请读取项目根目录下的 `doc/目录结构.md` 文件。该文件包含了项目目录结构
+
+### 项目数据库表结构
+请阅读项目根目录下的 `doc/数据库表结构.sql` 文件。该文件包含了项目数据库表结构
+
+
 ### 新增接口举例
     - 可以打开路由文件：
         routers\admin_mchnt_router.go
@@ -498,10 +515,3 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
 
         // NewTreeConverter 创建树形转换器
         func NewTreeConverter() *TreeConverter 
-
-## 项目目录结构：
-请读取项目根目录下的 `doc/目录结构.md` 文件。该文件包含了项目目录结构
-
-### 项目数据库表结构
-请阅读项目根目录下的 `doc/数据库表结构.sql` 文件。该文件包含了项目数据库表结构
-
