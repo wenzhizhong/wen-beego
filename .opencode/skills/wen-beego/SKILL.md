@@ -32,6 +32,7 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
 - routers/admin_plat_router.go：平台端路由
 - routers/admin_mchnt_router.go：商户端路由
 - routers/mq_task_router.go：mq任务路由
+- apps客户端的模块，都是mvc架构
 - 详细目录，请读取项目根目录下的 `doc/目录结构.md` 文件。该文件包含了项目目录结构
 
 ### 项目数据库表结构
