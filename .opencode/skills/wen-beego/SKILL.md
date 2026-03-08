@@ -21,9 +21,6 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
     - 运行http服务：go run cmd/http/main.go； 
     - 运行mq服务：go run cmd/mq/main.go；
 
-### 认证登录
-
-
 ### 新增接口举例
     - 可以打开路由文件：
         routers\admin_mchnt_router.go
@@ -162,29 +159,7 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
         func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto.RespDataListDto, err error) {
             data := make([]base_model.Unit, 0)
             var count int64 = 0
-
-            switch unitDto.ModuleName {
-            case "admin_plat":
-                data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Plat{}, &models.PlatUser{})
-            case "mchnt_plat":
-                data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Mchnt{}, &models.MchntUser{})
-            default:
-                err = errors.New("GetUnitList:模块名称错误")
-            }
-            if err != nil {
-                return
-            }
-            for k, v := range data {
-                tmpLogo, err1 := helper.LocalFileSign(unitDto.Host, v.Logo)
-                tmpPath, err2 := helper.LocalFileSign(unitDto.Host, v.License)
-                if err1 != nil || err2 != nil {
-                    errStr := helper.Ternary(err1 != nil, err1.Error(), err2.Error())
-                    global.Log.Error(errStr)
-                    continue
-                }
-                data[k].LogoLink = tmpLogo
-                data[k].LicenseLink = tmpPath
-            }
+            // 具体调用查询数据方法省略
             resultDto, err = helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
             return
         }
