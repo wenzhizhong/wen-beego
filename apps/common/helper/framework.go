@@ -2,6 +2,7 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"errors"
 	"fmt"
 	"io"
@@ -64,8 +65,8 @@ func AppRunmode() (string, error) {
 }
 
 // 检查运行模式
-func CheckRunMode(runMode string) bool {
-	if runMode, err := AppRunmode(); err == nil && runMode == "dev" {
+func IsDevRunMode() bool {
+	if runMode, err := AppRunmode(); err == nil && runMode == constant.RUN_MODE_DEV {
 		return true
 	}
 	return false

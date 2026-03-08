@@ -3,6 +3,7 @@ package auth
 import (
 	"WenBeego/apps/common/dto/auth_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/captcha"
 	"WenBeego/apps/common/models"
@@ -135,6 +136,10 @@ func (s *CommonAuth) checkRegisterDto(data auth_dto.RegisterDto) error {
 
 // 校验验证码
 func (s *CommonAuth) checkAuthCode(authCode string, authCodeId string, authCodeType string) error {
+	if helper.IsDevRunMode() && authCode == constant.CAPTCHAT_DEF_CODE {
+		// 测试环境,验证码默认使用：1234
+		return nil
+	}
 	authCode = strings.TrimSpace(authCode)
 	authCodeType = strings.TrimSpace(authCodeType)
 

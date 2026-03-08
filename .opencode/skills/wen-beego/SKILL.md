@@ -15,10 +15,14 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
 ### 测试参数
     账号：15912345678
     密码：G72+shD3^6
+    验证码：1234
 
 ### 运行
     - 运行http服务：go run cmd/http/main.go； 
     - 运行mq服务：go run cmd/mq/main.go；
+
+### 认证登录
+
 
 ### 新增接口举例
     - 可以打开路由文件：
@@ -332,8 +336,8 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
         // 获取框架runmode
         func AppRunmode() (string, error) 
 
-        // 检查运行模式
-        func CheckRunMode(runMode string) bool 
+        // 是否开发环境
+        func IsDevRunMode(runMode string) bool 
 
         // 从路由路径解析模块名
         func ParseModuleFromRoute(path string) string 
