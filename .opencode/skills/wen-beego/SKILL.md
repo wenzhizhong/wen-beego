@@ -17,10 +17,6 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
     - 运行mq服务：go run cmd/mq/main.go；
 
 ### 测试
-    - 测试参数
-    账号：15912345678
-    密码：G72+shD3^6
-    验证码：1234
     - 登录接口：
     ```
     POST http://localhost:8013/api/v1/auth/login HTTP/1.1
