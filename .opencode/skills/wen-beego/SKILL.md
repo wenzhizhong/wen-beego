@@ -24,6 +24,7 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
 ### 项目目录结构：
 - apps/admin_plat：平台端
 - apps/admin_mchnt：商户端
+- apps/api：api模块
 - apps/cron_task：定时任务
 - apps/common：公共模块
 - apps/mq_task：mq任务消费模块
