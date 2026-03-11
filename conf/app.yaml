@@ -73,6 +73,12 @@ branca:
     key: Uz4IhHSkEuWMmN98gL6YPBZJqDtvf12K
     exp: 86400
     expRemark: 24*60*60
+  api:
+    iss: wenBeegoApi
+    aud: wenBeegoApiUi
+    key: USqKW6Ntvf12g9BZJLHDkEuhI8YPz4Mm
+    exp: 86400
+    expRemark: 24*60*60
 queue:
   type: redis
   default_queue: wen_beego_tasks

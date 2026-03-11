@@ -35,10 +35,28 @@ type UserProfile struct {
 	Remark         string    `json:"remark" gorm:"default:'';comment:备注"`
 }
 
-var USER_STATUS_NORMAL = base_model.UNIT_USER_PROFILE_NORMAL
-var USER_STATUS_CANCLED = base_model.UNIT_USER_PROFILE_CANCLED
-var USER_STATUS_MAP = base_model.UNIT_GENDER_MAP
-var UNIT_CARD_TYPE_MAP = base_model.UNIT_CARD_TYPE_MAP
+var USER_PROFILE_NORMAL = base_model.UNIT_USER_PROFILE_NORMAL
+var USER_PROFILE_CANCLED = base_model.UNIT_USER_PROFILE_CANCLED
+var USER_CARD_TYPE_MAP = base_model.UNIT_CARD_TYPE_MAP
+
+var USER_PROFILE_MAP = base_model.UNIT_USER_PROFILE_MAP
+
+var USER_GENDER_MAIL = base_model.UNIT_GENDER_MAIL
+var USER_GENDER_FEMAIL = base_model.UNIT_GENDER_FEMAIL
+var USER_GENDER_MAP = base_model.UNIT_GENDER_MAP
+
+var USER_CARD_TYPE_1 = base_model.UNIT_CARD_TYPE_1
+var USER_CARD_TYPE_2 = base_model.UNIT_CARD_TYPE_2
+var USER_CARD_TYPE_3 = base_model.UNIT_CARD_TYPE_3
+var USER_CARD_TYPE_4 = base_model.UNIT_CARD_TYPE_4
+var USER_CARD_TYPE_5 = base_model.UNIT_CARD_TYPE_5
+
+var USER_SOURCE_SYSTEM = base_model.UNIT_USER_SOURCE_SYSTEM
+var USER_SOURCE_WECHAT = base_model.UNIT_USER_SOURCE_WECHAT
+var USER_SOURCE_WEB = base_model.UNIT_USER_SOURCE_WEB
+var USER_SOURCE_APP = base_model.UNIT_USER_SOURCE_APP
+var USER_SOURCE_OTHER = base_model.UNIT_USER_SOURCE_OTHER
+var USER_SOURCE_MAP = base_model.UNIT_USER_SOURCE_MAP
 
 func (m *UserProfile) TableName() string {
 	return `user_profile`

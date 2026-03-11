@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const aumid_expired = 2 * 60
+const aumid_expired = 10
 
 const AUMID_UPS = "AUMID_UPS"
 const AUMID_US = "AUMID_US"

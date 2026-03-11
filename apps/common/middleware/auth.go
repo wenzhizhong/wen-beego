@@ -76,6 +76,61 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		}
 	}
 }
+func AuthUser(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
+	return func(ctx *beecontext.Context) {
+		tmpWhiteApiListMap := listToMap(*whiteApiList)
+		tmpAuthApiListMap := listToMap(*authApiList)
+
+		// 验证:白名单api
+		isWriteApi := inWhiteApiList(ctx, tmpWhiteApiListMap)
+		if isWriteApi {
+			return
+		}
+
+		// 验证:认证token是否有效
+		moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
+		brancaData, err := checkToken(ctx, moduleName)
+		if err != nil {
+			return
+		}
+		ctx.Input.SetData("userId", brancaData.Sub)
+		ctx.Input.SetData("unitUserId", "")
+		ctx.Input.SetData("unitId", "")
+		ctx.Input.SetData("isOfficial", false)
+
+		// 验证:认证后基础api,通过则不校验权限
+		isValid := checkBaseAuthApi(ctx, tmpAuthApiListMap)
+		if isValid {
+			return
+		}
+
+		type checkResult struct {
+			status    bool
+			err       error
+			checkType string
+		}
+		checkResultNumber := 1
+		ch := make(chan checkResult, checkResultNumber)
+		// 验证状态:用户状态/组织单位状态/角色状态
+		go func() {
+			status, err := checkAuthUserStatus(moduleName, brancaData)
+			ch <- checkResult{status: status, err: err, checkType: "status"}
+		}()
+
+		errorStr := ""
+		for i := 0; i < checkResultNumber; i++ {
+			result := <-ch
+			if result.err != nil {
+				errorStr += result.err.Error() + ";\n"
+			}
+		}
+		close(ch)
+		if errorStr != "" {
+			setResponse(ctx, http.StatusNetworkAuthenticationRequired, errorStr, nil)
+			return
+		}
+	}
+}
 func responseStr(code int, msg string, data interface{}) string {
 	res := helper.Response(code, msg, data)
 	jsonString, _ := json.Marshal(res)
@@ -139,9 +194,16 @@ func checkAuthAdminPermis(moduleName string, brancaData helper.BrancaData, path 
 	return status, err
 }
 
-// 检测用户状态
+// 检测组织单位用户状态
 func checkAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
 	service := &framework.AuthMiddlewate{}
 	status, err := service.CheckAuthAdminStatus(moduleName, brancaData)
+	return status, err
+}
+
+// 检测api端用户状态
+func checkAuthUserStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
+	service := &framework.AuthMiddlewate{}
+	status, err := service.CheckAuthUserStatus(moduleName, brancaData)
 	return status, err
 }

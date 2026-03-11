@@ -395,7 +395,7 @@ func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, un
 	tmpPwd, err1 := helper.GenerateCryptPassword(unitUserSaveDto.UserDto.Password)
 	unitUserSaveDto.UserDto.Password = helper.Ternary(isAddUnitUser, tmpPwd, "")
 	unitUserSaveDto.UserProfileDto.Deleted = 0
-	unitUserSaveDto.UserProfileDto.Status = helper.Ternary(isAddUnitUser, models.USER_STATUS_NORMAL, userData.Status)
+	unitUserSaveDto.UserProfileDto.Status = helper.Ternary(isAddUnitUser, models.USER_PROFILE_NORMAL, userData.Status)
 	if err1 != nil {
 		err = err1
 		return

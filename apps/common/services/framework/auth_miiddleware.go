@@ -18,7 +18,7 @@ type AuthMiddlewate struct {
 }
 
 /**
- * 验证用户各种状态
+ * 验证组织单位用户各种状态
  */
 func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
 	userId := brancaData.Sub
@@ -78,6 +78,17 @@ func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData help
 	return true, nil
 }
 
+/**
+ * 验证api用户各种状态
+ */
+func (s *AuthMiddlewate) CheckAuthUserStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
+	userId := brancaData.Sub
+	if userId == "" {
+		return false, errors.New("CheckAuthUserStatus(): 用户id，不能为空")
+	}
+	return s.checkUserProfileStatus(moduleName, userId)
+}
+
 func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
 	unitId := brancaData.SubUnit
 	unitUserId := brancaData.SubUnitUser
@@ -89,7 +100,7 @@ func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData hel
 	return isOk, err
 }
 
-// 验证用户资料状态
+// 验证组织单位用户资料状态
 func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId string, unitId string) (status bool, err error) {
 	index := 0
 	index, err = business_store.GetAumidUps(userId, unitId, 0)
@@ -126,6 +137,42 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 	}
 
 	err = business_store.SetAumidUps(userId, unitId, data.Status)
+	if err == nil {
+		status = true
+	}
+	return
+}
+
+// 验证api用户资料状态
+func (s *AuthMiddlewate) checkUserProfileStatus(moduleName string, userId string) (status bool, err error) {
+	index := 0
+	index, err = business_store.GetAumidUps(userId, "", 0)
+	if err == nil && index > 0 {
+		status = index == models.USER_PROFILE_NORMAL
+		if !status {
+			err = errors.New("用户" + models.USER_PROFILE_MAP[index])
+		}
+	}
+	if err != nil {
+		return
+	}
+
+	var data models.UserProfile
+	data, err = base_ar.GetUserProfileOfById(userId)
+	if err != nil {
+		return
+	}
+	if data.Id == "" {
+		err = errors.New("用户资料信息不存在")
+		return
+	}
+
+	if !(data.Status == models.USER_PROFILE_NORMAL) {
+		err = errors.New("用户" + models.USER_PROFILE_MAP[data.Status])
+		return
+	}
+
+	err = business_store.SetAumidUps(userId, "", data.Status)
 	if err == nil {
 		status = true
 	}
@@ -177,10 +224,10 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 	switch v := data.(type) {
 	case *models.Plat:
 		tmpStatus = v.Status
-		status = v.Status == models.USER_STATUS_NORMAL
+		status = v.Status == models.USER_PROFILE_NORMAL
 	case *models.Mchnt:
 		tmpStatus = v.Status
-		status = v.Status == models.USER_STATUS_NORMAL
+		status = v.Status == models.USER_PROFILE_NORMAL
 	default:
 		err = errors.New("未知的用户单位类型")
 	}

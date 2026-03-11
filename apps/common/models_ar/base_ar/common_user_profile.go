@@ -2,7 +2,9 @@ package base_ar
 
 import (
 	"WenBeego/apps/common/dto/user_dto"
+	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
+	"errors"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -45,4 +47,25 @@ func SaveUserProfile(tx *gorm.DB, userProfileDto user_dto.UserProfileDto) (err e
 		// }),
 	}).Create(&userProfileDto).Error
 	return
+}
+
+func GetUserProfileOfById(userId string) (models.UserProfile, error) {
+	userModel := &models.User{}
+	userProfileModel := &models.UserProfile{}
+
+	tableUserName := userModel.TableName()
+	tableUserProfileName := userProfileModel.TableName()
+	var data models.UserProfile
+	if userId == "" {
+		return data, errors.New("userId 不能为空")
+	}
+
+	result := global.GetReadDb().
+		Model(userProfileModel).
+		Select(tableUserProfileName+".*").
+		Joins("inner join "+tableUserName+" on "+tableUserName+".id = "+tableUserProfileName+".id").
+		Where(tableUserName+".user_id = ?", userId).
+		Where(tableUserName+".deleted = ?", 0).
+		Take(&data)
+	return data, result.Error
 }
