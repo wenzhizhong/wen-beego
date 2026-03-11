@@ -22,7 +22,7 @@ type DeptController struct {
 // @Accept application/json
 // @Produce application/json
 // @Param selectUnitIds query string true "父级ID"
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/admin_mchnt/system-dept/get [get]
 
 func (c *DeptController) Get() {
@@ -61,7 +61,7 @@ func (c *DeptController) Get() {
 // @Accept  json
 // @Produce  json
 // @Param   selectUnitIds query string true "selectUnitIds"
-// @Success 200 {object}
+// @Success 200 {object}  interface{} "返回结果"
 // @Router /admin_plat/admin_mchnt/system-dept/get-dept-tree [get]
 func (c *DeptController) GetUnitDeptTree() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -88,7 +88,7 @@ func (c *DeptController) GetUnitDeptTree() {
 // @Accept  json
 // @Produce  json
 // @Param   selectUnitIds query string true "selectUnitIds"
-// @Success 200 {object}
+// @Success 200 {object} interface{} "返回结果"
 // @Router /admin_plat/admin_mchnt/system-dept/get-dept-principal [get]
 func (c *DeptController) GetUnitDeptPrincipal() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -128,7 +128,7 @@ func (c *DeptController) GetUnitDeptPrincipal() {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body dept_dto.UnitDeptDto true "新增组织架构参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Route /admin_mchnt/system-dept/add
 
 func (c *DeptController) Add() {
@@ -142,7 +142,7 @@ func (c *DeptController) Add() {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body dept_dto.UnitDeptDto true "修改组织架构参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Route /admin_mchnt/system-dept/edit
 func (c *DeptController) Edit() {
 	c.save("edit")
@@ -189,7 +189,7 @@ func (c *DeptController) save(optType string) {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body dept_dto.UnitDeptDto true "删除组织架构参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Route /admin_mchnt/system-dept/del
 func (c *DeptController) Del() {
 	deptDto, err1 := helper.GetReqBody[dept_dto.UnitDeptDto](c.Ctx)

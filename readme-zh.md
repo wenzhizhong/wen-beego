@@ -78,7 +78,7 @@
   swag init -g cmd/http/main.go  --output apps/swagger 
   ```
   命令运行成功后，会在apps/swagger目录下生成swagger.json和swagger.yaml文件，
-  文档访问地址：http://127.0.0.1:8031/swagger/index.html
+  文档访问地址：http://127.0.0.1:8013/swagger/index.html
 
 # 系统手册 
   [系统手册](doc/系统手册.md)

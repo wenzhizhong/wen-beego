@@ -19,7 +19,7 @@ type UploadController struct {
 // @Accept multipart/form-data
 // @Produce  json
 // @Param file formData file true "file"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_mchnt/upload/upload [post]
 func (c *UploadController) Upload() {
 	userId := c.Ctx.Input.GetData("userId")
@@ -57,7 +57,7 @@ func (c *UploadController) Upload() {
 // @Param totalSize formData int true "totalSize"
 // @Param totalChunks formData int true "totalChunks"
 // @Param filename formData string true "filename"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_mchnt/upload/vue-slice-upload [post]
 // @Security ApiKeyAuth
 
@@ -101,8 +101,8 @@ func (c *UploadController) VueSliceUpload() {
 // @Param identifier formData string true "identifier"
 // @Param chunkNumber formData int true "chunkNumber"
 // @Param totalChunks formData int true "totalChunks"
-// @Success 200 {object} dto.Response
-// @Router /admin_mchnt/upload/vue-slice-upload-check
+// @Success 200 {object} dto.Response "返回结果"
+// @Router /admin_mchnt/upload/vue-slice-upload-check [post]
 func (c *UploadController) VueSliceUploadCheck() {
 	userId := c.Ctx.Input.GetData("userId")
 	unitId := c.Ctx.Input.GetData("unitId")
@@ -127,8 +127,8 @@ func (c *UploadController) VueSliceUploadCheck() {
 // @Tags 上传
 // @Accept application/x-wwww-form-urlencoded
 // @Produce  json
-// @Param urls
-// @Success 200 {object} dto.Response
+// @Param urls path string true "urls"
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_mchnt/upload/link-sign [get]
 // @Security ApiKeyAuth
 func (c *UploadController) LinkSign() {

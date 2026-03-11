@@ -22,7 +22,7 @@ type MenuPlatController struct {
 // @Accept application/json
 // @Produce application/json
 // @Param parentUnitId query string true "父级ID"
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/system-menu/get-plat [get]
 func (c *MenuPlatController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -95,7 +95,7 @@ func (c *MenuPlatController) save(optType string) {
 // @Accept application/json
 // @Produce application/json
 // @Param menuDto body menu_dto.MenuDto true "平台菜单管理"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/add-plat [post]
 
 func (c *MenuPlatController) Add() {
@@ -109,7 +109,7 @@ func (c *MenuPlatController) Add() {
 // @Accept application/json
 // @Produce application/json
 // @Param menuDto body menu_dto.MenuDto true "平台菜单管理"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/edit-plat [post]
 
 func (c *MenuPlatController) Edit() {
@@ -121,8 +121,8 @@ func (c *MenuPlatController) Edit() {
 // @Tags 系统管理-平台菜单管理
 // @Accept application/json
 // @Produce application/json
-// @Param ids body dto.menuDto true "平台菜单管理"
-// @Success 200 {object} dto.Response
+// @Param ids body menu_dto.MenuDto true "平台菜单管理"
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/del-plat [post]
 func (c *MenuPlatController) Del() {
 	menuDto, err1 := helper.GetReqBody[menu_dto.MenuDto](c.Ctx)

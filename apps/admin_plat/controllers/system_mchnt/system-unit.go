@@ -22,7 +22,7 @@ type UnitController struct {
 // @Accept application/json
 // @Produce application/json
 // @Param parentUnitId query string true "父级ID"
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/admin_mchnt/system-unit/get [get]
 func (c *UnitController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -96,7 +96,7 @@ func (c *UnitController) save(optType string) {
 // @Accept application/json
 // @Produce application/json
 // @Param unitDto body unit_dto.UnitDto true "内部组织管理"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/admin_mchnt/system-unit/add [post]
 
 func (c *UnitController) Add() {
@@ -110,7 +110,7 @@ func (c *UnitController) Add() {
 // @Accept application/json
 // @Produce application/json
 // @Param unitDto body unit_dto.UnitDto true "内部组织管理"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/admin_mchnt/system-unit/edit [post]
 
 func (c *UnitController) Edit() {
@@ -122,8 +122,8 @@ func (c *UnitController) Edit() {
 // @Tags 系统管理-内部组织管理
 // @Accept application/json
 // @Produce application/json
-// @Param ids body dto.UnitDto true "内部组织管理"
-// @Success 200 {object} dto.Response
+// @Param ids body unit_dto.UnitDto true "内部组织管理"
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/admin_mchnt/system-unit/del [post]
 func (c *UnitController) Del() {
 	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)

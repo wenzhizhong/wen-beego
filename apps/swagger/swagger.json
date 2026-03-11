@@ -4,6 +4,975 @@
         "contact": {}
     },
     "paths": {
+        "/admin_mchnt/auth-mchnt/change-unit": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "切换组织",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "切换组织",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth-mchnt/get-user-unit": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取用户组织单位",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "获取用户组织单位",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth-menu/get-async-routes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取异步路由",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "获取异步路由",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth-params/model-params": {
+            "get": {
+                "tags": [
+                    "参数"
+                ],
+                "summary": "获取参数-模型常量参数",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth/get-captcha": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取验证码",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "获取验证码",
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth/login": {
+            "post": {
+                "description": "admin用户登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "登录",
+                "parameters": [
+                    {
+                        "description": "登录参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_dto.LoginDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "admin退出登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "退出登录",
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/auth/refresh-token": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "刷新token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "刷新token",
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-dept/get-dept-principal": {
+            "get": {
+                "description": "搜索可用的组织架构负责人",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织架构"
+                ],
+                "summary": "搜索可用的组织架构负责人",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-dept/get-dept-tree": {
+            "get": {
+                "description": "组织架构树形列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织架构"
+                ],
+                "summary": "组织架构树形列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-role/role-menu": {
+            "get": {
+                "description": "获取角色可选菜单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-角色"
+                ],
+                "summary": "获取角色可选菜单",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-role/role-menu-ids": {
+            "get": {
+                "description": "获取角色已选菜单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-角色"
+                ],
+                "summary": "获取角色已选菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "角色id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-unit/del": {
+            "post": {
+                "description": "删除内部组织管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-内部组织管理"
+                ],
+                "summary": "删除内部组织管理",
+                "parameters": [
+                    {
+                        "description": "内部组织管理",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/unit_dto.UnitDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-unit/get": {
+            "get": {
+                "description": "获取内部组织管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-内部组织管理"
+                ],
+                "summary": "获取内部组织管理",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级ID",
+                        "name": "parentUnitId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-user/add": {
+            "post": {
+                "description": "新增组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织单位用户"
+                ],
+                "summary": "新增组织单位用户",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "userDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_dto.UnitUserSaveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-user/del": {
+            "post": {
+                "description": "删除组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "删除组织单位用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "组织单位用户ID",
+                        "name": "unitUserId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-user/edit": {
+            "post": {
+                "description": "编辑组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织单位用户"
+                ],
+                "summary": "编辑组织单位用户",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "userDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_dto.UnitUserSaveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/system-user/get-role-tree": {
+            "get": {
+                "description": "角色树形列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "角色"
+                ],
+                "summary": "角色树形列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/upload/link-sign": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "私有附件-链接签名",
+                "consumes": [
+                    "application/x-wwww-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "上传"
+                ],
+                "summary": "私有附件-链接签名",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "urls",
+                        "name": "urls",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/upload/upload": {
+            "post": {
+                "description": "上传",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "上传"
+                ],
+                "summary": "上传",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_mchnt/upload/vue-slice-upload-check": {
+            "post": {
+                "description": "分片上传检查",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "上传"
+                ],
+                "summary": "分片上传检查",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifier",
+                        "name": "identifier",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "chunkNumber",
+                        "name": "chunkNumber",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "totalChunks",
+                        "name": "totalChunks",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-dept/get-dept-principal": {
+            "get": {
+                "description": "搜索可用的组织架构负责人",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织架构"
+                ],
+                "summary": "搜索可用的组织架构负责人",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-dept/get-dept-tree": {
+            "get": {
+                "description": "组织架构树形列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织架构"
+                ],
+                "summary": "组织架构树形列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-role/role-menu": {
+            "get": {
+                "description": "获取角色可选菜单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-角色"
+                ],
+                "summary": "获取角色可选菜单",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-role/role-menu-ids": {
+            "get": {
+                "description": "获取角色已选菜单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-角色"
+                ],
+                "summary": "获取角色已选菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "角色id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-unit/del": {
+            "post": {
+                "description": "删除内部组织管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-内部组织管理"
+                ],
+                "summary": "删除内部组织管理",
+                "parameters": [
+                    {
+                        "description": "内部组织管理",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/unit_dto.UnitDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-unit/get": {
+            "get": {
+                "description": "获取内部组织管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-内部组织管理"
+                ],
+                "summary": "获取内部组织管理",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级ID",
+                        "name": "parentUnitId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-user/add": {
+            "post": {
+                "description": "新增组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织单位用户"
+                ],
+                "summary": "新增组织单位用户",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "userDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_dto.UnitUserSaveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-user/del": {
+            "post": {
+                "description": "删除组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "删除组织单位用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "组织单位用户ID",
+                        "name": "unitUserId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-user/edit": {
+            "post": {
+                "description": "编辑组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织单位用户"
+                ],
+                "summary": "编辑组织单位用户",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "userDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_dto.UnitUserSaveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/admin_mchnt/system-user/get-role-tree": {
+            "get": {
+                "description": "角色树形列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "角色"
+                ],
+                "summary": "角色树形列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/admin_plat/auth-menu/get-async-routes": {
             "get": {
                 "security": [
@@ -246,6 +1215,287 @@
                 }
             }
         },
+        "/admin_plat/system-dept/get-dept-principal": {
+            "get": {
+                "description": "搜索可用的组织架构负责人",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织架构"
+                ],
+                "summary": "搜索可用的组织架构负责人",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-dept/get-dept-tree": {
+            "get": {
+                "description": "组织架构树形列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织架构"
+                ],
+                "summary": "组织架构树形列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-menu/del-mchnt": {
+            "post": {
+                "description": "删除商户菜单管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-商户菜单管理"
+                ],
+                "summary": "删除商户菜单管理",
+                "parameters": [
+                    {
+                        "description": "商户菜单管理",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/menu_dto.MenuDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-menu/del-plat": {
+            "post": {
+                "description": "删除平台菜单管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-平台菜单管理"
+                ],
+                "summary": "删除平台菜单管理",
+                "parameters": [
+                    {
+                        "description": "平台菜单管理",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/menu_dto.MenuDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-menu/get-mchnt": {
+            "get": {
+                "description": "商户菜单管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-商户菜单管理"
+                ],
+                "summary": "商户菜单管理",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级ID",
+                        "name": "parentUnitId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-menu/get-plat": {
+            "get": {
+                "description": "平台菜单管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-平台菜单管理"
+                ],
+                "summary": "平台菜单管理",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级ID",
+                        "name": "parentUnitId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-role/role-menu": {
+            "get": {
+                "description": "获取角色可选菜单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-角色"
+                ],
+                "summary": "获取角色可选菜单",
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-role/role-menu-ids": {
+            "get": {
+                "description": "获取角色已选菜单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-角色"
+                ],
+                "summary": "获取角色已选菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "角色id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-unit/del": {
+            "post": {
+                "description": "删除内部组织管理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理-内部组织管理"
+                ],
+                "summary": "删除内部组织管理",
+                "parameters": [
+                    {
+                        "description": "内部组织管理",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/unit_dto.UnitDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin_plat/system-unit/get": {
             "get": {
                 "description": "获取内部组织管理",
@@ -270,7 +1520,280 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RespDataListDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-user/add": {
+            "post": {
+                "description": "新增组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织单位用户"
+                ],
+                "summary": "新增组织单位用户",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "userDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_dto.UnitUserSaveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-user/del": {
+            "post": {
+                "description": "删除组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "删除组织单位用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "组织单位用户ID",
+                        "name": "unitUserId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}\" \"返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-user/edit": {
+            "post": {
+                "description": "编辑组织单位用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组织单位用户"
+                ],
+                "summary": "编辑组织单位用户",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "userDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_dto.UnitUserSaveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/system-user/get-role-tree": {
+            "get": {
+                "description": "角色树形列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "角色"
+                ],
+                "summary": "角色树形列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selectUnitIds",
+                        "name": "selectUnitIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin_plat/upload/link-sign": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "私有附件-链接签名",
+                "consumes": [
+                    "application/x-wwww-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "上传"
+                ],
+                "summary": "私有附件-链接签名",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "urls",
+                        "name": "urls",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/upload/upload": {
+            "post": {
+                "description": "上传",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "上传"
+                ],
+                "summary": "上传",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin_plat/upload/vue-slice-upload-check": {
+            "post": {
+                "description": "分片上传检查",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "上传"
+                ],
+                "summary": "分片上传检查",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifier",
+                        "name": "identifier",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "chunkNumber",
+                        "name": "chunkNumber",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "totalChunks",
+                        "name": "totalChunks",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/plat_admin/monitor-cron-log/get": {
+            "get": {
+                "description": "获取定时任务日志列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "定时任务日志"
+                ],
+                "summary": "获取定时任务日志列表",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/page_dto.MonitorCronLogListReqDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
                         "schema": {
                             "$ref": "#/definitions/dto.RespDataListDto"
                         }
@@ -311,6 +1834,56 @@
                 }
             }
         },
+        "dept_dto.UnitDeptDto": {
+            "type": "object",
+            "properties": {
+                "deleted": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "string"
+                },
+                "principal": {
+                    "type": "string"
+                },
+                "principal_id": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "unit_id": {
+                    "type": "string"
+                },
+                "unit_name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.RespDataListDto": {
             "type": "object",
             "properties": {
@@ -334,6 +1907,532 @@
                 },
                 "data": {},
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "menu_dto.MenuDto": {
+            "type": "object",
+            "properties": {
+                "activePath": {
+                    "type": "string"
+                },
+                "asyncToAll": {
+                    "type": "string"
+                },
+                "auths": {
+                    "type": "string"
+                },
+                "clone": {
+                    "type": "integer"
+                },
+                "component": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "integer"
+                },
+                "enterTransition": {
+                    "type": "string"
+                },
+                "extraIcon": {
+                    "type": "string"
+                },
+                "fixedTag": {
+                    "type": "boolean"
+                },
+                "frameLoading": {
+                    "type": "boolean"
+                },
+                "frameSrc": {
+                    "type": "string"
+                },
+                "hiddenTag": {
+                    "type": "boolean"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "keepAlive": {
+                    "type": "boolean"
+                },
+                "leaveTransition": {
+                    "type": "string"
+                },
+                "menuType": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "redirect": {
+                    "type": "string"
+                },
+                "showLink": {
+                    "type": "boolean"
+                },
+                "showParent": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unitId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "page_dto.MonitorCronLogListReqDto": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "currentPage": {
+                    "type": "integer"
+                },
+                "nameEn": {
+                    "type": "string"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                }
+            }
+        },
+        "role_dto.UnitRoleDto": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "role_classify_name": {
+                    "type": "string"
+                },
+                "role_name": {
+                    "type": "string"
+                },
+                "role_sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "unit_id": {
+                    "type": "string"
+                },
+                "unit_name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "updated_by": {
+                    "type": "string"
+                }
+            }
+        },
+        "unit_dto.UnitDto": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "corporation": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "default_unit_id": {
+                    "type": "string"
+                },
+                "default_unit_user_id": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "integer"
+                },
+                "deleted_by": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isOfficial": {
+                    "type": "boolean"
+                },
+                "license": {
+                    "type": "string"
+                },
+                "licenseLink": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "logoLink": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "updated_by": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_dto.UnitUserDeptDto": {
+            "type": "object",
+            "properties": {
+                "deleted": {
+                    "type": "integer"
+                },
+                "dept_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_dto.UnitUserDto": {
+            "type": "object",
+            "properties": {
+                "default_unit_id": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_default": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "unit_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_dto.UnitUserProfileDto": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "avatarLink": {
+                    "type": "string"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "card_images": {
+                    "type": "string"
+                },
+                "card_num": {
+                    "type": "string"
+                },
+                "card_type": {
+                    "type": "integer"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "constellation": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "degree_number": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "emergency_name": {
+                    "type": "string"
+                },
+                "emergency_tel": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "graduated_from": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "professional": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "schooling": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "valid_date_begin": {
+                    "type": "string"
+                },
+                "valid_date_end": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_dto.UnitUserRoleDto": {
+            "type": "object",
+            "properties": {
+                "deleted": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_dto.UnitUserSaveDto": {
+            "type": "object",
+            "properties": {
+                "dept_id": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "unitUserDeptDto": {
+                    "$ref": "#/definitions/user_dto.UnitUserDeptDto"
+                },
+                "unitUserDto": {
+                    "$ref": "#/definitions/user_dto.UnitUserDto"
+                },
+                "unitUserProfileDto": {
+                    "$ref": "#/definitions/user_dto.UnitUserProfileDto"
+                },
+                "unitUserRoleDto": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user_dto.UnitUserRoleDto"
+                    }
+                },
+                "userDto": {
+                    "$ref": "#/definitions/user_dto.UserDto"
+                },
+                "userProfileDto": {
+                    "$ref": "#/definitions/user_dto.UserProfileDto"
+                }
+            }
+        },
+        "user_dto.UserDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user_dto.UserProfileDto": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "card_images": {
+                    "type": "string"
+                },
+                "card_num": {
+                    "type": "string"
+                },
+                "card_type": {
+                    "type": "integer"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "constellation": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "degree_number": {
+                    "type": "string"
+                },
+                "deleted": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "emergency_name": {
+                    "type": "string"
+                },
+                "emergency_tel": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "graduated_from": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "professional": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "schooling": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "valid_date_begin": {
+                    "type": "string"
+                },
+                "valid_date_end": {
                     "type": "string"
                 }
             }

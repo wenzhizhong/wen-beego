@@ -22,7 +22,7 @@ type RoleController struct {
 // @Accept application/json
 // @Produce application/json
 // @Param selectUnitIds query string true "父级ID"
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/admin_mchnt/system-role/get [get]
 
 func (c *RoleController) Get() {
@@ -63,7 +63,7 @@ func (c *RoleController) Get() {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body role_dto.UnitRoleDto true "新增角色参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Route /admin_mchnt/system-role/add
 
 func (c *RoleController) Add() {
@@ -77,7 +77,7 @@ func (c *RoleController) Add() {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body role_dto.UnitRoleDto true "修改角色参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Route /admin_mchnt/system-role/edit
 func (c *RoleController) Edit() {
 	c.save("edit")
@@ -124,7 +124,7 @@ func (c *RoleController) save(optType string) {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body role_dto.UnitRoleDto true "删除角色参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Route /admin_mchnt/system-role/del
 func (c *RoleController) Del() {
 	roleDto, err1 := helper.GetReqBody[role_dto.UnitRoleDto](c.Ctx)
@@ -155,7 +155,7 @@ func (c *RoleController) Del() {
 // @Tags 系统管理-角色
 // @Accept application/json
 // @Produce application/json
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/admin_mchnt/system-role/role-menu [get]
 func (c *RoleController) RoleMenu() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -182,7 +182,7 @@ func (c *RoleController) RoleMenu() {
 // @Accept application/json
 // @Produce application/json
 // @Param id query string true "角色id"
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/admin_mchnt/system-role/role-menu-ids [get]
 func (c *RoleController) RoleMenuIds() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -210,7 +210,7 @@ func (c *RoleController) RoleMenuIds() {
 // @Accept application/json
 // @Produce application/json
 // @Param reqDto body role_dto.RoleMenuSaveDto true "保存角色菜单参数"
-// @Success 200 {object} dto.RespDataDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/admin_mchnt/system-role/role-menu-save [post]
 
 func (c *RoleController) RoleMenuSave() {

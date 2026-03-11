@@ -23,8 +23,10 @@ type UserController struct {
 // @Tags 系统管理-用户管理
 // @Accept application/json
 // @Produce application/json
-// @Param data body dto.GetUserListDto true "请求参数"
-// @Success 200 {object} dto.GetUserListDto "返回结果"
+// @Param data selectUnitIds string false "单位ID列表"
+// @Param data deptId string false "部门ID列表"
+// @Param data roleId string false "角色ID列表"
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_mchnt/system-user/get [get]
 
 func (c *UserController) GetUserList() {
@@ -63,8 +65,8 @@ func (c *UserController) GetUserList() {
 // @Description 新增组织单位用户
 // @Tags 组织单位用户
 // @Accept  json
-// @Param   userDto body user_dto.UnitUserSaveDto
-// @Success 200 {object} helper.Response
+// @Param   userDto body user_dto.UnitUserSaveDto true "请求参数"
+// @Success 200 {object} dto.Response  "返回结果"
 // @Router /admin_mchnt/system-user/add [post]
 func (c *UserController) Add() {
 	c.save("add")
@@ -75,9 +77,9 @@ func (c *UserController) Add() {
 // @Description 编辑组织单位用户
 // @Tags 组织单位用户
 // @Accept  json
-// @Param   userDto body user_dto.UnitUserSaveDto
-// @Success 200 {object} helper.Response
-// @Router /admin_mchnt/system-user/edit[post]
+// @Param   userDto body user_dto.UnitUserSaveDto true "请求参数"
+// @Success 200 {object} dto.Response "返回结果"
+// @Router /admin_mchnt/system-user/edit [post]
 func (c *UserController) Edit() {
 	c.save("edit")
 }
@@ -133,7 +135,7 @@ func (c *UserController) save(optType string) {
 // @Accept  json
 // @Produce  json
 // @Param   unitUserId query string true "组织单位用户ID"
-// @Success 200 {object} helper.Response "{"code": 200, "data": [...]}"
+// @Success 200 {object} dto.Response "{"code": 200, "data": [...]}"
 // @Router /admin_mchnt/system-user/del [post]
 func (c *UserController) Del() {
 	type reqStruct struct {
@@ -165,7 +167,7 @@ func (c *UserController) Del() {
 // @Accept  json
 // @Produce  json
 // @Param   selectUnitIds query string true "selectUnitIds"
-// @Success 200 {object}
+// @Success 200 {object} dto.Response "{"code": 200, "data": [...]}"
 // @Router /admin_mchnt/system-user/get-role-tree [get]
 func (c *UserController) GetRoleTree() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)

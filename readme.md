@@ -80,7 +80,7 @@
   swag init -g cmd/http/main.go  --output apps/swagger 
   ```
   After the command is successfully executed, the swagger.json and swagger.yaml files are generated in the apps/swagger directory, and
-  the document access address is http://127.0.0.1:8031/swagger/index.html
+  the document access address is http://127.0.0.1:8013/swagger/index.html
 
 # System manual 
   [System manual](doc/系统手册.md)

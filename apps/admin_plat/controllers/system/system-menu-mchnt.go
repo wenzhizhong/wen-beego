@@ -22,7 +22,7 @@ type MenuMchntController struct {
 // @Accept application/json
 // @Produce application/json
 // @Param parentUnitId query string true "父级ID"
-// @Success 200 {object} dto.RespDataListDto
+// @Success 200 {object} dto.RespDataListDto "返回结果"
 // @Router /admin_plat/system-menu/get-mchnt [get]
 func (c *MenuMchntController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
@@ -95,7 +95,7 @@ func (c *MenuMchntController) save(optType string) {
 // @Accept application/json
 // @Produce application/json
 // @Param menuDto body menu_dto.MenuDto true "商户菜单管理"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/add-mchnt [post]
 
 func (c *MenuMchntController) Add() {
@@ -109,7 +109,7 @@ func (c *MenuMchntController) Add() {
 // @Accept application/json
 // @Produce application/json
 // @Param menuDto body menu_dto.MenuDto true "商户菜单管理"
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/edit-mchnt [post]
 
 func (c *MenuMchntController) Edit() {
@@ -121,8 +121,8 @@ func (c *MenuMchntController) Edit() {
 // @Tags 系统管理-商户菜单管理
 // @Accept application/json
 // @Produce application/json
-// @Param ids body dto.menuDto true "商户菜单管理"
-// @Success 200 {object} dto.Response
+// @Param ids body menu_dto.MenuDto true "商户菜单管理"
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/del-mchnt [post]
 func (c *MenuMchntController) Del() {
 	menuDto, err1 := helper.GetReqBody[menu_dto.MenuDto](c.Ctx)
@@ -153,7 +153,7 @@ func (c *MenuMchntController) Del() {
 // @Tags 系统管理-商户菜单管理
 // @Accept application/json
 // @Produce application/json
-// @Success 200 {object} dto.Response
+// @Success 200 {object} dto.Response "返回结果"
 // @Router /admin_plat/system-menu/mchnt-unit-list [get]
 
 func (c *MenuMchntController) MchntUnitList() {

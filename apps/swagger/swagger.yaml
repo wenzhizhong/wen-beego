@@ -22,6 +22,39 @@ definitions:
     - password
     - phone
     type: object
+  dept_dto.UnitDeptDto:
+    properties:
+      deleted:
+        type: integer
+      deleted_at:
+        type: integer
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      pid:
+        type: string
+      principal:
+        type: string
+      principal_id:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+      unit_id:
+        type: string
+      unit_name:
+        type: string
+      updated_at:
+        type: integer
+    type: object
   dto.RespDataListDto:
     properties:
       currentPage:
@@ -40,9 +73,982 @@ definitions:
       message:
         type: string
     type: object
+  menu_dto.MenuDto:
+    properties:
+      activePath:
+        type: string
+      asyncToAll:
+        type: string
+      auths:
+        type: string
+      clone:
+        type: integer
+      component:
+        type: string
+      createdAt:
+        type: string
+      deleted:
+        type: integer
+      enterTransition:
+        type: string
+      extraIcon:
+        type: string
+      fixedTag:
+        type: boolean
+      frameLoading:
+        type: boolean
+      frameSrc:
+        type: string
+      hiddenTag:
+        type: boolean
+      icon:
+        type: string
+      id:
+        type: string
+      keepAlive:
+        type: boolean
+      leaveTransition:
+        type: string
+      menuType:
+        type: integer
+      name:
+        type: string
+      parentId:
+        type: string
+      path:
+        type: string
+      rank:
+        type: integer
+      redirect:
+        type: string
+      showLink:
+        type: boolean
+      showParent:
+        type: boolean
+      title:
+        type: string
+      unitId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  page_dto.MonitorCronLogListReqDto:
+    properties:
+      createdAt:
+        type: string
+      currentPage:
+        type: integer
+      nameEn:
+        type: string
+      offset:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  role_dto.UnitRoleDto:
+    properties:
+      created_at:
+        type: integer
+      created_by:
+        type: string
+      deleted:
+        type: integer
+      id:
+        type: string
+      remark:
+        type: string
+      role_classify_name:
+        type: string
+      role_name:
+        type: string
+      role_sort:
+        type: integer
+      status:
+        type: integer
+      unit_id:
+        type: string
+      unit_name:
+        type: string
+      updated_at:
+        type: integer
+      updated_by:
+        type: string
+    type: object
+  unit_dto.UnitDto:
+    properties:
+      address:
+        type: string
+      code:
+        type: string
+      corporation:
+        type: string
+      created_at:
+        type: integer
+      created_by:
+        type: string
+      default_unit_id:
+        type: string
+      default_unit_user_id:
+        type: string
+      deleted:
+        type: integer
+      deleted_at:
+        type: integer
+      deleted_by:
+        type: string
+      id:
+        type: string
+      isOfficial:
+        type: boolean
+      license:
+        type: string
+      licenseLink:
+        type: string
+      logo:
+        type: string
+      logoLink:
+        type: string
+      name:
+        type: string
+      pid:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+      updated_at:
+        type: integer
+      updated_by:
+        type: string
+    type: object
+  user_dto.UnitUserDeptDto:
+    properties:
+      deleted:
+        type: integer
+      dept_id:
+        type: string
+      id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  user_dto.UnitUserDto:
+    properties:
+      default_unit_id:
+        type: string
+      deleted:
+        type: integer
+      id:
+        type: string
+      is_default:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      unit_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  user_dto.UnitUserProfileDto:
+    properties:
+      address:
+        type: string
+      avatar:
+        type: string
+      avatarLink:
+        type: string
+      birth_date:
+        type: string
+      card_images:
+        type: string
+      card_num:
+        type: string
+      card_type:
+        type: integer
+      company:
+        type: string
+      constellation:
+        type: string
+      created_at:
+        type: integer
+      degree_number:
+        type: string
+      deleted:
+        type: integer
+      deleted_at:
+        type: integer
+      email:
+        type: string
+      emergency_name:
+        type: string
+      emergency_tel:
+        type: string
+      gender:
+        type: integer
+      graduated_from:
+        type: string
+      id:
+        type: string
+      occupation:
+        type: string
+      professional:
+        type: string
+      remark:
+        type: string
+      schooling:
+        type: string
+      source:
+        type: integer
+      status:
+        type: integer
+      updated_at:
+        type: integer
+      valid_date_begin:
+        type: string
+      valid_date_end:
+        type: string
+    type: object
+  user_dto.UnitUserRoleDto:
+    properties:
+      deleted:
+        type: integer
+      id:
+        type: string
+      role_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  user_dto.UnitUserSaveDto:
+    properties:
+      dept_id:
+        type: string
+      role_id:
+        items:
+          type: string
+        type: array
+      unitUserDeptDto:
+        $ref: '#/definitions/user_dto.UnitUserDeptDto'
+      unitUserDto:
+        $ref: '#/definitions/user_dto.UnitUserDto'
+      unitUserProfileDto:
+        $ref: '#/definitions/user_dto.UnitUserProfileDto'
+      unitUserRoleDto:
+        items:
+          $ref: '#/definitions/user_dto.UnitUserRoleDto'
+        type: array
+      userDto:
+        $ref: '#/definitions/user_dto.UserDto'
+      userProfileDto:
+        $ref: '#/definitions/user_dto.UserProfileDto'
+    type: object
+  user_dto.UserDto:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  user_dto.UserProfileDto:
+    properties:
+      address:
+        type: string
+      avatar:
+        type: string
+      birth_date:
+        type: string
+      card_images:
+        type: string
+      card_num:
+        type: string
+      card_type:
+        type: integer
+      company:
+        type: string
+      constellation:
+        type: string
+      created_at:
+        type: integer
+      degree_number:
+        type: string
+      deleted:
+        type: integer
+      deleted_at:
+        type: integer
+      email:
+        type: string
+      emergency_name:
+        type: string
+      emergency_tel:
+        type: string
+      gender:
+        type: integer
+      graduated_from:
+        type: string
+      id:
+        type: string
+      occupation:
+        type: string
+      professional:
+        type: string
+      remark:
+        type: string
+      schooling:
+        type: string
+      source:
+        type: integer
+      status:
+        type: integer
+      updated_at:
+        type: integer
+      user_id:
+        type: string
+      valid_date_begin:
+        type: string
+      valid_date_end:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /admin_mchnt/auth-mchnt/change-unit:
+    get:
+      consumes:
+      - application/json
+      description: 切换组织
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 切换组织
+      tags:
+      - admin
+  /admin_mchnt/auth-mchnt/get-user-unit:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户组织单位
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户组织单位
+      tags:
+      - admin
+  /admin_mchnt/auth-menu/get-async-routes:
+    get:
+      consumes:
+      - application/json
+      description: 获取异步路由
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取异步路由
+      tags:
+      - admin
+  /admin_mchnt/auth-params/model-params:
+    get:
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 获取参数-模型常量参数
+      tags:
+      - 参数
+  /admin_mchnt/auth/get-captcha:
+    get:
+      consumes:
+      - application/json
+      description: 获取验证码
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取验证码
+      tags:
+      - admin
+  /admin_mchnt/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: admin用户登录
+      parameters:
+      - description: 登录参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth_dto.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 登录
+      tags:
+      - admin
+  /admin_mchnt/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: admin退出登录
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 退出登录
+      tags:
+      - admin
+  /admin_mchnt/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: 刷新token
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 刷新token
+      tags:
+      - admin
+  /admin_mchnt/system-dept/get-dept-principal:
+    get:
+      consumes:
+      - application/json
+      description: 搜索可用的组织架构负责人
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 搜索可用的组织架构负责人
+      tags:
+      - 组织架构
+  /admin_mchnt/system-dept/get-dept-tree:
+    get:
+      consumes:
+      - application/json
+      description: 组织架构树形列表
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 组织架构树形列表
+      tags:
+      - 组织架构
+  /admin_mchnt/system-role/role-menu:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色可选菜单
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取角色可选菜单
+      tags:
+      - 系统管理-角色
+  /admin_mchnt/system-role/role-menu-ids:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色已选菜单
+      parameters:
+      - description: 角色id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取角色已选菜单
+      tags:
+      - 系统管理-角色
+  /admin_mchnt/system-unit/del:
+    post:
+      consumes:
+      - application/json
+      description: 删除内部组织管理
+      parameters:
+      - description: 内部组织管理
+        in: body
+        name: ids
+        required: true
+        schema:
+          $ref: '#/definitions/unit_dto.UnitDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除内部组织管理
+      tags:
+      - 系统管理-内部组织管理
+  /admin_mchnt/system-unit/get:
+    get:
+      consumes:
+      - application/json
+      description: 获取内部组织管理
+      parameters:
+      - description: 父级ID
+        in: query
+        name: parentUnitId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取内部组织管理
+      tags:
+      - 系统管理-内部组织管理
+  /admin_mchnt/system-user/add:
+    post:
+      consumes:
+      - application/json
+      description: 新增组织单位用户
+      parameters:
+      - description: 请求参数
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UnitUserSaveDto'
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 新增组织单位用户
+      tags:
+      - 组织单位用户
+  /admin_mchnt/system-user/del:
+    post:
+      consumes:
+      - application/json
+      description: 删除组织单位用户
+      parameters:
+      - description: 组织单位用户ID
+        in: query
+        name: unitUserId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除组织单位用户
+      tags:
+      - 用户管理
+  /admin_mchnt/system-user/edit:
+    post:
+      consumes:
+      - application/json
+      description: 编辑组织单位用户
+      parameters:
+      - description: 请求参数
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UnitUserSaveDto'
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 编辑组织单位用户
+      tags:
+      - 组织单位用户
+  /admin_mchnt/system-user/get-role-tree:
+    get:
+      consumes:
+      - application/json
+      description: 角色树形列表
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 角色树形列表
+      tags:
+      - 角色
+  /admin_mchnt/upload/link-sign:
+    get:
+      consumes:
+      - application/x-wwww-form-urlencoded
+      description: 私有附件-链接签名
+      parameters:
+      - description: urls
+        in: path
+        name: urls
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 私有附件-链接签名
+      tags:
+      - 上传
+  /admin_mchnt/upload/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 上传
+      tags:
+      - 上传
+  /admin_mchnt/upload/vue-slice-upload-check:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 分片上传检查
+      parameters:
+      - description: identifier
+        in: formData
+        name: identifier
+        required: true
+        type: string
+      - description: chunkNumber
+        in: formData
+        name: chunkNumber
+        required: true
+        type: integer
+      - description: totalChunks
+        in: formData
+        name: totalChunks
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 分片上传检查
+      tags:
+      - 上传
+  /admin_plat/admin_mchnt/system-dept/get-dept-principal:
+    get:
+      consumes:
+      - application/json
+      description: 搜索可用的组织架构负责人
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 搜索可用的组织架构负责人
+      tags:
+      - 组织架构
+  /admin_plat/admin_mchnt/system-dept/get-dept-tree:
+    get:
+      consumes:
+      - application/json
+      description: 组织架构树形列表
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 组织架构树形列表
+      tags:
+      - 组织架构
+  /admin_plat/admin_mchnt/system-role/role-menu:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色可选菜单
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取角色可选菜单
+      tags:
+      - 系统管理-角色
+  /admin_plat/admin_mchnt/system-role/role-menu-ids:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色已选菜单
+      parameters:
+      - description: 角色id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取角色已选菜单
+      tags:
+      - 系统管理-角色
+  /admin_plat/admin_mchnt/system-unit/del:
+    post:
+      consumes:
+      - application/json
+      description: 删除内部组织管理
+      parameters:
+      - description: 内部组织管理
+        in: body
+        name: ids
+        required: true
+        schema:
+          $ref: '#/definitions/unit_dto.UnitDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除内部组织管理
+      tags:
+      - 系统管理-内部组织管理
+  /admin_plat/admin_mchnt/system-unit/get:
+    get:
+      consumes:
+      - application/json
+      description: 获取内部组织管理
+      parameters:
+      - description: 父级ID
+        in: query
+        name: parentUnitId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取内部组织管理
+      tags:
+      - 系统管理-内部组织管理
+  /admin_plat/admin_mchnt/system-user/add:
+    post:
+      consumes:
+      - application/json
+      description: 新增组织单位用户
+      parameters:
+      - description: 请求参数
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UnitUserSaveDto'
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 新增组织单位用户
+      tags:
+      - 组织单位用户
+  /admin_plat/admin_mchnt/system-user/del:
+    post:
+      consumes:
+      - application/json
+      description: 删除组织单位用户
+      parameters:
+      - description: 组织单位用户ID
+        in: query
+        name: unitUserId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除组织单位用户
+      tags:
+      - 用户管理
+  /admin_plat/admin_mchnt/system-user/edit:
+    post:
+      consumes:
+      - application/json
+      description: 编辑组织单位用户
+      parameters:
+      - description: 请求参数
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UnitUserSaveDto'
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 编辑组织单位用户
+      tags:
+      - 组织单位用户
+  /admin_plat/admin_mchnt/system-user/get-role-tree:
+    get:
+      consumes:
+      - application/json
+      description: 角色树形列表
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 角色树形列表
+      tags:
+      - 角色
   /admin_plat/auth-menu/get-async-routes:
     get:
       consumes:
@@ -193,6 +1199,190 @@ paths:
       summary: 刷新token
       tags:
       - admin
+  /admin_plat/system-dept/get-dept-principal:
+    get:
+      consumes:
+      - application/json
+      description: 搜索可用的组织架构负责人
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 搜索可用的组织架构负责人
+      tags:
+      - 组织架构
+  /admin_plat/system-dept/get-dept-tree:
+    get:
+      consumes:
+      - application/json
+      description: 组织架构树形列表
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 组织架构树形列表
+      tags:
+      - 组织架构
+  /admin_plat/system-menu/del-mchnt:
+    post:
+      consumes:
+      - application/json
+      description: 删除商户菜单管理
+      parameters:
+      - description: 商户菜单管理
+        in: body
+        name: ids
+        required: true
+        schema:
+          $ref: '#/definitions/menu_dto.MenuDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除商户菜单管理
+      tags:
+      - 系统管理-商户菜单管理
+  /admin_plat/system-menu/del-plat:
+    post:
+      consumes:
+      - application/json
+      description: 删除平台菜单管理
+      parameters:
+      - description: 平台菜单管理
+        in: body
+        name: ids
+        required: true
+        schema:
+          $ref: '#/definitions/menu_dto.MenuDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除平台菜单管理
+      tags:
+      - 系统管理-平台菜单管理
+  /admin_plat/system-menu/get-mchnt:
+    get:
+      consumes:
+      - application/json
+      description: 商户菜单管理
+      parameters:
+      - description: 父级ID
+        in: query
+        name: parentUnitId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 商户菜单管理
+      tags:
+      - 系统管理-商户菜单管理
+  /admin_plat/system-menu/get-plat:
+    get:
+      consumes:
+      - application/json
+      description: 平台菜单管理
+      parameters:
+      - description: 父级ID
+        in: query
+        name: parentUnitId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 平台菜单管理
+      tags:
+      - 系统管理-平台菜单管理
+  /admin_plat/system-role/role-menu:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色可选菜单
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取角色可选菜单
+      tags:
+      - 系统管理-角色
+  /admin_plat/system-role/role-menu-ids:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色已选菜单
+      parameters:
+      - description: 角色id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取角色已选菜单
+      tags:
+      - 系统管理-角色
+  /admin_plat/system-unit/del:
+    post:
+      consumes:
+      - application/json
+      description: 删除内部组织管理
+      parameters:
+      - description: 内部组织管理
+        in: body
+        name: ids
+        required: true
+        schema:
+          $ref: '#/definitions/unit_dto.UnitDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除内部组织管理
+      tags:
+      - 系统管理-内部组织管理
   /admin_plat/system-unit/get:
     get:
       consumes:
@@ -208,10 +1398,188 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 返回结果
           schema:
             $ref: '#/definitions/dto.RespDataListDto'
       summary: 获取内部组织管理
       tags:
       - 系统管理-内部组织管理
+  /admin_plat/system-user/add:
+    post:
+      consumes:
+      - application/json
+      description: 新增组织单位用户
+      parameters:
+      - description: 请求参数
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UnitUserSaveDto'
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 新增组织单位用户
+      tags:
+      - 组织单位用户
+  /admin_plat/system-user/del:
+    post:
+      consumes:
+      - application/json
+      description: 删除组织单位用户
+      parameters:
+      - description: 组织单位用户ID
+        in: query
+        name: unitUserId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}" "返回结果'
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 删除组织单位用户
+      tags:
+      - 用户管理
+  /admin_plat/system-user/edit:
+    post:
+      consumes:
+      - application/json
+      description: 编辑组织单位用户
+      parameters:
+      - description: 请求参数
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UnitUserSaveDto'
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 编辑组织单位用户
+      tags:
+      - 组织单位用户
+  /admin_plat/system-user/get-role-tree:
+    get:
+      consumes:
+      - application/json
+      description: 角色树形列表
+      parameters:
+      - description: selectUnitIds
+        in: query
+        name: selectUnitIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema: {}
+      summary: 角色树形列表
+      tags:
+      - 角色
+  /admin_plat/upload/link-sign:
+    get:
+      consumes:
+      - application/x-wwww-form-urlencoded
+      description: 私有附件-链接签名
+      parameters:
+      - description: urls
+        in: path
+        name: urls
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 私有附件-链接签名
+      tags:
+      - 上传
+  /admin_plat/upload/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 上传
+      tags:
+      - 上传
+  /admin_plat/upload/vue-slice-upload-check:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 分片上传检查
+      parameters:
+      - description: identifier
+        in: formData
+        name: identifier
+        required: true
+        type: string
+      - description: chunkNumber
+        in: formData
+        name: chunkNumber
+        required: true
+        type: integer
+      - description: totalChunks
+        in: formData
+        name: totalChunks
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 分片上传检查
+      tags:
+      - 上传
+  /plat_admin/monitor-cron-log/get:
+    get:
+      consumes:
+      - application/json
+      description: 获取定时任务日志列表
+      parameters:
+      - description: 请求参数
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/page_dto.MonitorCronLogListReqDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.RespDataListDto'
+      summary: 获取定时任务日志列表
+      tags:
+      - 定时任务日志
 swagger: "2.0"
