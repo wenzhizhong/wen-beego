@@ -15,34 +15,7 @@
   If the business model is B2B2C (platform mode: platform ->(merchant ->consumer)), use the admin_plat module
 
   #### Directory structure
-  ```
-  ├─apps                    # Applications
-  │  ├─admin_org            # Application: merchant management
-  │  ├─admin_plat            # Application: platform management
-  │  │  ├─controllers       # Controllers
-  │  │  ├─models            # Models   
-  │  │  ├─services          # Business logic    
-  │  │  └─views             # Views     
-  │  ├─common               # Public modules    
-  │  │  ├─controller        # base controller
-  │  │  ├─global            # global
-  │  │  ├─helper            # helper
-  │  │  ├─middleware        # middleware
-  │  │  └─models            # public models    
-  │  └─index                # Applications: Other custom applications
-  │      ├─controllers
-  │      ├─models
-  │      ├─services
-  │      └─views
-  ├─beego-docker            # container configuration
-  ├─conf                    # configuration
-  ├─doc                     # documentation
-  ├─routers                 # routing
-  ├─static                  # static
-  ├─temp                    # temporary file
-  │  └─logs 
-  ├─tests                   # Test
-  ```
+  [Directory structure](doc/目录结构.md)
 
 ## Install & Run
   #### environment

@@ -92,7 +92,7 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
         // @Accept application/json
         // @Produce application/json
         // @Param parentUnitId query string true "父级ID"
-        // @Success 200 {object} dto.RespDataListDto
+        // @Success 200 {object} dto.RespDataListDto "返回结果"
         // @Router /admin_plat/system-unit/get [get]
         func (c *UnitController) Get() {
             baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)

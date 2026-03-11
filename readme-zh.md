@@ -15,34 +15,7 @@
   如果经营模式是B2B2C (平台模式:平台->(商户->消费者))，使用admin_plat模块即可
 
   #### 目录结构
-  ```
-  ├─apps                    # 应用
-  │  ├─admin_org            # 应用:商户管理后台
-  │  ├─admin_plat            # 应用:平台管理后台
-  │  │  ├─controllers       # 控制器
-  │  │  ├─models            # 模型  
-  │  │  ├─services          # 业务逻辑    
-  │  │  └─views             # 视图    
-  │  ├─common               # 公共模块    
-  │  │  ├─controller        # base controller
-  │  │  ├─global            # 全局变量
-  │  │  ├─helper            # 助手函数
-  │  │  ├─middleware        # 中间件
-  │  │  └─models            # 公共模型    
-  │  └─index                # 应用:其他自定义应用
-  │      ├─controllers
-  │      ├─models
-  │      ├─services
-  │      └─views
-  ├─beego-docker            # 容器配置文件
-  ├─conf                    # 配置文件
-  ├─doc                     # 文档
-  ├─routers                 # 路由
-  ├─static                  # 静态资源
-  ├─temp                    # 临时文件
-  │  └─logs 
-  ├─tests                   # 测试
-  ```
+  [目录结构](doc/目录结构.md)
 
 ## 安装&运行
   #### 环境
