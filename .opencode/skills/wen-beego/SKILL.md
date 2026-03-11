@@ -18,6 +18,7 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
 
 ### 测试
     - 登录接口：
+    开发环境`authCode=1234`，`authCodeId=开发环境随便填`, `AuthCodeType=captcha`
     ```
     POST http://localhost:8013/api/v1/auth/login HTTP/1.1
     Content-Type: application/json
@@ -26,8 +27,25 @@ wen-beego框架， 是基于beego框架的web开发框架。系统包含平台�
         "phone": "15912345678",
         "password": "G72+shD3^6",
         "authCode": "1234",
-        "authCodeId": "9s9dxXnoG4GUnC9qnhSr",
+        "authCodeId": "开发环境随便填",
         "AuthCodeType":"captcha"
+    }
+    ```
+    返回参数：
+    ```
+    {
+        "code": 200,
+        "message": "登录成功",
+        "data": {
+            "userInfo": {
+            "phone": "159****5678",
+            "name": "wzz",
+            "username": "wzz",
+            "expires": 1773303810000,
+            "accessToken": "xxx",
+            "refreshToken": "xxx"
+            }
+        }
     }
     ```
 
