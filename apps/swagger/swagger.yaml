@@ -1560,6 +1560,170 @@ paths:
       summary: 分片上传检查
       tags:
       - 上传
+  /api/v1/auth/get-captcha:
+    get:
+      consumes:
+      - application/json
+      description: 获取验证码
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取验证码
+      tags:
+      - admin
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: admin用户登录
+      parameters:
+      - description: 登录参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth_dto.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 登录
+      tags:
+      - admin
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: admin退出登录
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 退出登录
+      tags:
+      - admin
+  /api/v1/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: 刷新token
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 刷新token
+      tags:
+      - admin
+  /api/v1/upload/link-sign:
+    get:
+      consumes:
+      - application/x-wwww-form-urlencoded
+      description: 私有附件-链接签名
+      parameters:
+      - description: urls
+        in: path
+        name: urls
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 私有附件-链接签名
+      tags:
+      - 上传
+  /api/v1/upload/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 上传
+      tags:
+      - 上传
+  /api/v1/upload/vue-slice-upload-check:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 分片上传检查
+      parameters:
+      - description: identifier
+        in: formData
+        name: identifier
+        required: true
+        type: string
+      - description: chunkNumber
+        in: formData
+        name: chunkNumber
+        required: true
+        type: integer
+      - description: totalChunks
+        in: formData
+        name: totalChunks
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: 分片上传检查
+      tags:
+      - 上传
   /plat_admin/monitor-cron-log/get:
     get:
       consumes:
