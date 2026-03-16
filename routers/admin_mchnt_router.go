@@ -6,7 +6,7 @@ import (
 	adminUpload "WenBeego/apps/admin_mchnt/controllers/upload"
 	adminSystemPlat "WenBeego/apps/admin_plat/controllers/system_mchnt"
 	"WenBeego/apps/common/global/constant"
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/blocker"
 
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
@@ -142,13 +142,13 @@ func init() {
 
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
-		(new(middleware.AccessMiddleware).RouterBefore())(ctx)
-		middleware.AuthAdmin(&mchntWhiteApiList, &mchntAuthApiList)(ctx)
+		(new(blocker.AccessMiddleware).RouterBefore())(ctx)
+		blocker.AuthAdmin(&mchntWhiteApiList, &mchntAuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
-	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
+	// 	(new(blocker.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/admin_mchnt/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(&mchntWhiteApiList, &mchntAuthApiList), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/admin_mchnt/*", beego.FinishRouter, new(blocker.AccessMiddleware).RouterAfter(&mchntWhiteApiList, &mchntAuthApiList), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }

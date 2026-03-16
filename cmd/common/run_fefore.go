@@ -3,7 +3,7 @@ package common
 import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/blocker"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,8 +24,8 @@ func customBeego() {
 	// beego自定义配置
 	_ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
 
-	beego.InsertFilter("/*", beego.BeforeStatic, new(middleware.AccessMiddleware).LimitTimes())
-	beego.InsertFilter("/*", beego.BeforeRouter, new(middleware.AccessMiddleware).LimitTimes())
+	beego.InsertFilter("/*", beego.BeforeStatic, new(blocker.AccessMiddleware).LimitTimes())
+	beego.InsertFilter("/*", beego.BeforeRouter, new(blocker.AccessMiddleware).LimitTimes())
 	beego.AddViewPath(global.AppDir + "/index/views")
 	beego.AddViewPath(global.AppDir + "/admin_plat/views")
 	beego.BConfig.WebConfig.StaticDir["/static"] = global.StaticDir

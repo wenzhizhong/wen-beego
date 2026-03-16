@@ -1,9 +1,10 @@
-package middleware
+package blocker
 
 import (
 	"WenBeego/apps/common/dto/mq_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/middleware"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -63,6 +64,8 @@ func (m *AccessMiddleware) LimitTimes() web.FilterFunc {
 // api 请求前
 func (m *AccessMiddleware) RouterBefore() web.FilterFunc {
 	return func(ctx *beecontext.Context) {
+		fmt.Println("RouterBefore====")
+		ctx.Input.RequestBody = []byte{}
 		// url, host, shceme, method, token, ip := m.getBaseInfo(ctx)
 		// timeStr := time.Now().Format("2006-01-02 15:04:05")
 	}
@@ -142,5 +145,5 @@ func mqSendTask(data interface{}) {
 		return
 	}
 	args := []tasks.Arg{{Name: "actionSaveToDbData", Type: "string", Value: dataStr}}
-	(&MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
+	(&middleware.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
 }

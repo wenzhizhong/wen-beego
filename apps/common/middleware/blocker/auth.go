@@ -1,10 +1,11 @@
-package middleware
+package blocker
 
 import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/services/framework"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/beego/beego/v2/server/web"
@@ -13,6 +14,7 @@ import (
 
 func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 	return func(ctx *beecontext.Context) {
+		fmt.Println("AuthAdmin====")
 		tmpWhiteApiListMap := listToMap(*whiteApiList)
 		tmpAuthApiListMap := listToMap(*authApiList)
 

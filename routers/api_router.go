@@ -3,7 +3,7 @@ package routers
 import (
 	apiAuthV1 "WenBeego/apps/api/controllers/auth/v1"
 	apiUploadV1 "WenBeego/apps/api/controllers/upload/v1"
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/blocker"
 
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
@@ -48,13 +48,13 @@ func init() {
 
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
-		(new(middleware.AccessMiddleware).RouterBefore())(ctx)
-		middleware.AuthUser(&apiWhiteApiList, &apiAuthApiList)(ctx)
+		(new(blocker.AccessMiddleware).RouterBefore())(ctx)
+		blocker.AuthUser(&apiWhiteApiList, &apiAuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
-	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
+	// 	(new(blocker.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/api/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(&apiWhiteApiList, &apiAuthApiList), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/api/*", beego.FinishRouter, new(blocker.AccessMiddleware).RouterAfter(&apiWhiteApiList, &apiAuthApiList), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }

@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/blocker"
 	indeHome "WenBeego/apps/index/controllers/home"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -26,12 +26,12 @@ func init() {
 
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
-		(new(middleware.AccessMiddleware).RouterBefore())(ctx)
+		(new(blocker.AccessMiddleware).RouterBefore())(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
-	// 	(new(middleware.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
+	// 	(new(blocker.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/index/*", beego.FinishRouter, new(middleware.AccessMiddleware).RouterAfter(&indexWhiteApiList, &indexAuthApiList), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/index/*", beego.FinishRouter, new(blocker.AccessMiddleware).RouterAfter(&indexWhiteApiList, &indexAuthApiList), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }
