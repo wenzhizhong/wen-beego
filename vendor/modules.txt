@@ -105,7 +105,6 @@ github.com/aws/aws-sdk-go/service/sts/stsiface
 ## explicit; go 1.20
 github.com/beego/beego/v2
 github.com/beego/beego/v2/client/cache
-github.com/beego/beego/v2/client/cache/redis
 github.com/beego/beego/v2/core/admin
 github.com/beego/beego/v2/core/berror
 github.com/beego/beego/v2/core/config
@@ -117,7 +116,6 @@ github.com/beego/beego/v2/server/web/context
 github.com/beego/beego/v2/server/web/context/param
 github.com/beego/beego/v2/server/web/grace
 github.com/beego/beego/v2/server/web/session
-github.com/beego/beego/v2/task
 # github.com/beorn7/perks v1.0.1
 ## explicit; go 1.11
 github.com/beorn7/perks/quantile
@@ -136,6 +134,11 @@ github.com/eknkc/basex
 # github.com/felixge/httpsnoop v1.0.4
 ## explicit; go 1.13
 github.com/felixge/httpsnoop
+# github.com/go-jose/go-jose/v4 v4.1.3
+## explicit; go 1.24.0
+github.com/go-jose/go-jose/v4
+github.com/go-jose/go-jose/v4/cipher
+github.com/go-jose/go-jose/v4/json
 # github.com/go-logr/logr v1.4.1
 ## explicit; go 1.18
 github.com/go-logr/logr
