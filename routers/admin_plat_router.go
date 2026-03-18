@@ -109,13 +109,13 @@ func init() {
 
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
-		(new(blocker.AccessMiddleware).RouterBefore())(ctx)
+		blocker.RouterBefore()(ctx)
 		blocker.AuthAdmin(&platWhiteApiList, &platAuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
-	// 	(new(blocker.AccessMiddleware).RouterAfter())(ctx) // 请求后处理存在bug
+	// 	(blocker.RouterAfter())(ctx) // 请求后处理存在bug
 	// })
-	beego.InsertFilter("/admin_plat/*", beego.FinishRouter, new(blocker.AccessMiddleware).RouterAfter(&platWhiteApiList, &platAuthApiList), beego.WithReturnOnOutput(false))
+	beego.InsertFilter("/admin_plat/*", beego.FinishRouter, blocker.RouterAfter(&platWhiteApiList, &platAuthApiList), beego.WithReturnOnOutput(false))
 
 	beego.AddNamespace(ns)
 }

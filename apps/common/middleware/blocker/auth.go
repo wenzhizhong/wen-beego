@@ -4,7 +4,6 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/services/framework"
-	"encoding/json"
 	"net/http"
 
 	"github.com/beego/beego/v2/server/web"
@@ -59,7 +58,7 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		}()
 		// 检测用户是否有api权限
 		go func() {
-			status, err := checkAuthAdminPermis(moduleName, brancaData, helper.GetReqUrl(*ctx))
+			status, err := checkAuthAdminPermis(moduleName, brancaData, helper.GetReqUrl(ctx))
 			ch <- checkResult{status: status, err: err, checkType: "perms"}
 		}()
 		errorStr := ""
@@ -71,7 +70,7 @@ func AuthAdmin(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		}
 		close(ch)
 		if errorStr != "" {
-			setResponse(ctx, http.StatusNetworkAuthenticationRequired, errorStr, nil)
+			setResponse(ctx, http.StatusBadRequest, errorStr, nil)
 			return
 		}
 	}
@@ -126,20 +125,10 @@ func AuthUser(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 		}
 		close(ch)
 		if errorStr != "" {
-			setResponse(ctx, http.StatusNetworkAuthenticationRequired, errorStr, nil)
+			setResponse(ctx, http.StatusBadRequest, errorStr, nil)
 			return
 		}
 	}
-}
-func responseStr(code int, msg string, data interface{}) string {
-	res := helper.Response(code, msg, data)
-	jsonString, _ := json.Marshal(res)
-	return string(jsonString)
-}
-func setResponse(ctx *beecontext.Context, code int, msg string, data interface{}) {
-	jsonString := responseStr(code, msg, data)
-	ctx.ResponseWriter.ResponseWriter.WriteHeader(code)
-	ctx.ResponseWriter.Write([]byte(jsonString))
 }
 
 // list 转 map
@@ -153,19 +142,19 @@ func listToMap(listData []string) map[string]bool {
 
 // 验证:白名单api
 func inWhiteApiList(ctx *beecontext.Context, writeApiListMap map[string]bool) bool {
-	url := helper.GetReqUrl(*ctx)
+	url := helper.GetReqUrl(ctx)
 	return writeApiListMap[url]
 }
 
 // 验证:登录后基本api
 func inAuthApiList(ctx *beecontext.Context, authApiListMap map[string]bool) bool {
-	url := helper.GetReqUrl(*ctx)
+	url := helper.GetReqUrl(ctx)
 	return authApiListMap[url]
 }
 
 // 校验token
 func checkToken(ctx *beecontext.Context, moduleName string) (helper.BrancaData, error) {
-	token := helper.GetReqToken(*ctx)
+	token := helper.GetReqToken(ctx)
 	brancaData, err := helper.BrancaDecode(token, moduleName)
 	if err != nil {
 		setResponse(ctx, http.StatusUnauthorized, err.Error(), nil)

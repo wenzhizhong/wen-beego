@@ -5,6 +5,9 @@ version: 1.0.0
 EnableDocs: false
 copyrequestbody: true
 timezone: Asia/Shanghai
+apiSecurity:
+  encrypt: true
+  signature: true
 gorm:
   # logLevel Silent Error Warn Info 
   logLevel: Info

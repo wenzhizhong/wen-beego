@@ -31,3 +31,7 @@ type RespDataListDto struct {
 	PageSize    int         `json:"pageSize"`
 	CurrentPage int         `json:"currentPage"`
 }
+
+type BodyEncryptDto struct {
+	EncryptedData string `json:"encryptedData"`
+}

@@ -11,33 +11,38 @@ import (
 )
 
 // 获取请求的token
-func GetReqToken(ctx beecontext.Context) string {
+func GetReqToken(ctx *beecontext.Context) string {
 	token := ctx.Request.Header.Get("Authorization")
 	token = strings.TrimPrefix(token, "Bearer ")
 	return token
 }
 
+// 获取body签名
+func GetReqSignature(ctx *beecontext.Context) string {
+	return ctx.Request.Header.Get("Signature")
+}
+
 // 获取请求接口
-func GetReqUrl(ctx beecontext.Context) string {
+func GetReqUrl(ctx *beecontext.Context) string {
 	return ctx.Request.URL.Path
 }
 
 // 获取请求方法
-func GetReqMethod(ctx beecontext.Context) string {
+func GetReqMethod(ctx *beecontext.Context) string {
 	return ctx.Request.Method
 }
 
 // 获取请求协议
-func GetReqScheme(ctx beecontext.Context) string {
+func GetReqScheme(ctx *beecontext.Context) string {
 	return ctx.Request.URL.Scheme
 }
 
 // 获取请求主机
-func GetReqHost(ctx beecontext.Context) string {
+func GetReqHost(ctx *beecontext.Context) string {
 	return ctx.Request.Host
 }
 
-func GetReqIp(ctx beecontext.Context) string {
+func GetReqIp(ctx *beecontext.Context) string {
 	return ctx.Request.RemoteAddr
 }
 

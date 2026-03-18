@@ -24,8 +24,8 @@ func customBeego() {
 	// beego自定义配置
 	_ = beego.LoadAppConfig("yaml", global.ConfigDir+"/app.yaml")
 
-	beego.InsertFilter("/*", beego.BeforeStatic, new(blocker.AccessMiddleware).LimitTimes())
-	beego.InsertFilter("/*", beego.BeforeRouter, new(blocker.AccessMiddleware).LimitTimes())
+	beego.InsertFilter("/*", beego.BeforeStatic, blocker.LimitTimes())
+	beego.InsertFilter("/*", beego.BeforeRouter, blocker.LimitTimes())
 	beego.AddViewPath(global.AppDir + "/index/views")
 	beego.AddViewPath(global.AppDir + "/admin_plat/views")
 	beego.BConfig.WebConfig.StaticDir["/static"] = global.StaticDir

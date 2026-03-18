@@ -191,7 +191,7 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDataL
 import "WenBeego/apps/common/global/constant"
 import "WenBeego/apps/common/global"
 
-fmt.Println(constant.ADMIN)                // 常量
+fmt.Println(constant.MODULE_NAME)                // 常量
 fmt.Println(global.RootPath, global.AppDir) // 项目路径
 ```
 

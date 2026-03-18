@@ -3,8 +3,10 @@ package blocker
 import (
 	"WenBeego/apps/common/dto/mq_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/services/framework"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,9 +28,6 @@ var (
 	flushCacheInterval = 60 * time.Second
 )
 
-type AccessMiddleware struct {
-}
-
 func init() {
 	// 启动定期检查和批量处理
 	go func() {
@@ -41,7 +40,7 @@ func init() {
 }
 
 // 限制访问次数,防止dos攻击
-func (m *AccessMiddleware) LimitTimes() web.FilterFunc {
+func LimitTimes() web.FilterFunc {
 	return func(ctx *beecontext.Context) {
 		if !limiter.Allow() {
 			fmt.Println("Too Many Requests")
@@ -54,7 +53,7 @@ func (m *AccessMiddleware) LimitTimes() web.FilterFunc {
 			signStr := ctx.Request.URL.Query().Get("sign")
 			_, err := helper.LocalFileSignCheck(signStr)
 			if err != nil {
-				http.Error(ctx.ResponseWriter, "sign error", http.StatusUnauthorized)
+				http.Error(ctx.ResponseWriter, "sign error", http.StatusBadRequest)
 				return
 			}
 		}
@@ -62,48 +61,40 @@ func (m *AccessMiddleware) LimitTimes() web.FilterFunc {
 }
 
 // api 请求前
-func (m *AccessMiddleware) RouterBefore() web.FilterFunc {
+func RouterBefore() web.FilterFunc {
 	return func(ctx *beecontext.Context) {
-		// url, host, shceme, method, token, ip := m.getBaseInfo(ctx)
-		// timeStr := time.Now().Format("2006-01-02 15:04:05")
+		moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
+		ctx.Input.SetData(constant.MODULE_NAME, moduleName)
+
+		dealSignAndEncrypt(ctx)
 	}
 }
 
 // api 请求后
-func (m *AccessMiddleware) RouterAfter(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
+func RouterAfter(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 	return func(ctx *beecontext.Context) {
-		m.statisticsApiLog(ctx, whiteApiList, authApiList)
+		statisticsApiLog(ctx, whiteApiList, authApiList)
 	}
 }
 
-func (m *AccessMiddleware) getBaseInfo(ctx *beecontext.Context) (url, host, shceme, method, token, ip string) {
-	url = ctx.Request.URL.Path
-	host = ctx.Request.Host
-	shceme = ctx.Request.URL.Scheme
-	method = ctx.Request.Method
-	token = ctx.Request.Header.Get("Authorization")
-	ip = ctx.Request.RemoteAddr
-	return
-}
-
 // api 统计
-func (m *AccessMiddleware) statisticsApiLog(ctx *beecontext.Context, whiteApiList *[]string, authApiList *[]string) {
+func statisticsApiLog(ctx *beecontext.Context, whiteApiList *[]string, authApiList *[]string) {
 	modules, _ := global.GetConfigDiy("logToDbModules")
 	moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
 	tmpIgnoreArr := helper.ArrayMerge(*whiteApiList, *authApiList)
-	url, host, _, method, token, ip := m.getBaseInfo(ctx)
-	isInArray, _ := helper.InArray(url, tmpIgnoreArr)
+	headerBaseInfo := getBaseInfo(ctx)
+	isInArray, _ := helper.InArray(headerBaseInfo.url, tmpIgnoreArr)
 
 	if modules != nil && !isInArray {
 		if res, err := helper.InArray(moduleName, modules); err == nil && res {
 
 			userId, unitId := "", ""
-			if token != "" {
-				brancaData, _ := helper.BrancaDecode(token, moduleName)
+			if headerBaseInfo.token != "" {
+				brancaData, _ := helper.BrancaDecode(headerBaseInfo.token, moduleName)
 				userId = brancaData.Sub
 				unitId = brancaData.SubUnit
 			}
-			data := mq_dto.ApiLogDto{Uri: url, Host: host, Ip: ip, Method: method, UserId: userId, UnitId: unitId}
+			data := mq_dto.ApiLogDto{Uri: headerBaseInfo.url, Host: headerBaseInfo.host, Ip: headerBaseInfo.ip, Method: headerBaseInfo.method, UserId: userId, UnitId: unitId}
 
 			// 加锁操作共享变量
 			cacheMutex.Lock()
@@ -121,6 +112,7 @@ func (m *AccessMiddleware) statisticsApiLog(ctx *beecontext.Context, whiteApiLis
 	}
 }
 
+// api 统计-清空缓存
 func flushCacheIfNeeded() {
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
@@ -131,7 +123,7 @@ func flushCacheIfNeeded() {
 	}
 }
 
-// mq发送任务
+// api 统计-mq发送任务
 func mqSendTask(data interface{}) {
 	if data == nil {
 		return
@@ -144,4 +136,13 @@ func mqSendTask(data interface{}) {
 	}
 	args := []tasks.Arg{{Name: "actionSaveToDbData", Type: "string", Value: dataStr}}
 	(&middleware.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
+}
+
+// 处理body签名和body加密
+func dealSignAndEncrypt(ctx *beecontext.Context) error {
+	err := (&framework.AccessMiddlewate{}).DealSignAndEncrypt(ctx)
+	if err != nil {
+		setResponse(ctx, http.StatusBadRequest, err.Error(), nil)
+	}
+	return err
 }
