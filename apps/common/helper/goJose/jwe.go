@@ -1,7 +1,6 @@
 package goJose
 
 import (
-	"crypto/rsa"
 	"errors"
 
 	"github.com/go-jose/go-jose/v4"
@@ -52,7 +51,8 @@ func JweEncrypt(payload []byte, publicKey interface{}, enc jose.ContentEncryptio
  *
  */
 
-func JweDecrypt(jweString string, privateKey *rsa.PrivateKey, enc jose.ContentEncryption, alg jose.KeyAlgorithm) ([]byte, error) {
+// func JweDecrypt(jweString string, privateKey *rsa.PrivateKey, enc jose.ContentEncryption, alg jose.KeyAlgorithm) ([]byte, error) {
+func JweDecrypt(jweString string, privateKey any, enc jose.ContentEncryption, alg jose.KeyAlgorithm) ([]byte, error) {
 	if len(jweString) == 0 {
 		return nil, errors.New("jweString is empty")
 	}

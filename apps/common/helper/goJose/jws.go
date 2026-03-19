@@ -3,6 +3,9 @@ package goJose
 // go-jose 封装
 import (
 	"errors"
+	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/go-jose/go-jose/v4"
 )
@@ -68,4 +71,41 @@ func JwsSignVerify(payload []byte, signature string, publicKey interface{}, alg 
 		return err
 	}
 	return JsonWebSignature.DetachedVerify(payload, publicKey)
+}
+
+// SerializeForPayload 将任意 JSON 兼容数据转换为用于签名的字符串
+func SerializeForPayload(v interface{}) string {
+	switch val := v.(type) {
+	case nil:
+		return "null"
+	case string:
+		return val
+	case bool:
+		if val {
+			return "true"
+		}
+		return "false"
+	case float64, float32, int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
+		return fmt.Sprint(val) // 数字转为十进制字符串
+	case []interface{}:
+		elems := make([]string, len(val))
+		for i, e := range val {
+			elems[i] = SerializeForPayload(e)
+		}
+		return "[" + strings.Join(elems, ",") + "]"
+	case map[string]interface{}:
+		keys := make([]string, 0, len(val))
+		for k := range val {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		var parts []string
+		for _, k := range keys {
+			parts = append(parts, k+SerializeForPayload(val[k]))
+		}
+		return strings.Join(parts, "")
+	default:
+		// 其他类型（如通过反射处理复杂结构），可根据实际扩展
+		panic(fmt.Sprintf("unsupported type: %T", v))
+	}
 }

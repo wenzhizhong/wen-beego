@@ -7,7 +7,9 @@ copyrequestbody: true
 timezone: Asia/Shanghai
 apiSecurity:
   encrypt: true
+  encryptAlg: RS512
   signature: true
+  signAlg: HS256
 gorm:
   # logLevel Silent Error Warn Info 
   logLevel: Info

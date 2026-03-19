@@ -39,6 +39,12 @@ func TestJweCrypt(t *testing.T) {
 	fmt.Printf("错误解密2 err=%#v \n", err)
 	fmt.Printf("错误解密2 parseJweSecret=%#v \n", string(parseJweSecret))
 
-	fmt.Println("===== end =====")
+	fmt.Println("\n====================")
+	jweString, err = goJose.JweEncrypt(payload, privateKey.Public(), jose.A256GCM, jose.RSA_OAEP, jose.NONE, nil)
+	parseJweSecret, err = goJose.JweDecrypt(jweString, privateKey, jose.A256GCM, jose.RSA_OAEP)
+	fmt.Println("\n===== A256GCM jweString =====\n " + jweString)
+	fmt.Println("===== A256GCM parseJweSecret =====\n" + string(parseJweSecret))
+
+	fmt.Println("\n===== end =====")
 
 }

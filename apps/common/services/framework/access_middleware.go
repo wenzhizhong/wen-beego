@@ -31,10 +31,13 @@ type AccessMiddlewate struct {
 func (s *AccessMiddlewate) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	var err error
 	moduleName := ctx.Input.GetData(constant.MODULE_NAME)
-	reqMethod := ctx.Input.Method()
+	reqMethod := helper.GetReqMethod(ctx)
 	if _, ok := methodOfEncryptBody[reqMethod]; !ok {
 		return nil
 	}
+	// if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "json") {
+	// 	return nil
+	// }
 
 	// 代码配置文件是否开启api安全配置
 	encryptEnagle, err1 := s.checkApiSecurityConfig("apiSecurity.encrypt")
@@ -49,9 +52,12 @@ func (s *AccessMiddlewate) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	if err != nil {
 		return err
 	}
-	if bodyEncryptDto.EncryptedData == "" || bodyEncryptDto.EncryptedData == "null" || bodyEncryptDto.EncryptedData == "{}" {
+	if bodyEncryptDto.EncryptedData == "" {
+		tmpBody := "{\"error\":\"DealSignAndEncrypt(): body encrypted data is empty\"}"
+		s.doResetBody(ctx, []byte(tmpBody))
 		return nil
 	}
+
 	// 请求: header头携带的签名字符串
 	signatureStr, err := s.getHeaderSignature(ctx)
 	if err != nil {
@@ -105,6 +111,7 @@ func (s *AccessMiddlewate) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	return err
 }
 
+// 解密请求体并覆盖
 func (s *AccessMiddlewate) decryptBodyAndReset(ctx *beecontext.Context, configModel models.Config, bodyEncryptStr string) error {
 	rsaConfigData, err := s.parseSignatureRsaKey(configModel)
 	if err != nil {
@@ -114,14 +121,17 @@ func (s *AccessMiddlewate) decryptBodyAndReset(ctx *beecontext.Context, configMo
 	if err != nil {
 		return err
 	}
-	bodyDecryptByte, err := goJose.JweDecrypt(bodyEncryptStr, privateKey, jose.A128GCM, jose.RSA_OAEP)
+	bodyDecryptByte, err := goJose.JweDecrypt(bodyEncryptStr, privateKey, jose.A256CBC_HS512, jose.RSA_OAEP_256)
 	if err != nil {
 		return err
 	}
 	// 解密成功，重置body
-	ctx.Input.RequestBody = bodyDecryptByte
+	s.doResetBody(ctx, bodyDecryptByte)
 
 	return nil
+}
+func (s *AccessMiddlewate) doResetBody(ctx *beecontext.Context, newBody []byte) {
+	ctx.Input.RequestBody = newBody
 }
 
 // 验证请求体签名
@@ -135,7 +145,11 @@ func (s *AccessMiddlewate) verifyBodySign(ctx *beecontext.Context, configModel m
 		return err
 	}
 
-	err = goJose.JwsSignVerify([]byte(ctx.Input.RequestBody), signatureStr, publicKey, jose.RS512)
+	bodyMap := make(map[string]interface{})
+	json.Unmarshal(ctx.Input.RequestBody, &bodyMap)
+	payload := goJose.SerializeForPayload(bodyMap)
+
+	err = goJose.JwsSignVerify([]byte(payload), signatureStr, publicKey, jose.RS512)
 	if err != nil {
 		global.Log.Error("签名验证失败：" + err.Error())
 		return errors.New("签名验证失败")
@@ -196,9 +210,13 @@ func (s *AccessMiddlewate) getDatabaseRsaData(ctx *beecontext.Context) (configMo
 	return configModelMap, nil
 }
 
-// 获取数据库签名密钥-读取签名密钥
+// 获取数据库签名密钥 - 读取签名密钥
 func (s *AccessMiddlewate) parseSignatureRsaKey(configModel models.Config) (rsaConfigData *db_param.Db_config_rsa, err error) {
+	tmpValue := configModel.Value
+	tmpValue = strings.ReplaceAll(tmpValue, "\r", "")
+	tmpValue = strings.ReplaceAll(tmpValue, "\n", "\\n")
+
 	rsaConfigData = &db_param.Db_config_rsa{}
-	err = json.Unmarshal([]byte(configModel.Value), &rsaConfigData)
+	err = json.Unmarshal([]byte(tmpValue), &rsaConfigData)
 	return rsaConfigData, err
 }

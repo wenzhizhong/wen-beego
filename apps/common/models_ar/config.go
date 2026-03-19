@@ -24,6 +24,6 @@ func (a *ConfigAr) GetByNames(names []string) ([]models.Config, error) {
 	if len(names) == 0 {
 		return data, errors.New("name不能为空")
 	}
-	result := global.GetReadDb().Where("name in ?", names).Where("deleted=0").Find(&data)
+	result := global.GetReadDb().Where("name in ?", names).Where("deleted=false").Find(&data)
 	return data, result.Error
 }

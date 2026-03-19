@@ -138,7 +138,7 @@ func mqSendTask(data interface{}) {
 	(&middleware.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
 }
 
-// 处理body签名和body加密
+// 处理body签名和body加密，【解密后覆盖body】
 func dealSignAndEncrypt(ctx *beecontext.Context) error {
 	err := (&framework.AccessMiddlewate{}).DealSignAndEncrypt(ctx)
 	if err != nil {

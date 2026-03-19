@@ -19,10 +19,15 @@ func RsaPrivateKeyToPem(privateKey *rsa.PrivateKey) (string, error) {
 		return "", errors.New("private key is nil")
 	}
 
-	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey) // 将私钥转换为 DER 格式
+	// privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey) // 将私钥转换为 DER 格式
+	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey) // 将私钥转换为 DER 格式
+	if err != nil {
+		return "", err
+	}
 
 	privateKeyPem := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		// Type:  "RSA PRIVATE KEY",
+		Type:  "PRIVATE KEY",
 		Bytes: privateKeyBytes,
 	}
 	return string(pem.EncodeToMemory(privateKeyPem)), nil // 编码为 PEM 字符串
@@ -47,13 +52,14 @@ func RsaPublicKeyToPem(publicKey *rsa.PublicKey) (string, error) {
 }
 
 // RsaPemToPrivateKey：将 PEM 字符串转换回 RSA 私钥
-func RsaPemToPrivateKey(pemString string) (*rsa.PrivateKey, error) {
+func RsaPemToPrivateKey(pemString string) (any, error) {
 	block, _ := pem.Decode([]byte(pemString))
 	if block == nil {
 		return nil, errors.New("failed to decode PEM block")
 	}
 
-	return x509.ParsePKCS1PrivateKey(block.Bytes) // 解析 PKCS#1 私钥
+	// return x509.ParsePKCS1PrivateKey(block.Bytes) // 解析 PKCS#1 私钥
+	return x509.ParsePKCS8PrivateKey(block.Bytes) // 解析 PKCS#8 私钥
 }
 
 // RsaPemToPublicKey：将 PEM 字符串转换回 RSA 公钥
