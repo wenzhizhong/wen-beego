@@ -31,13 +31,15 @@ type AccessMiddlewate struct {
 func (s *AccessMiddlewate) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	var err error
 	moduleName := ctx.Input.GetData(constant.MODULE_NAME)
+	contentType := ctx.Request.Header.Get("Content-Type")
 	reqMethod := helper.GetReqMethod(ctx)
 	if _, ok := methodOfEncryptBody[reqMethod]; !ok {
 		return nil
 	}
-	// if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "json") {
-	// 	return nil
-	// }
+	if !strings.Contains(contentType, "application/json") ||
+		strings.Contains(contentType, "multipart/form-data") {
+		return nil
+	}
 
 	// 代码配置文件是否开启api安全配置
 	encryptEnagle, err1 := s.checkApiSecurityConfig("apiSecurity.encrypt")

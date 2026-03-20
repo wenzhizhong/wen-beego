@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"strings"
 )
 
 // GenerateRsa：RSA私钥
@@ -64,6 +65,7 @@ func RsaPemToPrivateKey(pemString string) (any, error) {
 
 // RsaPemToPublicKey：将 PEM 字符串转换回 RSA 公钥
 func RsaPemToPublicKey(pemString string) (*rsa.PublicKey, error) {
+	pemString = RsaPrivateKey(pemString)
 	block, _ := pem.Decode([]byte(pemString))
 	if block == nil {
 		return nil, errors.New("failed to decode PEM block")
@@ -80,4 +82,12 @@ func RsaPemToPublicKey(pemString string) (*rsa.PublicKey, error) {
 	}
 
 	return rsaPublicKey, nil
+}
+
+func RsaPrivateKey(pemString string) string {
+	pemString = strings.ReplaceAll(pemString, "\r", "")
+	pemString = strings.ReplaceAll(pemString, "\t", "")
+	// pemString = strings.ReplaceAll(pemString, "\n", "\\n")
+	return pemString
+
 }
