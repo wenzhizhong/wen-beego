@@ -1,4 +1,3 @@
-version: '3.8'
 
 networks:
   nextcloud_network:
@@ -59,8 +58,30 @@ volumes:
       device: .\\rabbitmq\cinfig2
 
 services:
+  # c_golang:
+  #   build:
+  #     context: ./0Dockerfiles
+  #     dockerfile: ./0Dockerfiles/Dockerfile-golang
+  #   container_name: c_dev_golang
+  #   user: "0:0" 
+  #   privileged: true
+  #   environment:
+  #     TZ: Asia/Shanghai            # 时区设置
+  #   volumes:
+  #     - ..:/app                    # 挂载项目代码
+  #     - ../doc:/app/wen-admin-docker #覆盖排除wen-admin-docker目录
+  #   ports:
+  #     - "8013:8013"               # 端口映射
+  #   networks:
+  #     - nextcloud_network
+  #   restart: unless-stopped        # 自动重启策略
+  #   working_dir: /app              # 设置工作目录
+  #   command: tail -f /dev/null     # 保持容器运行（用于开发环境）
+
   c_postgresql:
-    image: bitnami/postgresql  # 使用轻量级的Alpine版本
+    build:
+      context: ./0Dockerfiles
+      dockerfile: ./0Dockerfiles/Dockerfile-pg
     container_name: c_dev_postgresql
     user: "0:0" 
     privileged: true
@@ -81,7 +102,9 @@ services:
 
 
   redis:
-    image: 'redis:7.0'
+    build:
+      context: ./0Dockerfiles
+      dockerfile: ./0Dockerfiles/Dockerfile-redis
     container_name: c_dev_redis70
     init: true
     environment:
@@ -97,8 +120,11 @@ services:
       - '6379:6379'
     networks:
       - nextcloud_network
+      
   rabbitmq:
-    image: 'rabbitmq:latest'
+    build:
+      context: ./0Dockerfiles
+      dockerfile: ./0Dockerfiles/Dockerfile-rabbitmq
     container_name: c_dev_rabbitmq
     environment:
       RABBITMQ_USERNAME: 'guest'

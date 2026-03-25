@@ -1,0 +1,75 @@
+# Wen-Beego 开发环境 Dockerfile
+FROM golang:1.26-alpine
+
+# 设置维护者信息
+LABEL maintainer="wen"
+
+# 安装常用工具
+RUN apk add --no-cache \
+    git \
+    curl \
+    wget \
+    vim \
+    ca-certificates \
+    tzdata
+
+# 配置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 安装 Bee 工具
+RUN go install github.com/beego/bee/v2@latest
+
+# 安装 Swag 工具（用于生成 API 文档）
+RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
+
+# 安装 Delve 调试器
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+# 创建应用目录
+WORKDIR /app
+
+# 1. 开发环境
+    # 流程 
+        # # docker-compose volumes挂载目录
+        # # 构建，运行
+        # RUN go mod tidy && dlv -port 8013 
+    
+# 2. 线上环境-制品挂载模式 
+    # 流程：
+        # CI 构建 → 生成制品（如 jar、war、二进制文件）→ 上传至制品仓库（如 Nexus、JFrog）
+        # 部署时：在宿主机上拉取制品，放置到特定目录 → 容器通过卷挂载该目录（例如 volumes: - /data/app.jar:/app/app.jar）→ 重启容器（或热加载）
+    # 优点：
+        # 镜像层与应用分离，镜像体积小且固定，无需为每个版本构建新镜像。
+        # 制品更新快，仅需替换文件并重启容器，构建流程简单。
+        # 适合单一应用、传统单体架构，或对构建速度有极高要求的场景。
+    # 缺点：
+        # 容器与宿主机耦合：挂载路径、权限、文件系统依赖可能导致环境不一致。
+        # 回滚复杂：需要保留多版本制品，且回滚时需要切换文件并重启，若编排系统未集成制品版本管理，容易出错。
+        # 不可变性差：容器运行期间，挂载的制品文件可能被意外修改或替换，难以审计。
+        # 扩展性受限：在 Kubernetes 等集群中，每个节点都需要预先放置制品或通过共享存储（如 NFS），增加了运维复杂度。
+        # 依赖宿主机文件系统：容器迁移到其他节点时，必须确保制品已同步。
+# 3. 线上环境-镜像内置模式
+    # 流程：
+        # CI 构建 → 将制品 COPY 进镜像 → 推送镜像至镜像仓库（如 Docker Hub、Harbor）
+        # 部署时：直接拉取镜像运行（或通过编排系统更新镜像标签）
+    # 优点：
+        # 不可变性：镜像一旦构建，内容不可变，部署结果可预测。
+        # 环境一致性：从开发到生产，运行环境完全相同（包括操作系统、依赖、配置）。
+        # 回滚简单：只需切换镜像标签，编排系统通常支持一键回滚（如 kubectl rollout undo）。
+        # 易于扩展：镜像可在任意节点运行，无需额外同步制品，适合大规模集群（Kubernetes、Swarm）。
+        # 安全与审计：镜像有签名和扫描，变更可追溯。
+    # 缺点：
+        # 每次代码变更需构建新镜像，构建时间相对较长（但可通过分层缓存优化）。
+        # 镜像仓库需较大存储空间（但可定期清理旧镜像）。
+
+
+# 配置 Go 代理（加速依赖下载）
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GO111MODULE=on
+
+# 暴露端口
+EXPOSE 8013
+
+# 默认命令：保持容器运行
+CMD ["tail", "-f", "/dev/null"]

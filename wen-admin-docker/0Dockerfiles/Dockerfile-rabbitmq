@@ -1,0 +1,22 @@
+# RabbitMQ 开发环境 Dockerfile
+FROM rabbitmq:latest
+
+# 设置维护者信息
+LABEL maintainer="wen"
+
+# # 安装常用工具
+# RUN apt-get update && apt-get install -y \
+#     tzdata \
+#     vim \
+#     curl \
+#     && rm -rf /var/lib/apt/lists/*
+
+# 配置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 暴露端口
+EXPOSE 5672 15672
+
+# 默认命令在 docker-compose.yml 中指定
+CMD ["rabbitmq-server"]

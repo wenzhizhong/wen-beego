@@ -14,7 +14,7 @@
         // "BEEGO_RUNMODE": "dev"
       },
       "args": [
-        "-vendor=true",
+        // "-vendor=true",
         // "-runmode=dev"
       ]
     },
@@ -48,7 +48,7 @@
         // "BEEGO_RUNMODE": "dev"
       },
       "args": [
-        "-vendor=true",
+        // "-vendor=true",
         // "-runmode=dev"
       ]
     }

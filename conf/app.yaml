@@ -32,7 +32,7 @@ pgsql_read:
     timezone: Asia/Shanghai
 
 redis:
-  host: 127.0.0.1
+  host: localhost
   port: 6379
   username: ""
   password: ""
@@ -88,12 +88,12 @@ queue:
   type: redis
   default_queue: wen_beego_tasks
   redis:
-    host: 127.0.0.1
+    host: localhost
     dbNum: 0
     port: 6379
     password: ""
   rabbitmq:
-    host: 127.0.0.1
+    host: localhost
     port: 5672
     user: guest
     password: guest
@@ -109,11 +109,11 @@ upload:
   local:
     public:
       path: /uploads/public
-      url: http://127.0.0.1:8013/public
+      url: http://localhost:8013/public
       maxSize: 10
     private:
       path: /uploads/private
-      url: http://127.0.0.1:8013/private
+      url: http://localhost:8013/private
       maxSize: 10
   minio:
     public:

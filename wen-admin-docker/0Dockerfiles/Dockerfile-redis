@@ -1,0 +1,24 @@
+# Redis 开发环境 Dockerfile
+FROM redis:7.0
+
+# 设置维护者信息
+LABEL maintainer="wen"
+
+# # 安装常用工具
+# RUN apk add --no-cache \
+#     tzdata \
+#     vim \
+#     curl
+
+# 配置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 创建工作目录
+WORKDIR /data
+
+# 暴露端口
+EXPOSE 6379
+
+# 默认命令在 docker-compose.yml 中指定
+CMD ["redis-server"]

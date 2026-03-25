@@ -1,0 +1,14 @@
+# PostgreSQL 开发环境 Dockerfile
+FROM bitnami/postgresql:latest
+
+# 设置维护者信息
+LABEL maintainer="wen"
+
+# 配置时区
+ENV TZ=Asia/Shanghai
+
+# 可以在这里添加自定义的初始化脚本
+# COPY init-scripts/ /docker-entrypoint-initdb.d/
+
+# 默认配置已经在 docker-compose.yml 中通过环境变量设置
+# 如需自定义 postgresql.conf 或 pg_hba.conf，可通过 volumes 挂载

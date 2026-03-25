@@ -1,0 +1,13 @@
+.git
+.idea
+.history 
+node_modules
+temp
+vendor
+cmd/*/*.exe
+!cmd/*/*.go
+
+*.exe*
+uploads/*
+upload/*
+wen-admin-docker

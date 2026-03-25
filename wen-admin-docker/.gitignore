@@ -6,10 +6,10 @@
 
 # 保留根目录的指定文件
 !.gitignore
-!Dockerfile
 !docker-compose.yml
 
 # 保留嵌套文件（需确保父目录未被忽略）
+!0Dockerfiles/*
 !redis/
 !redis/config/
 !redis/config/redis.conf
