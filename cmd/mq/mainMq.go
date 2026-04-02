@@ -48,7 +48,7 @@ func main() {
 		global.Log.Error("MqServer.Launch() error:", err)
 		panic(err)
 	}
-	fmt.Println("Mq started！")
+	fmt.Println("Mq stoped!")
 }
 
 /**
@@ -130,6 +130,7 @@ func reflectCallback(f interface{}, args interface{}) error {
 	res := callbackValue.Call(in)
 	if len(res) > 0 {
 		if err, ok := res[0].Interface().(error); ok {
+			fmt.Println("mq exec error, callback: ", err)
 			return err
 		}
 	}

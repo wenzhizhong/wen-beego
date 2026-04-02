@@ -15,7 +15,7 @@ type ApiLog struct {
 func (c *ApiLog) ActionSaveToDb(base64JsonStr string) error {
 	jsonStr, err := base64.StdEncoding.DecodeString(base64JsonStr)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	data := []mq_dto.ApiLogDto{}

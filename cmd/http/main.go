@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/global"
 	cmdCommon "WenBeego/cmd/common"
 	_ "WenBeego/routers"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -24,7 +25,6 @@ func main() {
 	// // 启动服务
 	// httpport, _ := beego.AppConfig.DIY("httpport")
 	// beego.Run(":" + strconv.Itoa(httpport.(int)))
-	// fmt.Println("---->>>---")
 
 	httpport, _ := beego.AppConfig.DIY("httpport")
 	port := strconv.Itoa(httpport.(int))
@@ -34,5 +34,6 @@ func main() {
 	} else {
 		global.Log.Info("Server on %v stopped", port)
 	}
+	fmt.Println("================== exit ===================")
 	os.Exit(0)
 }

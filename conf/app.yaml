@@ -85,7 +85,7 @@ branca:
     exp: 86400
     expRemark: 24*60*60
 queue:
-  type: redis
+  type: rabbitmq
   default_queue: wen_beego_tasks
   redis:
     host: localhost
@@ -99,7 +99,7 @@ queue:
     password: guest
     exchange:     machinery_exchange
     exchangeType: direct
-    bindingKey:   machinery_task
+    # bindingKey:   machinery_task
 upload:
   types: 
     - local 

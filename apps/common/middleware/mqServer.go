@@ -54,8 +54,9 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		err = err3
 		return cnf, err
 	}
+	defaultQueue := tmpDefaultQueue.(string) + "_" + runMode
 	cnf = &config.Config{
-		DefaultQueue: tmpDefaultQueue.(string) + "_" + runMode,
+		DefaultQueue: defaultQueue,
 	}
 
 	var brokerURL string
@@ -102,7 +103,7 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		port := tmpRabitMqConfig["port"].(int)
 		exchange := tmpRabitMqConfig["exchange"].(string)
 		exchangeType := tmpRabitMqConfig["exchangeType"].(string)
-		bindingKey := tmpRabitMqConfig["bindingKey"].(string)
+		bindingKey := defaultQueue // tmpRabitMqConfig["bindingKey"].(string)
 
 		brokerURL = fmt.Sprintf("amqp://%s:%s@%s:%d/",
 			user,
