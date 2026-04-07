@@ -2,7 +2,7 @@ package main
 
 import (
 	"WenBeego/apps/common/global"
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/mq"
 	cmdCommon "WenBeego/cmd/common"
 	"WenBeego/routers"
 	"errors"
@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// 启动mq服务
-	mqServer, err := (&middleware.MqServer{}).NewMq()
+	mqServer, err := (&mq.MqServer{}).NewMq()
 	if err != nil {
 		global.Log.Error("MqServer.NewMq() error:", err)
 		panic(err)
@@ -38,6 +38,8 @@ func main() {
 			return reflectCallback(task.CallBack, args)
 		})
 	}
+	// 死信队列
+	// mq.SetupDeadLetterQueue(mqServer.Server.connec)
 
 	fmt.Println("Mq starting")
 	// 启动Worker"服务"

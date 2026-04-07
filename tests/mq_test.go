@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/mq"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -25,6 +25,6 @@ func TestMqSendTask(t *testing.T) {
 		{Name: "hobby", Type: "string", Value: hobbyJson},
 	}
 
-	asyncResult, err := (&middleware.MqClient{}).SendTask("test", options)
+	asyncResult, err := (&mq.MqClient{}).SendTask("test", options)
 	fmt.Println("\n", asyncResult, err)
 }

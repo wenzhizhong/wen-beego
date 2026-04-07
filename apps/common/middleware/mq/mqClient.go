@@ -1,9 +1,10 @@
-package middleware
+package mq
 
 import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"fmt"
+	"time"
 
 	"github.com/RichardKnop/machinery/v1/backends/result"
 	"github.com/RichardKnop/machinery/v1/tasks"
@@ -43,6 +44,9 @@ func (mq *MqClient) GetNewBaseSignature() (*tasks.Signature, error) {
 	signature := &tasks.Signature{}
 	signature.UUID = fmt.Sprintf("task_%v", uuid)
 	signature.RetryCount = 3
+
+	time := time.Now().Add(10 * time.Second)
+	signature.ETA = &time
 	signature.IgnoreWhenTaskNotRegistered = runMode == "prod"
 	return signature, nil
 }

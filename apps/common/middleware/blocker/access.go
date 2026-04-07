@@ -5,7 +5,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
-	"WenBeego/apps/common/middleware"
+	"WenBeego/apps/common/middleware/mq"
 	"WenBeego/apps/common/services/framework"
 	"encoding/json"
 	"fmt"
@@ -135,7 +135,7 @@ func mqSendTask(data interface{}) {
 		return
 	}
 	args := []tasks.Arg{{Name: "actionSaveToDbData", Type: "string", Value: dataStr}}
-	(&middleware.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
+	(&mq.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
 }
 
 // 处理body签名和body加密，【解密后覆盖body】

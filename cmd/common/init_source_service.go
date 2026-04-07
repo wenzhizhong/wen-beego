@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/middleware/crontab"
 	"WenBeego/apps/common/middleware/database"
+	"WenBeego/apps/common/middleware/mq"
 )
 
 // 初始化公共资源数据
@@ -39,7 +40,7 @@ func InitCommonSource(logType string) {
 
 // 初始化Mq client
 func InitMqClient() {
-	client := &middleware.MqClient{}
+	client := &mq.MqClient{}
 	client.Init()
 }
 

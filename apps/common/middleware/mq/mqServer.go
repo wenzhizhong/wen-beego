@@ -1,4 +1,4 @@
-package middleware
+package mq
 
 import (
 	"WenBeego/apps/common/global"
@@ -16,6 +16,19 @@ type MqServer struct {
 	Server *machinery.Server
 }
 
+func GetDefaultQueueName() (string, error) {
+	appName, err1 := helper.AppName()
+	runMode, err2 := helper.AppRunmode()
+	tmpDefaultQueue, err3 := beego.AppConfig.DIY("queue.default_queue")
+	err := helper.Ternary(err1 != nil, err1, err2)
+	err = helper.Ternary(err != nil, err, err3)
+
+	defaultQueue := appName + "." + runMode + "." + tmpDefaultQueue.(string)
+
+	return defaultQueue, err
+
+}
+
 // 统一的配置创建函数
 func (mq *MqServer) NewMq() (*MqServer, error) {
 
@@ -23,7 +36,6 @@ func (mq *MqServer) NewMq() (*MqServer, error) {
 	if err != nil {
 		return mq, err
 	}
-
 	server, err := machinery.NewServer(cnf)
 	if err != nil {
 		return mq, err
@@ -40,8 +52,7 @@ func (mq *MqServer) RegisterTask(funcName string, funcCallBack func(...any) erro
 // 获取配置
 func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 	tmpQueueType, err1 := beego.AppConfig.DIY("queue.type")
-	runMode, err2 := helper.AppRunmode()
-	tmpDefaultQueue, err3 := beego.AppConfig.DIY("queue.default_queue")
+	defaultQueue, err2 := GetDefaultQueueName()
 	if err1 != nil {
 		err = err1
 		return cnf, err
@@ -50,11 +61,6 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		err = err2
 		return cnf, err
 	}
-	if err3 != nil {
-		err = err3
-		return cnf, err
-	}
-	defaultQueue := tmpDefaultQueue.(string) + "_" + runMode
 	cnf = &config.Config{
 		DefaultQueue: defaultQueue,
 	}
