@@ -14,7 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/RichardKnop/machinery/v1/tasks"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
+
 	"github.com/beego/beego/v2/server/web"
 	beecontext "github.com/beego/beego/v2/server/web/context"
 	"golang.org/x/time/rate"

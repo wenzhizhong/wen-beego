@@ -21,38 +21,6 @@ cloud.google.com/go/pubsub/internal/scheduler
 # github.com/KyleBanks/depth v1.2.1
 ## explicit
 github.com/KyleBanks/depth
-# github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae
-## explicit
-github.com/RichardKnop/logging
-# github.com/RichardKnop/machinery v1.10.8
-## explicit; go 1.15
-github.com/RichardKnop/machinery/v1
-github.com/RichardKnop/machinery/v1/backends/amqp
-github.com/RichardKnop/machinery/v1/backends/dynamodb
-github.com/RichardKnop/machinery/v1/backends/eager
-github.com/RichardKnop/machinery/v1/backends/iface
-github.com/RichardKnop/machinery/v1/backends/memcache
-github.com/RichardKnop/machinery/v1/backends/mongo
-github.com/RichardKnop/machinery/v1/backends/null
-github.com/RichardKnop/machinery/v1/backends/redis
-github.com/RichardKnop/machinery/v1/backends/result
-github.com/RichardKnop/machinery/v1/brokers/amqp
-github.com/RichardKnop/machinery/v1/brokers/eager
-github.com/RichardKnop/machinery/v1/brokers/errs
-github.com/RichardKnop/machinery/v1/brokers/gcppubsub
-github.com/RichardKnop/machinery/v1/brokers/iface
-github.com/RichardKnop/machinery/v1/brokers/redis
-github.com/RichardKnop/machinery/v1/brokers/sqs
-github.com/RichardKnop/machinery/v1/common
-github.com/RichardKnop/machinery/v1/config
-github.com/RichardKnop/machinery/v1/locks/eager
-github.com/RichardKnop/machinery/v1/locks/iface
-github.com/RichardKnop/machinery/v1/locks/redis
-github.com/RichardKnop/machinery/v1/log
-github.com/RichardKnop/machinery/v1/retry
-github.com/RichardKnop/machinery/v1/tasks
-github.com/RichardKnop/machinery/v1/tracing
-github.com/RichardKnop/machinery/v1/utils
 # github.com/aws/aws-sdk-go v1.37.16
 ## explicit; go 1.11
 github.com/aws/aws-sdk-go/aws

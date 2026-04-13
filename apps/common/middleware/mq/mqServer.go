@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/RichardKnop/machinery/v1"
-	"github.com/RichardKnop/machinery/v1/config"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/config"
+
 	beego "github.com/beego/beego/v2/server/web"
 )
 

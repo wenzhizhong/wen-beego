@@ -5,8 +5,8 @@ import (
 	"WenBeego/apps/common/helper"
 	"fmt"
 
-	"github.com/RichardKnop/machinery/v1/backends/result"
-	"github.com/RichardKnop/machinery/v1/tasks"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/backends/result"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
 )
 
 type MqClient struct {

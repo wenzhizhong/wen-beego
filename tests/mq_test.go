@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/RichardKnop/machinery/v1/tasks"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
 )
 
 func init() {
