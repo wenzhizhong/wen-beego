@@ -23,6 +23,7 @@ func TestMqSendTask(t *testing.T) {
 	options := []tasks.Arg{
 		{Name: "username", Type: "string", Value: "张三"},
 		{Name: "hobby", Type: "string", Value: hobbyJson},
+		{Name: "age", Type: "int", Value: 23},
 	}
 
 	asyncResult, err := (&mq.MqClient{}).SendTask("test", options)

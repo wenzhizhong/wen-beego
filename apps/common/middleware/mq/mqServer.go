@@ -13,7 +13,8 @@ import (
 )
 
 type MqServer struct {
-	Server *machinery.Server
+	Server    *machinery.Server
+	ServerDlx *machinery.Server
 }
 
 func GetDefaultQueueName() (string, error) {
@@ -37,10 +38,16 @@ func (mq *MqServer) NewMq() (*MqServer, error) {
 		return mq, err
 	}
 	server, err := machinery.NewServer(cnf)
-	if err != nil {
+
+	cnf.DefaultQueue = cnf.DefaultQueue + ".dlx"
+
+	serverDlx, err1 := machinery.NewServer(cnf)
+	if err != nil || err1 != nil {
+		err = helper.Ternary(err != nil, err, err1)
 		return mq, err
 	}
 	mq.Server = server
+	mq.ServerDlx = serverDlx
 	return mq, nil
 }
 

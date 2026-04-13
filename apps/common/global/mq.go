@@ -3,5 +3,6 @@ package global
 import "github.com/RichardKnop/machinery/v1"
 
 var (
-	MqClient *machinery.Server
+	MqClient    *machinery.Server
+	MqClientDlx *machinery.Server
 )

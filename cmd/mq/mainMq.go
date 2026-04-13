@@ -19,6 +19,7 @@ func main() {
 	// 注册自己资源服务
 	cmdCommon.RunBefore()
 	cmdCommon.InitCommonSource("pathMq")
+	cmdCommon.InitMqClient()
 
 	tasks := routers.GetMqTasks()
 	if len(tasks) == 0 {
@@ -38,8 +39,6 @@ func main() {
 			return reflectCallback(task.CallBack, args)
 		})
 	}
-	// 死信队列
-	// mq.SetupDeadLetterQueue(mqServer.Server.connec)
 
 	fmt.Println("Mq starting")
 	// 启动Worker"服务"
