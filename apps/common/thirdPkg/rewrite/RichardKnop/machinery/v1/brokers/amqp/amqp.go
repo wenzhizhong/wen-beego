@@ -33,7 +33,7 @@ type AMQPConnection struct {
 type Broker struct {
 	common.Broker
 	common.AMQPConnector
-	processingWG sync.WaitGroup // use wait group to make sure task processing completes on interrupt signal
+	processingWG sync.WaitGroup
 
 	connections      map[string]*AMQPConnection
 	connectionsMutex sync.RWMutex
@@ -41,7 +41,11 @@ type Broker struct {
 
 // New creates new Broker instance
 func New(cnf *config.Config) iface.Broker {
-	return &Broker{Broker: common.NewBroker(cnf), AMQPConnector: common.AMQPConnector{}, connections: make(map[string]*AMQPConnection)}
+	return &Broker{
+		Broker:        common.NewBroker(cnf),
+		AMQPConnector: common.AMQPConnector{},
+		connections:   make(map[string]*AMQPConnection),
+	}
 }
 
 // StartConsuming enters a loop and waits for incoming messages
@@ -53,19 +57,36 @@ func (b *Broker) StartConsuming(consumerTag string, concurrency int, taskProcess
 		queueName = b.GetConfig().DefaultQueue
 	}
 
+	// 1. 初始化队列参数
+	queueDeclareArgs := amqp.Table{}
+	if b.GetConfig().AMQP != nil && b.GetConfig().AMQP.QueueDeclareArgs != nil {
+		for k, v := range b.GetConfig().AMQP.QueueDeclareArgs {
+			queueDeclareArgs[k] = v
+		}
+	}
+
+	// 2. 为【主队列】配置死信交换机 (这才是真正的死信队列!)
+	if b.GetConfig().AMQP != nil && b.GetConfig().AMQP.DeadLetterExchange != "" {
+		queueDeclareArgs["x-dead-letter-exchange"] = b.GetConfig().AMQP.DeadLetterExchange
+		if b.GetConfig().AMQP.DeadLetterRoutingKey != "" {
+			queueDeclareArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.DeadLetterRoutingKey
+		}
+	}
+
+	// 3. 连接到【主队列】
 	conn, channel, queue, _, amqpCloseChan, err := b.Connect(
 		b.GetConfig().Broker,
 		b.GetConfig().MultipleBrokerSeparator,
 		b.GetConfig().TLSConfig,
-		b.GetConfig().AMQP.Exchange,     // exchange name
-		b.GetConfig().AMQP.ExchangeType, // exchange type
-		queueName,                       // queue name
-		true,                            // queue durable
-		false,                           // queue delete when unused
-		b.GetConfig().AMQP.BindingKey,   // queue binding key
-		nil,                             // exchange declare args
-		amqp.Table(b.GetConfig().AMQP.QueueDeclareArgs), // queue declare args
-		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs), // queue binding args
+		b.GetConfig().AMQP.Exchange,
+		b.GetConfig().AMQP.ExchangeType,
+		queueName,
+		true,  // queue durable
+		false, // queue delete when unused
+		b.GetConfig().AMQP.BindingKey,
+		nil,
+		queueDeclareArgs,
+		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs),
 	)
 	if err != nil {
 		b.GetRetryFunc()(b.GetRetryStopChan())
@@ -73,6 +94,7 @@ func (b *Broker) StartConsuming(consumerTag string, concurrency int, taskProcess
 	}
 	defer b.Close(channel, conn)
 
+	// 4. 设置预取
 	if err = channel.Qos(
 		b.GetConfig().AMQP.PrefetchCount,
 		0,     // prefetch size
@@ -81,110 +103,128 @@ func (b *Broker) StartConsuming(consumerTag string, concurrency int, taskProcess
 		return b.GetRetry(), fmt.Errorf("Channel qos error: %s", err)
 	}
 
+	// 5. 消费【主队列】
 	deliveries, err := channel.Consume(
-		queue.Name,  // queue
-		consumerTag, // consumer tag
-		false,       // auto-ack
-		false,       // exclusive
-		false,       // no-local
-		false,       // no-wait
-		nil,         // arguments
+		queue.Name,
+		consumerTag,
+		false, // auto-ack: FALSE
+		false, // exclusive
+		false, // no-local
+		false, // no-wait
+		nil,   // arguments
 	)
 	if err != nil {
 		return b.GetRetry(), fmt.Errorf("Queue consume error: %s", err)
 	}
 
-	log.INFO.Print("[*] Waiting for messages. To exit press CTRL+C")
+	log.INFO.Printf("[*] Consuming from queue: %s", queue.Name)
 
 	if err := b.consume(deliveries, concurrency, taskProcessor, amqpCloseChan); err != nil {
 		return b.GetRetry(), err
 	}
 
-	// Waiting for any tasks being processed to finish
 	b.processingWG.Wait()
-
 	return b.GetRetry(), nil
 }
 
 // StopConsuming quits the loop
 func (b *Broker) StopConsuming() {
 	b.Broker.StopConsuming()
-
-	// Waiting for any tasks being processed to finish
 	b.processingWG.Wait()
 }
 
-// GetOrOpenConnection will return a connection on a particular queue name. Open connections
-// are saved to avoid having to reopen connection for multiple queues
+// GetOrOpenConnection returns a connection for a queue
+// ... existing code ...
 func (b *Broker) GetOrOpenConnection(queueName string, queueBindingKey string, exchangeDeclareArgs, queueDeclareArgs, queueBindingArgs amqp.Table) (*AMQPConnection, error) {
-	var err error
-
 	b.connectionsMutex.Lock()
 	defer b.connectionsMutex.Unlock()
 
-	conn, ok := b.connections[queueName]
-	if !ok {
-		conn = &AMQPConnection{
-			queueName: queueName,
-			cleanup:   make(chan struct{}),
-		}
-		conn.connection, conn.channel, conn.queue, conn.confirmation, conn.errorchan, err = b.Connect(
-			b.GetConfig().Broker,
-			b.GetConfig().MultipleBrokerSeparator,
-			b.GetConfig().TLSConfig,
-			b.GetConfig().AMQP.Exchange,     // exchange name
-			b.GetConfig().AMQP.ExchangeType, // exchange type
-			queueName,                       // queue name
-			true,                            // queue durable
-			false,                           // queue delete when unused
-			queueBindingKey,                 // queue binding key
-			exchangeDeclareArgs,             // exchange declare args
-			queueDeclareArgs,                // queue declare args
-			queueBindingArgs,                // queue binding args
-		)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Failed to connect to queue %s", queueName)
-		}
-
-		// Reconnect to the channel if it disconnects/errors out
-		go func() {
-			select {
-			case err = <-conn.errorchan:
-				log.INFO.Printf("Error occurred on queue: %s. Reconnecting", queueName)
-				b.connectionsMutex.Lock()
-				delete(b.connections, queueName)
-				b.connectionsMutex.Unlock()
-				_, err := b.GetOrOpenConnection(queueName, queueBindingKey, exchangeDeclareArgs, queueDeclareArgs, queueBindingArgs)
-				if err != nil {
-					log.ERROR.Printf("Failed to reopen queue: %s.", queueName)
-				}
-			case <-conn.cleanup:
-				return
-			}
-		}()
-		b.connections[queueName] = conn
+	if conn, ok := b.connections[queueName]; ok {
+		return conn, nil
 	}
+
+	// 1. 初始化队列参数
+	finalQueueArgs := amqp.Table{}
+	if queueDeclareArgs != nil {
+		for k, v := range queueDeclareArgs {
+			finalQueueArgs[k] = v
+		}
+	}
+
+	// 2. 为【主队列】配置死信交换机 (强制覆盖)
+	if queueName == b.GetConfig().DefaultQueue &&
+		b.GetConfig().AMQP != nil &&
+		b.GetConfig().AMQP.DeadLetterExchange != "" {
+
+		finalQueueArgs["x-dead-letter-exchange"] = b.GetConfig().AMQP.DeadLetterExchange
+		if b.GetConfig().AMQP.DeadLetterRoutingKey != "" {
+			finalQueueArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.DeadLetterRoutingKey
+		}
+	}
+
+	// 3. 连接队列
+	conn := &AMQPConnection{
+		queueName: queueName,
+		cleanup:   make(chan struct{}),
+	}
+	var err error
+	conn.connection, conn.channel, conn.queue, conn.confirmation, conn.errorchan, err = b.Connect(
+		b.GetConfig().Broker,
+		b.GetConfig().MultipleBrokerSeparator,
+		b.GetConfig().TLSConfig,
+		b.GetConfig().AMQP.Exchange,
+		b.GetConfig().AMQP.ExchangeType,
+		queueName,
+		true,
+		false,
+		queueBindingKey,
+		exchangeDeclareArgs,
+		finalQueueArgs,
+		queueBindingArgs,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed to connect to queue %s", queueName)
+	}
+
+	// 4. 自动重连
+	go func() {
+		select {
+		case err := <-conn.errorchan:
+			log.INFO.Printf("Error on queue %s: %v. Reconnecting...", queueName, err)
+			b.connectionsMutex.Lock()
+			delete(b.connections, queueName)
+			b.connectionsMutex.Unlock()
+			b.GetOrOpenConnection(queueName, queueBindingKey, exchangeDeclareArgs, queueDeclareArgs, queueBindingArgs)
+		case <-conn.cleanup:
+			return
+		}
+	}()
+
+	b.connections[queueName] = conn
 	return conn, nil
 }
 
+// ... existing code ...
+
+// ... existing code ...
+
+// CloseConnections closes all connections
 func (b *Broker) CloseConnections() error {
 	b.connectionsMutex.Lock()
 	defer b.connectionsMutex.Unlock()
 
-	for key, conn := range b.connections {
+	for _, conn := range b.connections {
 		if err := b.Close(conn.channel, conn.connection); err != nil {
 			log.ERROR.Print("Failed to close channel")
-			return nil
 		}
 		close(conn.cleanup)
-		delete(b.connections, key)
 	}
+	b.connections = make(map[string]*AMQPConnection)
 	return nil
 }
 
-// Publish places a new message on the default queue
+// Publish places a new message on the queue
 func (b *Broker) Publish(ctx context.Context, signature *tasks.Signature) error {
-	// Adjust routing key (this decides which queue the message will be published to)
 	b.AdjustRoutingKey(signature)
 
 	msg, err := json.Marshal(signature)
@@ -192,44 +232,58 @@ func (b *Broker) Publish(ctx context.Context, signature *tasks.Signature) error 
 		return fmt.Errorf("JSON marshal error: %s", err)
 	}
 
-	// Check the ETA signature field, if it is set and it is in the future,
-	// delay the task
+	// 1. 处理延迟任务
 	if signature.ETA != nil {
 		now := time.Now().UTC()
-
 		if signature.ETA.After(now) {
 			delayMs := int64(signature.ETA.Sub(now) / time.Millisecond)
-
 			return b.delay(signature, delayMs)
 		}
 	}
 
+	// 2. 准备发布到【主队列】的参数
 	queue := b.GetConfig().DefaultQueue
-	bindingKey := b.GetConfig().AMQP.BindingKey // queue binding key
+	bindingKey := b.GetConfig().AMQP.BindingKey
 	if b.isDirectExchange() {
 		queue = signature.RoutingKey
 		bindingKey = signature.RoutingKey
 	}
 
-	connection, err := b.GetOrOpenConnection(
-		queue,
-		bindingKey, // queue binding key
-		nil,        // exchange declare args
-		amqp.Table(b.GetConfig().AMQP.QueueDeclareArgs), // queue declare args
-		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs), // queue binding args
-	)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to get a connection for queue %s", queue)
+	// 【终极强制注入】无论上层传什么，这里必须构造出带 DLX 的参数
+	publishQueueArgs := amqp.Table{
+		"x-dead-letter-exchange": b.GetConfig().AMQP.DeadLetterExchange,
+	}
+	if b.GetConfig().AMQP.DeadLetterRoutingKey != "" {
+		publishQueueArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.DeadLetterRoutingKey
 	}
 
-	channel := connection.channel
-	confirmsChan := connection.confirmation
+	// 合并其他可能存在的参数
+	if b.GetConfig().AMQP.QueueDeclareArgs != nil {
+		for k, v := range b.GetConfig().AMQP.QueueDeclareArgs {
+			publishQueueArgs[k] = v
+		}
+	}
 
+	conn, err := b.GetOrOpenConnection(
+		queue,
+		bindingKey,
+		nil,
+		publishQueueArgs, // 传入我们刚构造的、绝对正确的参数
+		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs),
+	)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to get connection for queue %s", queue)
+	}
+
+	channel := conn.channel
+	confirmsChan := conn.confirmation
+
+	// 3. 发布消息
 	if err := channel.Publish(
-		b.GetConfig().AMQP.Exchange, // exchange name
-		signature.RoutingKey,        // routing key
-		false,                       // mandatory
-		false,                       // immediate
+		b.GetConfig().AMQP.Exchange,
+		signature.RoutingKey,
+		false,
+		false,
 		amqp.Publishing{
 			Headers:      amqp.Table(signature.Headers),
 			ContentType:  "application/json",
@@ -242,29 +296,22 @@ func (b *Broker) Publish(ctx context.Context, signature *tasks.Signature) error 
 	}
 
 	confirmed := <-confirmsChan
-
-	if confirmed.Ack {
-		return nil
+	if !confirmed.Ack {
+		return fmt.Errorf("Failed delivery of tag: %d", confirmed.DeliveryTag)
 	}
 
-	return fmt.Errorf("Failed delivery of delivery tag: %v", confirmed.DeliveryTag)
+	return nil
 }
 
-// consume takes delivered messages from the channel and manages a worker pool
-// to process tasks concurrently
+// consume manages worker pool
 func (b *Broker) consume(deliveries <-chan amqp.Delivery, concurrency int, taskProcessor iface.TaskProcessor, amqpCloseChan <-chan *amqp.Error) error {
 	pool := make(chan struct{}, concurrency)
-
-	// initialize worker pool with maxWorkers workers
 	go func() {
 		for i := 0; i < concurrency; i++ {
 			pool <- struct{}{}
 		}
 	}()
 
-	// make channel with a capacity makes it become a buffered channel so that a worker which wants to
-	// push an error to `errorsChan` doesn't need to be blocked while the for-loop is blocked waiting
-	// a worker, that is, it avoids a possible deadlock
 	errorsChan := make(chan error, 1)
 
 	for {
@@ -275,184 +322,194 @@ func (b *Broker) consume(deliveries <-chan amqp.Delivery, concurrency int, taskP
 			return err
 		case d := <-deliveries:
 			if concurrency > 0 {
-				// get worker from pool (blocks until one is available)
 				<-pool
 			}
 
 			b.processingWG.Add(1)
+			go func(delivery amqp.Delivery) {
+				defer func() {
+					if r := recover(); r != nil {
+						log.ERROR.Printf("Panic: %v", r)
+						delivery.Nack(false, false) // 进入死信队列
+					}
+					b.processingWG.Done()
+					if concurrency > 0 {
+						pool <- struct{}{}
+					}
+				}()
 
-			// Consume the task inside a gotourine so multiple tasks
-			// can be processed concurrently
-			go func() {
-				if err := b.consumeOne(d, taskProcessor, true); err != nil {
-					errorsChan <- err
+				// 处理消息
+				if err := b.consumeOne(delivery, taskProcessor, true); err != nil {
+					log.ERROR.Printf("Task error: %v", err)
 				}
-
-				b.processingWG.Done()
-
-				if concurrency > 0 {
-					// give worker back to pool
-					pool <- struct{}{}
-				}
-			}()
+			}(d)
 		case <-b.GetStopChan():
 			return nil
 		}
 	}
 }
 
-// consumeOne processes a single message using TaskProcessor
+// consumeOne processes a single message
 func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProcessor, ack bool) error {
 	if len(delivery.Body) == 0 {
-		delivery.Nack(true, false)                     // multiple, requeue
-		return errors.New("Received an empty message") // RabbitMQ down?
+		delivery.Nack(true, false)
+		return errors.New("empty message")
 	}
 
-	var multiple, requeue = false, false
-
-	// Unmarshal message body into signature struct
 	signature := new(tasks.Signature)
-	decoder := json.NewDecoder(bytes.NewReader(delivery.Body))
-	decoder.UseNumber()
-	if err := decoder.Decode(signature); err != nil {
-		delivery.Nack(multiple, requeue)
+	if err := json.NewDecoder(bytes.NewReader(delivery.Body)).Decode(signature); err != nil {
+		log.ERROR.Printf("Unmarshal error: %s", err)
+		delivery.Nack(false, false) // 进入死信队列
 		return errs.NewErrCouldNotUnmarshalTaskSignature(delivery.Body, err)
 	}
 
-	// If the task is not registered, we nack it and requeue,
-	// there might be different workers for processing specific tasks
 	if !b.IsTaskRegistered(signature.Name) {
-		requeue = true
-		log.INFO.Printf("Task not registered with this worker. Requeing message: %s", delivery.Body)
-
 		if !signature.IgnoreWhenTaskNotRegistered {
-			delivery.Nack(multiple, requeue)
+			delivery.Nack(false, true) // 重新入队
+		} else {
+			delivery.Ack(false)
 		}
-
 		return nil
 	}
 
-	log.DEBUG.Printf("Received new message: %s", delivery.Body)
+	log.DEBUG.Printf("Received: %s", delivery.Body)
 
+	// 执行任务
 	err := taskProcessor.Process(signature)
 	if ack {
-		delivery.Ack(multiple)
+		if err != nil {
+			// 任务失败 -> 进入【死信队列】
+			log.ERROR.Printf("Task failed: %v", err)
+			delivery.Nack(false, false) // 不重入队，进入死信
+		} else {
+			// 任务成功 -> 从队列删除
+			log.DEBUG.Printf("Task succeeded")
+			delivery.Ack(false)
+		}
 	}
 	return err
 }
 
-// delay a task by delayDuration miliseconds, the way it works is a new queue
-// is created without any consumers, the message is then published to this queue
-// with appropriate ttl expiration headers, after the expiration, it is sent to
-// the proper queue with consumers
+// delay handles delayed tasks
 func (b *Broker) delay(signature *tasks.Signature, delayMs int64) error {
 	if delayMs <= 0 {
-		return errors.New("Cannot delay task by 0ms")
+		return errors.New("invalid delay")
 	}
 
 	message, err := json.Marshal(signature)
 	if err != nil {
-		return fmt.Errorf("JSON marshal error: %s", err)
+		return fmt.Errorf("marshal error: %s", err)
 	}
 
+	// 1. 延迟队列名称
 	queueName := b.GetConfig().AMQP.DelayedQueue
-	declareQueueArgs := amqp.Table{
-		// Exchange where to send messages after TTL expiration.
-		"x-dead-letter-exchange": b.GetConfig().AMQP.Exchange,
-		// Routing key which use when resending expired messages.
-		"x-dead-letter-routing-key": signature.RoutingKey,
-	}
-	messageProperties := amqp.Publishing{
-		Headers:      amqp.Table(signature.Headers),
-		ContentType:  "application/json",
-		Body:         message,
-		DeliveryMode: amqp.Persistent,
-		Expiration:   fmt.Sprint(delayMs),
-	}
 	if queueName == "" {
-		// It's necessary to redeclare the queue each time (to zero its TTL timer).
 		queueName = fmt.Sprintf(
 			"delay.%d.%s.%s",
-			delayMs, // delay duration in mileseconds
+			delayMs,
 			b.GetConfig().AMQP.Exchange,
-			signature.RoutingKey, // routing key
+			signature.RoutingKey,
 		)
-		declareQueueArgs = amqp.Table{
-			// Exchange where to send messages after TTL expiration.
-			"x-dead-letter-exchange": b.GetConfig().AMQP.Exchange,
-			// Routing key which use when resending expired messages.
-			"x-dead-letter-routing-key": signature.RoutingKey,
-			// Time in milliseconds
-			// after that message will expire and be sent to destination.
-			"x-message-ttl": delayMs,
-			// Time after that the queue will be deleted.
-			"x-expires": delayMs * 2,
-		}
-		messageProperties = amqp.Publishing{
-			Headers:      amqp.Table(signature.Headers),
-			ContentType:  "application/json",
-			Body:         message,
-			DeliveryMode: amqp.Persistent,
-		}
 	}
 
+	// 2. 延迟队列参数
+	declareQueueArgs := amqp.Table{
+		// 过期后路由到【主交换机】
+		"x-dead-letter-exchange":    b.GetConfig().AMQP.Exchange,
+		"x-dead-letter-routing-key": signature.RoutingKey,
+		"x-message-ttl":             delayMs,
+		"x-expires":                 delayMs * 2,
+	}
+
+	// 3. 连接到【延迟队列】
 	conn, channel, _, _, _, err := b.Connect(
 		b.GetConfig().Broker,
 		b.GetConfig().MultipleBrokerSeparator,
 		b.GetConfig().TLSConfig,
-		b.GetConfig().AMQP.Exchange,     // exchange name
-		b.GetConfig().AMQP.ExchangeType, // exchange type
-		queueName,                       // queue name
-		true,                            // queue durable
-		b.GetConfig().AMQP.AutoDelete,   // queue delete when unused
-		queueName,                       // queue binding key
-		nil,                             // exchange declare args
-		declareQueueArgs,                // queue declare args
-		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs), // queue binding args
+		b.GetConfig().AMQP.Exchange,
+		b.GetConfig().AMQP.ExchangeType,
+		queueName,
+		true,
+		b.GetConfig().AMQP.AutoDelete,
+		queueName,
+		nil,
+		declareQueueArgs,
+		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs),
 	)
 	if err != nil {
 		return err
 	}
-
 	defer b.Close(channel, conn)
 
-	if err := channel.Publish(
-		b.GetConfig().AMQP.Exchange, // exchange
-		queueName,                   // routing key
-		false,                       // mandatory
-		false,                       // immediate
-		messageProperties,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	// 4. 发布到延迟队列
+	return channel.Publish(
+		b.GetConfig().AMQP.Exchange,
+		queueName,
+		false,
+		false,
+		amqp.Publishing{
+			Headers:      amqp.Table(signature.Headers),
+			ContentType:  "application/json",
+			Body:         message,
+			DeliveryMode: amqp.Persistent,
+		},
+	)
 }
 
+// isDirectExchange checks if exchange type is direct
 func (b *Broker) isDirectExchange() bool {
 	return b.GetConfig().AMQP != nil && b.GetConfig().AMQP.ExchangeType == "direct"
 }
 
-// AdjustRoutingKey makes sure the routing key is correct.
-// If the routing key is an empty string:
-// a) set it to binding key for direct exchange type
-// b) set it to default queue name
+// AdjustRoutingKey sets correct routing key
 func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 	if s.RoutingKey != "" {
 		return
 	}
-
 	if b.isDirectExchange() {
-		// The routing algorithm behind a direct exchange is simple - a message goes
-		// to the queues whose binding key exactly matches the routing key of the message.
 		s.RoutingKey = b.GetConfig().AMQP.BindingKey
-		return
+	} else {
+		s.RoutingKey = b.GetConfig().DefaultQueue
 	}
-
-	s.RoutingKey = b.GetConfig().DefaultQueue
 }
 
-// Helper type for GetPendingTasks to accumulate signatures
+// GetPendingTasks retrieves pending tasks
+func (b *Broker) GetPendingTasks(queue string) ([]*tasks.Signature, error) {
+	if queue == "" {
+		queue = b.GetConfig().DefaultQueue
+	}
+
+	conn, err := b.GetOrOpenConnection(
+		queue,
+		b.GetConfig().AMQP.BindingKey,
+		nil,
+		amqp.Table(b.GetConfig().AMQP.QueueDeclareArgs),
+		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs),
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed to get connection for queue %s", queue)
+	}
+
+	channel := conn.channel
+	queueInfo, err := channel.QueueInspect(queue)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed to inspect queue %s", queue)
+	}
+
+	dumper := &sigDumper{customQueue: queue}
+	for i := 0; i < queueInfo.Messages; i++ {
+		d, ok, err := channel.Get(queue, false)
+		if err != nil || !ok {
+			break
+		}
+		d.Nack(false, true) // 重新入队
+		b.consumeOne(d, dumper, false)
+	}
+
+	return dumper.Signatures, nil
+}
+
+// Helper for GetPendingTasks
 type sigDumper struct {
 	customQueue string
 	Signatures  []*tasks.Signature
@@ -463,49 +520,6 @@ func (s *sigDumper) Process(sig *tasks.Signature) error {
 	return nil
 }
 
-func (s *sigDumper) CustomQueue() string {
-	return s.customQueue
-}
+func (s *sigDumper) CustomQueue() string { return s.customQueue }
 
-func (_ *sigDumper) PreConsumeHandler() bool {
-	return true
-}
-
-func (b *Broker) GetPendingTasks(queue string) ([]*tasks.Signature, error) {
-	if queue == "" {
-		queue = b.GetConfig().DefaultQueue
-	}
-
-	bindingKey := b.GetConfig().AMQP.BindingKey // queue binding key
-	conn, err := b.GetOrOpenConnection(
-		queue,
-		bindingKey, // queue binding key
-		nil,        // exchange declare args
-		amqp.Table(b.GetConfig().AMQP.QueueDeclareArgs), // queue declare args
-		amqp.Table(b.GetConfig().AMQP.QueueBindingArgs), // queue binding args
-	)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to get a connection for queue %s", queue)
-	}
-
-	channel := conn.channel
-	queueInfo, err := channel.QueueInspect(queue)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to get info for queue %s", queue)
-	}
-
-	var tag uint64
-	defer channel.Nack(tag, true, true) // multiple, requeue
-
-	dumper := &sigDumper{customQueue: queue}
-	for i := 0; i < queueInfo.Messages; i++ {
-		d, _, err := channel.Get(queue, false)
-		if err != nil {
-			return nil, errors.Wrap(err, "Failed to get from queue")
-		}
-		tag = d.DeliveryTag
-		b.consumeOne(d, dumper, false)
-	}
-
-	return dumper.Signatures, nil
-}
+func (_ *sigDumper) PreConsumeHandler() bool { return true }

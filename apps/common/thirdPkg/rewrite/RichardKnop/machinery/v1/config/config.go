@@ -86,6 +86,12 @@ type AMQPConfig struct {
 	PrefetchCount    int              `yaml:"prefetch_count" envconfig:"AMQP_PREFETCH_COUNT"`
 	AutoDelete       bool             `yaml:"auto_delete" envconfig:"AMQP_AUTO_DELETE"`
 	DelayedQueue     string           `yaml:"delayed_queue" envconfig:"AMQP_DELAYED_QUEUE"`
+
+	// DeadLetterExchange 死信交换机名称
+	DeadLetterExchange string `yaml:"dead_letter_exchange" envconfig:"AMQP_DEAD_LETTER_EXCHANGE"`
+
+	// DeadLetterRoutingKey 死信路由键 (可选，默认为原 routing key)
+	DeadLetterRoutingKey string `yaml:"dead_letter_routing_key" envconfig:"AMQP_DEAD_LETTER_ROUTING_KEY"`
 }
 
 // DynamoDBConfig wraps DynamoDB related configuration

@@ -51,9 +51,48 @@ func (ac *AMQPConnector) Connect(urls string, urlSeparator string, tlsConfig *tl
 			return conn, channel, amqp.Queue{}, nil, nil, fmt.Errorf("Exchange declare error: %s", err)
 		}
 	}
+	if queueDeclareArgs != nil && queueDeclareArgs["x-dead-letter-exchange"] != nil {
+		dlxName := queueDeclareArgs["x-dead-letter-exchange"].(string)
+
+		if dlxName != exchange {
+			// 1. 声明死信交换机
+			err = channel.ExchangeDeclare(
+				dlxName, "direct", true, false, false, false, nil,
+			)
+			if err != nil {
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLX [%s]: %s", dlxName, err)
+			}
+
+			// 2. 声明死信队列
+			dlqName := ""
+			if queueDeclareArgs["x-dead-letter-routing-key"] != nil {
+				dlqName = queueDeclareArgs["x-dead-letter-routing-key"].(string)
+			} else {
+				dlqName = dlxName + "_queue"
+			}
+
+			_, err = channel.QueueDeclare(
+				dlqName, true, false, false, false, nil,
+			)
+			if err != nil {
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLQ [%s]: %s", dlqName, err)
+			}
+
+			// 3. 绑定死信队列到死信交换机
+			err = channel.QueueBind(
+				dlqName, dlqName, dlxName, false, nil,
+			)
+			if err != nil {
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Bind DLQ [%s] to DLX [%s]: %s", dlqName, dlxName, err)
+			}
+		}
+	}
 
 	var queue amqp.Queue
 	if queueName != "" {
+		if queueDeclareArgs == nil {
+			queueDeclareArgs = amqp.Table{}
+		}
 		// Declare a queue
 		queue, err = channel.QueueDeclare(
 			queueName,        // name
