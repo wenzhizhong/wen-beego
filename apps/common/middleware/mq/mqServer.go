@@ -35,14 +35,15 @@ func GetDefaultQueueName() (string, error) {
 func (mq *MqServer) NewMq() (*MqServer, error) {
 
 	cnf, err := mq.getConfig()
-	if err != nil {
+	cnf2, err2 := mq.getConfig()
+	if err != nil || err2 != nil {
+		err = helper.Ternary(err != nil, err, err2)
 		return mq, err
 	}
+	cnf2.DefaultQueue = cnf2.DefaultQueue + ".dlx"
+
 	server, err := machinery.NewServer(cnf)
-
-	cnf.DefaultQueue = cnf.DefaultQueue + ".dlx"
-
-	serverDlx, err1 := machinery.NewServer(cnf)
+	serverDlx, err1 := machinery.NewServer(cnf2)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
 		return mq, err
@@ -116,8 +117,10 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		host := tmpRabitMqConfig["host"].(string)
 		port := tmpRabitMqConfig["port"].(int)
 		exchange := tmpRabitMqConfig["exchange"].(string)
+		exchangeDlx := tmpRabitMqConfig["exchangeDlx"].(string)
 		exchangeType := tmpRabitMqConfig["exchangeType"].(string)
 		bindingKey := defaultQueue // tmpRabitMqConfig["bindingKey"].(string)
+		bindingKeyDlx := bindingKey + ".dlx"
 
 		brokerURL = fmt.Sprintf("amqp://%s:%s@%s:%d/",
 			user,
@@ -131,6 +134,9 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 			Exchange:     exchange,
 			ExchangeType: exchangeType,
 			BindingKey:   bindingKey,
+
+			DeadLetterExchange:   exchangeDlx,
+			DeadLetterRoutingKey: bindingKeyDlx,
 		}
 	}
 

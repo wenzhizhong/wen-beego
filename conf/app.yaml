@@ -98,6 +98,7 @@ queue:
     user: guest
     password: guest
     exchange:     machinery_exchange
+    exchangeDlx:  machinery_exchange_dlx
     exchangeType: direct
     # bindingKey:   machinery_task
 upload:

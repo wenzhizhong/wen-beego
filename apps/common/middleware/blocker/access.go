@@ -136,7 +136,12 @@ func mqSendTask(data interface{}) {
 		return
 	}
 	args := []tasks.Arg{{Name: "actionSaveToDbData", Type: "string", Value: dataStr}}
-	(&mq.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
+	res, err := (&mq.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
+	if err != nil {
+		global.Log.Error("mqSendTask() SendTask err:", err)
+		global.Log.Error("mqSendTask() SendTask res:", res)
+		return
+	}
 }
 
 // 处理body签名和body加密，【解密后覆盖body】

@@ -13,5 +13,6 @@ func GetMqTasks() []MqTasks {
 	TasksList := []MqTasks{}
 
 	TasksList = append(TasksList, MqTasks{Name: "ApiLog.ActionSaveToDb", CallBack: (*controllers.ApiLog).ActionSaveToDb})
+	TasksList = append(TasksList, MqTasks{Name: "Test.ActionTestMsg", CallBack: (*controllers.Test).ActionTestMsg})
 	return TasksList
 }

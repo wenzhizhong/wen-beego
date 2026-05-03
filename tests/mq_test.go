@@ -23,9 +23,10 @@ func TestMqSendTask(t *testing.T) {
 	options := []tasks.Arg{
 		{Name: "username", Type: "string", Value: "张三"},
 		{Name: "hobby", Type: "string", Value: hobbyJson},
-		{Name: "age", Type: "int", Value: 23},
+		// {Name: "age", Type: "int64", Value: 23}, // amqp.go:363 Task failed: Reflect task args error: 23 is not int64
+		{Name: "age", Type: "string", Value: "23"},
 	}
 
-	asyncResult, err := (&mq.MqClient{}).SendTask("test", options)
+	asyncResult, err := (&mq.MqClient{}).SendTask("Test.ActionTestMsg", options)
 	fmt.Println("\n", asyncResult, err)
 }
