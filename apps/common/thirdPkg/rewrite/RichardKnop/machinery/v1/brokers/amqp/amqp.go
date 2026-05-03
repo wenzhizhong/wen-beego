@@ -65,11 +65,12 @@ func (b *Broker) StartConsuming(consumerTag string, concurrency int, taskProcess
 		}
 	}
 
-	// 2. 为【主队列】配置死信交换机 (这才是真正的死信队列!)
+	// 2. 为【主队列】配置死信交换机 -> 路由到重试队列
 	if b.GetConfig().AMQP != nil && b.GetConfig().AMQP.DeadLetterExchange != "" {
 		queueDeclareArgs["x-dead-letter-exchange"] = b.GetConfig().AMQP.DeadLetterExchange
-		if b.GetConfig().AMQP.DeadLetterRoutingKey != "" {
-			queueDeclareArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.DeadLetterRoutingKey
+		queueDeclareArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.BindingKey
+		if b.GetConfig().AMQP.RetryDelayMs > 0 {
+			queueDeclareArgs["x-retry-delay-ms"] = b.GetConfig().AMQP.RetryDelayMs
 		}
 	}
 
@@ -151,14 +152,15 @@ func (b *Broker) GetOrOpenConnection(queueName string, queueBindingKey string, e
 		}
 	}
 
-	// 2. 为【主队列】配置死信交换机 (强制覆盖)
+	// 2. 为【主队列】配置死信交换机 (强制覆盖) -> 路由到重试队列
 	if queueName == b.GetConfig().DefaultQueue &&
 		b.GetConfig().AMQP != nil &&
 		b.GetConfig().AMQP.DeadLetterExchange != "" {
 
 		finalQueueArgs["x-dead-letter-exchange"] = b.GetConfig().AMQP.DeadLetterExchange
-		if b.GetConfig().AMQP.DeadLetterRoutingKey != "" {
-			finalQueueArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.DeadLetterRoutingKey
+		finalQueueArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.BindingKey
+		if b.GetConfig().AMQP.RetryDelayMs > 0 {
+			finalQueueArgs["x-retry-delay-ms"] = b.GetConfig().AMQP.RetryDelayMs
 		}
 	}
 
@@ -251,10 +253,11 @@ func (b *Broker) Publish(ctx context.Context, signature *tasks.Signature) error 
 
 	// 【终极强制注入】无论上层传什么，这里必须构造出带 DLX 的参数
 	publishQueueArgs := amqp.Table{
-		"x-dead-letter-exchange": b.GetConfig().AMQP.DeadLetterExchange,
+		"x-dead-letter-exchange":    b.GetConfig().AMQP.DeadLetterExchange,
+		"x-dead-letter-routing-key": b.GetConfig().AMQP.BindingKey,
 	}
-	if b.GetConfig().AMQP.DeadLetterRoutingKey != "" {
-		publishQueueArgs["x-dead-letter-routing-key"] = b.GetConfig().AMQP.DeadLetterRoutingKey
+	if b.GetConfig().AMQP.RetryDelayMs > 0 {
+		publishQueueArgs["x-retry-delay-ms"] = b.GetConfig().AMQP.RetryDelayMs
 	}
 
 	// 合并其他可能存在的参数
@@ -361,6 +364,10 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 		log.ERROR.Printf("Unmarshal error: %s", err)
 		delivery.Nack(false, false) // 进入死信队列
 		return errs.NewErrCouldNotUnmarshalTaskSignature(delivery.Body, err)
+	}
+
+	if delivery.Headers != nil {
+		signature.Headers = tasks.Headers(delivery.Headers)
 	}
 
 	if !b.IsTaskRegistered(signature.Name) {
@@ -473,6 +480,60 @@ func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 	}
 }
 
+func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) error {
+	dlqName := b.GetConfig().DefaultQueue + ".dlx"
+	dlxName := b.GetConfig().AMQP.DeadLetterExchange
+	if dlxName == "" {
+		return fmt.Errorf("DeadLetterExchange not configured")
+	}
+
+	msg, err := json.Marshal(signature)
+	if err != nil {
+		return fmt.Errorf("JSON marshal error: %s", err)
+	}
+
+	conn, channel, _, confirmsChan, _, err := b.Connect(
+		b.GetConfig().Broker,
+		b.GetConfig().MultipleBrokerSeparator,
+		b.GetConfig().TLSConfig,
+		dlxName,
+		"direct",
+		dlqName,
+		true,
+		false,
+		dlqName,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to connect to DLQ %s", dlqName)
+	}
+	defer b.Close(channel, conn)
+
+	if err := channel.Publish(
+		dlxName,
+		dlqName,
+		false,
+		false,
+		amqp.Publishing{
+			Headers:      amqp.Table(signature.Headers),
+			ContentType:  "application/json",
+			Body:         msg,
+			DeliveryMode: amqp.Persistent,
+		},
+	); err != nil {
+		return errors.Wrap(err, "Failed to publish to DLQ")
+	}
+
+	confirmed := <-confirmsChan
+	if !confirmed.Ack {
+		return fmt.Errorf("Failed delivery to DLQ, tag: %d", confirmed.DeliveryTag)
+	}
+
+	return nil
+}
+
 // GetPendingTasks retrieves pending tasks
 func (b *Broker) GetPendingTasks(queue string) ([]*tasks.Signature, error) {
 	if queue == "" {
@@ -523,3 +584,40 @@ func (s *sigDumper) Process(sig *tasks.Signature) error {
 func (s *sigDumper) CustomQueue() string { return s.customQueue }
 
 func (_ *sigDumper) PreConsumeHandler() bool { return true }
+
+func _getXDeathRetryCount(headers amqp.Table, queueName string) int {
+	if headers == nil || queueName == "" {
+		return 0
+	}
+	xDeathRaw, ok := headers["x-death"]
+	if !ok {
+		return 0
+	}
+	xDeathList, ok := xDeathRaw.([]interface{})
+	if !ok {
+		return 0
+	}
+	for _, entry := range xDeathList {
+		entryMap, ok := entry.(amqp.Table)
+		if !ok {
+			if m, ok2 := entry.(map[string]interface{}); ok2 {
+				entryMap = amqp.Table(m)
+			} else {
+				continue
+			}
+		}
+		reason, _ := entryMap["reason"].(string)
+		queue, _ := entryMap["queue"].(string)
+		if reason == "rejected" && queue == queueName {
+			switch c := entryMap["count"].(type) {
+			case int64:
+				return int(c)
+			case int32:
+				return int(c)
+			case float64:
+				return int(c)
+			}
+		}
+	}
+	return 0
+}

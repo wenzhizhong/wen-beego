@@ -63,27 +63,50 @@ func (ac *AMQPConnector) Connect(urls string, urlSeparator string, tlsConfig *tl
 				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLX [%s]: %s", dlxName, err)
 			}
 
-			// 2. 声明死信队列
-			dlqName := ""
-			if queueDeclareArgs["x-dead-letter-routing-key"] != nil {
-				dlqName = queueDeclareArgs["x-dead-letter-routing-key"].(string)
-			} else {
-				dlqName = dlxName + "_queue"
-			}
+		// 2. 声明死信队列（最终目的地，绑定独立key，仅由taskFailed显式发布）
+		dlqFinalName := queueName + ".dlx"
+		_, err = channel.QueueDeclare(
+			dlqFinalName, true, false, false, false, nil,
+		)
+		if err != nil {
+			return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLQ [%s]: %s", dlqFinalName, err)
+		}
+		err = channel.QueueBind(
+			dlqFinalName, dlqFinalName, dlxName, false, nil,
+		)
+		if err != nil {
+			return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Bind DLQ [%s] to DLX [%s]: %s", dlqFinalName, dlxName, err)
+		}
 
+			// 3. 声明重试队列（带TTL，过期后回到主交换机）
+			retryQueueName := queueName + ".retry"
+			retryDelayMs := int32(1000)
+			if retryDelay, ok := queueDeclareArgs["x-retry-delay-ms"]; ok {
+				switch v := retryDelay.(type) {
+				case int32:
+					retryDelayMs = v
+				case int:
+					retryDelayMs = int32(v)
+				case int64:
+					retryDelayMs = int32(v)
+				}
+			}
+			retryArgs := amqp.Table{
+				"x-dead-letter-exchange":    exchange,
+				"x-dead-letter-routing-key": queueBindingKey,
+				"x-message-ttl":             retryDelayMs,
+			}
 			_, err = channel.QueueDeclare(
-				dlqName, true, false, false, false, nil,
+				retryQueueName, true, false, false, false, retryArgs,
 			)
 			if err != nil {
-				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLQ [%s]: %s", dlqName, err)
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare RetryQueue [%s]: %s", retryQueueName, err)
 			}
-
-			// 3. 绑定死信队列到死信交换机
 			err = channel.QueueBind(
-				dlqName, dlqName, dlxName, false, nil,
+				retryQueueName, queueBindingKey, dlxName, false, nil,
 			)
 			if err != nil {
-				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Bind DLQ [%s] to DLX [%s]: %s", dlqName, dlxName, err)
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Bind RetryQueue [%s] to DLX [%s]: %s", retryQueueName, dlxName, err)
 			}
 		}
 	}

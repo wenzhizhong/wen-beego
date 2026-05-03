@@ -1,6 +1,13 @@
 package machinery
 
 import (
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/backends/amqp"
+	amqpBroker "WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/amqp"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/errs"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/log"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tracing"
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -11,13 +18,6 @@ import (
 	"time"
 
 	"github.com/opentracing/opentracing-go"
-
-	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/backends/amqp"
-	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/errs"
-	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/log"
-	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/retry"
-	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
-	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tracing"
 )
 
 // Worker represents a single worker process
@@ -191,7 +191,14 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 		// Otherwise, execute default retry logic based on signature.RetryCount
 		// and signature.RetryTimeout values
 		if signature.RetryCount > 0 {
-			return worker.taskRetry(signature)
+			retryAttempts := getXDeathRetryCount(signature.Headers, worker.Queue)
+			if worker.Queue == "" {
+				retryAttempts = getXDeathRetryCount(signature.Headers, worker.server.GetConfig().DefaultQueue)
+			}
+			if retryAttempts >= signature.RetryCount {
+				return worker.taskFailed(signature, err)
+			}
+			return worker.taskRetry(signature, err)
 		}
 
 		return worker.taskFailed(signature, err)
@@ -200,46 +207,34 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 	return worker.taskSucceeded(signature, results)
 }
 
-// retryTask decrements RetryCount counter and republishes the task to the queue
-func (worker *Worker) taskRetry(signature *tasks.Signature) error {
+// retryTask decrements RetryCount counter and Nacks the message via DLX + retry queue
+func (worker *Worker) taskRetry(signature *tasks.Signature, taskErr error) error {
 	// Update task state to RETRY
 	if err := worker.server.GetBackend().SetStateRetry(signature); err != nil {
 		return fmt.Errorf("Set state to 'retry' for task %s returned error: %s", signature.UUID, err)
 	}
 
-	// Decrement the retry counter, when it reaches 0, we won't retry again
-	signature.RetryCount--
+	retryAttempts := getXDeathRetryCount(signature.Headers, worker.Queue)
+	if worker.Queue == "" {
+		retryAttempts = getXDeathRetryCount(signature.Headers, worker.server.GetConfig().DefaultQueue)
+	}
 
-	// Increase retry timeout
-	signature.RetryTimeout = retry.FibonacciNext(signature.RetryTimeout)
+	log.WARNING.Printf("Task %s failed (retry attempt %d/%d). Going to retry via DLX.",
+		signature.UUID, retryAttempts+1, signature.RetryCount)
 
-	// Delay task by signature.RetryTimeout seconds
-	eta := time.Now().UTC().Add(time.Second * time.Duration(signature.RetryTimeout))
-	signature.ETA = &eta
-
-	log.WARNING.Printf("Task %s failed. Going to retry in %d seconds.", signature.UUID, signature.RetryTimeout)
-
-	// Send the task back to the queue
-	_, err := worker.server.SendTask(signature)
-	return err
+	return taskErr
 }
 
-// taskRetryIn republishes the task to the queue with ETA of now + retryIn.Seconds()
+// taskRetryIn Nacks the message to DLX + retry queue for delayed retry
 func (worker *Worker) retryTaskIn(signature *tasks.Signature, retryIn time.Duration) error {
 	// Update task state to RETRY
 	if err := worker.server.GetBackend().SetStateRetry(signature); err != nil {
 		return fmt.Errorf("Set state to 'retry' for task %s returned error: %s", signature.UUID, err)
 	}
 
-	// Delay task by retryIn duration
-	eta := time.Now().UTC().Add(retryIn)
-	signature.ETA = &eta
-
 	log.WARNING.Printf("Task %s failed. Going to retry in %.0f seconds.", signature.UUID, retryIn.Seconds())
 
-	// Send the task back to the queue
-	_, err := worker.server.SendTask(signature)
-	return err
+	return fmt.Errorf("task retry after %.0fs: %s", retryIn.Seconds(), signature.UUID)
 }
 
 // taskSucceeded updates the task state and triggers success callbacks or a
@@ -372,7 +367,6 @@ func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) erro
 
 	// Trigger error callbacks
 	for _, errorTask := range signature.OnError {
-		// Pass error as a first argument to error callbacks
 		args := append([]tasks.Arg{{
 			Type:  "string",
 			Value: taskErr.Error(),
@@ -381,11 +375,28 @@ func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) erro
 		worker.server.SendTask(errorTask)
 	}
 
+	// 发布到死信队列
+	if amqpBrokerInst, ok := worker.server.GetBroker().(*amqpBroker.Broker); ok {
+		retryAttempts := getXDeathRetryCount(signature.Headers, worker.Queue)
+		if worker.Queue == "" {
+			retryAttempts = getXDeathRetryCount(signature.Headers, worker.server.GetConfig().DefaultQueue)
+		}
+		if signature.Headers == nil {
+			signature.Headers = make(tasks.Headers)
+		}
+		signature.Headers["x-retry-attempts"] = retryAttempts
+		if err := amqpBrokerInst.PublishToDLQ(context.Background(), signature); err != nil {
+			log.ERROR.Printf("Failed to publish task %s to DLQ: %v", signature.UUID, err)
+			return taskErr
+		}
+		log.INFO.Printf("Task %s moved to DLQ after %d retries", signature.UUID, retryAttempts)
+	}
+
 	if signature.StopTaskDeletionOnError {
 		return errs.ErrStopTaskDeletion
 	}
 
-	return taskErr
+	return nil
 }
 
 // Returns true if the worker uses AMQP backend
@@ -434,4 +445,37 @@ func RedactURL(urlString string) string {
 		return urlString
 	}
 	return fmt.Sprintf("%s://%s", u.Scheme, u.Host)
+}
+
+func getXDeathRetryCount(headers tasks.Headers, queueName string) int {
+	if headers == nil || queueName == "" {
+		return 0
+	}
+	xDeathRaw, ok := headers["x-death"]
+	if !ok {
+		return 0
+	}
+	xDeathList, ok := xDeathRaw.([]interface{})
+	if !ok {
+		return 0
+	}
+	for _, entry := range xDeathList {
+		entryMap, ok := entry.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		reason, _ := entryMap["reason"].(string)
+		queue, _ := entryMap["queue"].(string)
+		if reason == "rejected" && queue == queueName {
+			switch c := entryMap["count"].(type) {
+			case int64:
+				return int(c)
+			case int32:
+				return int(c)
+			case float64:
+				return int(c)
+			}
+		}
+	}
+	return 0
 }

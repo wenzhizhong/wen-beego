@@ -92,6 +92,9 @@ type AMQPConfig struct {
 
 	// DeadLetterRoutingKey 死信路由键 (可选，默认为原 routing key)
 	DeadLetterRoutingKey string `yaml:"dead_letter_routing_key" envconfig:"AMQP_DEAD_LETTER_ROUTING_KEY"`
+
+	// RetryDelayMs 重试队列消息TTL(毫秒)，默认1000ms
+	RetryDelayMs int32 `yaml:"retry_delay_ms" envconfig:"AMQP_RETRY_DELAY_MS"`
 }
 
 // DynamoDBConfig wraps DynamoDB related configuration
