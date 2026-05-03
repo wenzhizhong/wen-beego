@@ -370,6 +370,19 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 		signature.Headers = tasks.Headers(delivery.Headers)
 	}
 
+	// 兜底保护：若重试次数已超过配置上限，发布到DLQ后Ack
+	if signature.RetryCount > 0 {
+		queueName := b.GetConfig().DefaultQueue
+		if retryAttempts := _getXDeathRetryCount(delivery.Headers, queueName); retryAttempts > signature.RetryCount {
+			log.WARNING.Printf("Task %s exceeded retry limit (%d > %d), moving to DLQ", signature.UUID, retryAttempts, signature.RetryCount)
+			if err := b.PublishToDLQ(context.Background(), signature); err != nil {
+				log.ERROR.Printf("Failed to publish %s to DLQ in safety net: %v", signature.UUID, err)
+			}
+			delivery.Ack(false)
+			return nil
+		}
+	}
+
 	if !b.IsTaskRegistered(signature.Name) {
 		if !signature.IgnoreWhenTaskNotRegistered {
 			delivery.Nack(false, true) // 重新入队
@@ -482,37 +495,28 @@ func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 
 func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) error {
 	dlqName := b.GetConfig().DefaultQueue + ".dlx"
-	dlxName := b.GetConfig().AMQP.DeadLetterExchange
-	if dlxName == "" {
-		return fmt.Errorf("DeadLetterExchange not configured")
-	}
 
 	msg, err := json.Marshal(signature)
 	if err != nil {
 		return fmt.Errorf("JSON marshal error: %s", err)
 	}
 
-	conn, channel, _, confirmsChan, _, err := b.Connect(
-		b.GetConfig().Broker,
-		b.GetConfig().MultipleBrokerSeparator,
-		b.GetConfig().TLSConfig,
-		dlxName,
-		"direct",
+	conn, err := b.GetOrOpenConnection(
 		dlqName,
-		true,
-		false,
 		dlqName,
 		nil,
 		nil,
 		nil,
 	)
 	if err != nil {
-		return errors.Wrapf(err, "Failed to connect to DLQ %s", dlqName)
+		return errors.Wrapf(err, "Failed to get connection for DLQ %s", dlqName)
 	}
-	defer b.Close(channel, conn)
+
+	channel := conn.channel
+	confirmsChan := conn.confirmation
 
 	if err := channel.Publish(
-		dlxName,
+		b.GetConfig().AMQP.Exchange,
 		dlqName,
 		false,
 		false,

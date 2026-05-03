@@ -386,10 +386,10 @@ func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) erro
 		}
 		signature.Headers["x-retry-attempts"] = retryAttempts
 		if err := amqpBrokerInst.PublishToDLQ(context.Background(), signature); err != nil {
-			log.ERROR.Printf("Failed to publish task %s to DLQ: %v", signature.UUID, err)
-			return taskErr
+			log.ERROR.Printf("Failed to publish task %s to DLQ: %v, acking to prevent loop", signature.UUID, err)
+		} else {
+			log.INFO.Printf("Task %s moved to DLQ after %d retries", signature.UUID, retryAttempts)
 		}
-		log.INFO.Printf("Task %s moved to DLQ after %d retries", signature.UUID, retryAttempts)
 	}
 
 	if signature.StopTaskDeletionOnError {
