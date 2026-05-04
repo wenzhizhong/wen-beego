@@ -195,6 +195,8 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 			if worker.Queue == "" {
 				retryAttempts = getXDeathRetryCount(signature.Headers, worker.server.GetConfig().DefaultQueue)
 			}
+			log.INFO.Printf("Task %s retry check: xdeathRejected=%d limit=%d headers=%+v",
+				signature.UUID, retryAttempts, signature.RetryCount, signature.Headers)
 			if retryAttempts >= signature.RetryCount {
 				return worker.taskFailed(signature, err)
 			}
@@ -459,6 +461,7 @@ func getXDeathRetryCount(headers tasks.Headers, queueName string) int {
 	if !ok {
 		return 0
 	}
+	maxCount := 0
 	for _, entry := range xDeathList {
 		entryMap, ok := entry.(map[string]interface{})
 		if !ok {
@@ -467,15 +470,42 @@ func getXDeathRetryCount(headers tasks.Headers, queueName string) int {
 		reason, _ := entryMap["reason"].(string)
 		queue, _ := entryMap["queue"].(string)
 		if reason == "rejected" && queue == queueName {
-			switch c := entryMap["count"].(type) {
-			case int64:
-				return int(c)
-			case int32:
-				return int(c)
-			case float64:
-				return int(c)
+			c := _getInt(entryMap["count"])
+			if c > maxCount {
+				maxCount = c
 			}
 		}
 	}
+	return maxCount
+}
+
+func _getInt(v interface{}) int {
+	switch c := v.(type) {
+	case int:
+		return c
+	case int8:
+		return int(c)
+	case int16:
+		return int(c)
+	case int32:
+		return int(c)
+	case int64:
+		return int(c)
+	case uint:
+		return int(c)
+	case uint8:
+		return int(c)
+	case uint16:
+		return int(c)
+	case uint32:
+		return int(c)
+	case uint64:
+		return int(c)
+	case float32:
+		return int(c)
+	case float64:
+		return int(c)
+	}
+	log.ERROR.Printf("_getInt: unknown numeric type %T value %v", v, v)
 	return 0
 }

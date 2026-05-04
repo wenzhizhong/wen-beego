@@ -380,6 +380,8 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 			}
 			delivery.Ack(false)
 			return nil
+		} else {
+			log.DEBUG.Printf("Task %s retry safety check: attempts=%d limit=%d, passing through", signature.UUID, retryAttempts, signature.RetryCount)
 		}
 	}
 
@@ -495,28 +497,23 @@ func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 
 func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) error {
 	dlqName := b.GetConfig().DefaultQueue + ".dlx"
+	dlxName := b.GetConfig().AMQP.DeadLetterExchange
+	if dlxName == "" {
+		return fmt.Errorf("DeadLetterExchange not configured")
+	}
 
 	msg, err := json.Marshal(signature)
 	if err != nil {
 		return fmt.Errorf("JSON marshal error: %s", err)
 	}
 
-	conn, err := b.GetOrOpenConnection(
-		dlqName,
-		dlqName,
-		nil,
-		nil,
-		nil,
-	)
+	conn, err := b.getOrOpenDLQConn(dlqName, dlxName)
 	if err != nil {
-		return errors.Wrapf(err, "Failed to get connection for DLQ %s", dlqName)
+		return errors.Wrapf(err, "Failed to get DLQ connection for %s", dlqName)
 	}
 
-	channel := conn.channel
-	confirmsChan := conn.confirmation
-
-	if err := channel.Publish(
-		b.GetConfig().AMQP.Exchange,
+	if err := conn.channel.Publish(
+		dlxName,
 		dlqName,
 		false,
 		false,
@@ -530,12 +527,68 @@ func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) e
 		return errors.Wrap(err, "Failed to publish to DLQ")
 	}
 
-	confirmed := <-confirmsChan
+	confirmed := <-conn.confirmation
 	if !confirmed.Ack {
 		return fmt.Errorf("Failed delivery to DLQ, tag: %d", confirmed.DeliveryTag)
 	}
 
 	return nil
+}
+
+func (b *Broker) getOrOpenDLQConn(dlqName, dlxName string) (*AMQPConnection, error) {
+	connKey := "dlq:" + dlqName
+	b.connectionsMutex.Lock()
+	if conn, ok := b.connections[connKey]; ok {
+		b.connectionsMutex.Unlock()
+		return conn, nil
+	}
+	b.connectionsMutex.Unlock()
+
+	connection, channel, queue, confirmsChan, errorChan, err := b.Connect(
+		b.GetConfig().Broker,
+		b.GetConfig().MultipleBrokerSeparator,
+		b.GetConfig().TLSConfig,
+		dlxName,
+		"direct",
+		dlqName,
+		true,
+		false,
+		dlqName,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	conn := &AMQPConnection{
+		queueName:    dlqName,
+		connection:   connection,
+		channel:      channel,
+		queue:        queue,
+		confirmation: confirmsChan,
+		errorchan:    errorChan,
+		cleanup:      make(chan struct{}),
+	}
+
+	b.connectionsMutex.Lock()
+	b.connections[connKey] = conn
+	b.connectionsMutex.Unlock()
+
+	go func() {
+		select {
+		case amqpErr := <-errorChan:
+			log.INFO.Printf("DLQ connection error for %s: %v. Cleaning up.", dlqName, amqpErr)
+			b.connectionsMutex.Lock()
+			delete(b.connections, connKey)
+			b.connectionsMutex.Unlock()
+		case <-conn.cleanup:
+			return
+		}
+	}()
+
+	return conn, nil
 }
 
 // GetPendingTasks retrieves pending tasks
@@ -601,6 +654,7 @@ func _getXDeathRetryCount(headers amqp.Table, queueName string) int {
 	if !ok {
 		return 0
 	}
+	maxCount := 0
 	for _, entry := range xDeathList {
 		entryMap, ok := entry.(amqp.Table)
 		if !ok {
@@ -613,15 +667,42 @@ func _getXDeathRetryCount(headers amqp.Table, queueName string) int {
 		reason, _ := entryMap["reason"].(string)
 		queue, _ := entryMap["queue"].(string)
 		if reason == "rejected" && queue == queueName {
-			switch c := entryMap["count"].(type) {
-			case int64:
-				return int(c)
-			case int32:
-				return int(c)
-			case float64:
-				return int(c)
+			c := _getInt2(entryMap["count"])
+			if c > maxCount {
+				maxCount = c
 			}
 		}
 	}
+	return maxCount
+}
+
+func _getInt2(v interface{}) int {
+	switch c := v.(type) {
+	case int:
+		return c
+	case int8:
+		return int(c)
+	case int16:
+		return int(c)
+	case int32:
+		return int(c)
+	case int64:
+		return int(c)
+	case uint:
+		return int(c)
+	case uint8:
+		return int(c)
+	case uint16:
+		return int(c)
+	case uint32:
+		return int(c)
+	case uint64:
+		return int(c)
+	case float32:
+		return int(c)
+	case float64:
+		return int(c)
+	}
+	log.ERROR.Printf("_getInt2: unknown numeric type %T value %v", v, v)
 	return 0
 }
