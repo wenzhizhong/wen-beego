@@ -107,6 +107,10 @@ func (server *Server) GetBroker() brokersiface.Broker {
 	return server.broker
 }
 
+func (server *Server) StartDLQConsuming(dlqQueue string, handler brokersiface.DLQHandler) error {
+	return server.broker.StartDLQConsuming(dlqQueue, handler)
+}
+
 // SetBroker sets broker
 func (server *Server) SetBroker(broker brokersiface.Broker) {
 	server.broker = broker

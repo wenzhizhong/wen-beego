@@ -7,6 +7,8 @@ import (
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
 )
 
+type DLQHandler func(signature *tasks.Signature) error
+
 // Broker - a common interface for all brokers
 type Broker interface {
 	GetConfig() *config.Config
@@ -18,6 +20,7 @@ type Broker interface {
 	GetPendingTasks(queue string) ([]*tasks.Signature, error)
 	GetDelayedTasks() ([]*tasks.Signature, error)
 	AdjustRoutingKey(s *tasks.Signature)
+	StartDLQConsuming(dlqQueue string, handler DLQHandler) error
 }
 
 // TaskProcessor - can process a delivered task

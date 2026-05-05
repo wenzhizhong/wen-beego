@@ -137,3 +137,7 @@ func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 
 	s.RoutingKey = b.GetConfig().DefaultQueue
 }
+
+func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) error {
+	return errors.New("DLQ consuming not supported for this broker")
+}

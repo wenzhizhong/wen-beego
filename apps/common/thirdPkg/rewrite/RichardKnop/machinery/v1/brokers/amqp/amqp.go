@@ -134,9 +134,7 @@ func (b *Broker) StopConsuming() {
 	b.processingWG.Wait()
 }
 
-type DLQHandler func(signature *tasks.Signature) error
-
-func (b *Broker) StartDLQConsuming(dlqQueue string, handler DLQHandler) error {
+func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) error {
 	conn, channel, queue, _, amqpCloseChan, err := b.Connect(
 		b.GetConfig().Broker,
 		b.GetConfig().MultipleBrokerSeparator,

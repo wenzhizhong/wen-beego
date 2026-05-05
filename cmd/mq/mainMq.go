@@ -5,7 +5,6 @@ import (
 	"WenBeego/apps/common/middleware/mq"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar"
-	amqpBroker "WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/amqp"
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
 	cmdCommon "WenBeego/cmd/common"
 	"WenBeego/routers"
@@ -48,13 +47,8 @@ func main() {
 
 	if len(os.Args) > 1 && os.Args[1] == "dlx" {
 		dlxQueue := DefaultQueue + ".dlx"
-		b, ok := mqServer.Server.GetBroker().(*amqpBroker.Broker)
-		if !ok {
-			fmt.Println("DLQ consumer only supports amqp broker")
-			return
-		}
 		fmt.Printf("DLX mode, consuming from: %s\n", dlxQueue)
-		if err := b.StartDLQConsuming(dlxQueue, func(sig *tasks.Signature) error {
+		if err := mqServer.Server.StartDLQConsuming(dlxQueue, func(sig *tasks.Signature) error {
 			cb := findCallback(taskDefs, sig.Name)
 			if cb == nil {
 				global.Log.Error("DLQ task not registered:", sig.Name)
