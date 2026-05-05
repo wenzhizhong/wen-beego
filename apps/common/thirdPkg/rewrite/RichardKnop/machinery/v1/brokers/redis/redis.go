@@ -346,7 +346,71 @@ func (b *Broker) consumeOne(delivery []byte, taskProcessor iface.TaskProcessor) 
 
 	log.DEBUG.Printf("Received new message: %s", delivery)
 
-	return taskProcessor.Process(signature)
+	if signature.Headers == nil {
+		signature.Headers = make(tasks.Headers)
+	}
+	if _, ok := signature.Headers["x-original-retry-count"]; !ok {
+		signature.Headers["x-original-retry-count"] = signature.RetryCount
+	}
+
+	err := taskProcessor.Process(signature)
+	if err != nil {
+		queue := getQueue(b.GetConfig(), taskProcessor)
+		if err == tasks.ErrTaskFailed {
+			dlqQueue := b.GetConfig().DefaultQueue + ".dlx"
+			if orig, ok := signature.Headers["x-original-retry-count"]; ok {
+				switch v := orig.(type) {
+				case int:
+					signature.RetryCount = v
+				case float64:
+					signature.RetryCount = int(v)
+				case json.Number:
+					n, _ := v.Int64()
+					signature.RetryCount = int(n)
+				}
+			}
+			if body, e := json.Marshal(signature); e == nil {
+				delivery = body
+			}
+			log.WARNING.Printf("DLQ PUSH %s -> %s RetryCount=%d", signature.UUID, dlqQueue, signature.RetryCount)
+			conn := b.open()
+			conn.Do("RPUSH", dlqQueue, delivery)
+			conn.Close()
+			return nil
+		}
+		if signature.RetryCount > 0 {
+			signature.RetryCount--
+			log.WARNING.Printf("RETRY %s count=%d", signature.UUID, signature.RetryCount)
+			if body, e := json.Marshal(signature); e == nil {
+				conn := b.open()
+				if signature.RetryCount > 0 {
+					conn.Do("RPUSH", queue, body)
+				} else {
+					dlqQueue := b.GetConfig().DefaultQueue + ".dlx"
+					if orig, ok := signature.Headers["x-original-retry-count"]; ok {
+						switch v := orig.(type) {
+						case int:
+							signature.RetryCount = v
+						case float64:
+							signature.RetryCount = int(v)
+						case json.Number:
+							n, _ := v.Int64()
+							signature.RetryCount = int(n)
+						}
+					}
+					if body2, e2 := json.Marshal(signature); e2 == nil {
+						body = body2
+					}
+					log.WARNING.Printf("DLQ PUSH (exhausted) %s -> %s RetryCount=%d", signature.UUID, dlqQueue, signature.RetryCount)
+					conn.Do("RPUSH", dlqQueue, body)
+				}
+				conn.Close()
+				time.Sleep(2 * time.Second)
+			}
+		}
+	}
+
+	return err
 }
 
 // nextTask pops next available task from the default queue
@@ -484,4 +548,43 @@ func (b *Broker) requeueMessage(delivery []byte, taskProcessor iface.TaskProcess
 	conn := b.open()
 	defer conn.Close()
 	conn.Do("RPUSH", getQueue(b.GetConfig(), taskProcessor), delivery)
+}
+
+func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) error {
+	conn := b.open()
+	defer conn.Close()
+
+	log.WARNING.Printf("[*] DLQ(redis) consuming from: %s", dlqQueue)
+
+	for {
+		select {
+		case <-b.GetStopChan():
+			return nil
+		default:
+			task, err := b.nextTask(dlqQueue)
+			if err != nil || len(task) == 0 {
+				continue
+			}
+			sig := new(tasks.Signature)
+			if err := json.Unmarshal(task, sig); err != nil {
+				log.ERROR.Printf("DLQ unmarshal error: %s", err)
+				continue
+			}
+			log.WARNING.Printf("DLQ RECEIVED %s RetryCount=%d", sig.UUID, sig.RetryCount)
+			if err := handler(sig); err != nil {
+				if sig.RetryCount > 0 {
+					log.WARNING.Printf("DLQ RETRY %s count=%d", sig.UUID, sig.RetryCount)
+					sig.RetryCount--
+					if body, e := json.Marshal(sig); e == nil {
+						conn.Do("RPUSH", dlqQueue, body)
+						time.Sleep(2 * time.Second)
+					}
+				} else {
+					log.WARNING.Printf("DLQ EXHAUSTED %s", sig.UUID)
+				}
+			} else {
+				log.WARNING.Printf("DLQ SUCCESS %s", sig.UUID)
+			}
+		}
+	}
 }

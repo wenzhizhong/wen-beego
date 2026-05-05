@@ -308,21 +308,80 @@ func (b *BrokerGR) consumeOne(delivery []byte, taskProcessor iface.TaskProcessor
 		return errs.NewErrCouldNotUnmarshalTaskSignature(delivery, err)
 	}
 
-	// If the task is not registered, we requeue it,
-	// there might be different workers for processing specific tasks
 	if !b.IsTaskRegistered(signature.Name) {
 		if signature.IgnoreWhenTaskNotRegistered {
 			return nil
 		}
 		log.INFO.Printf("Task not registered with this worker. Requeuing message: %s", delivery)
-
 		b.rclient.RPush(context.Background(), getQueueGR(b.GetConfig(), taskProcessor), delivery)
 		return nil
 	}
 
 	log.DEBUG.Printf("Received new message: %s", delivery)
 
-	return taskProcessor.Process(signature)
+	log.DEBUG.Printf("Received new message: %s", delivery)
+
+	if signature.Headers == nil {
+		signature.Headers = make(tasks.Headers)
+	}
+	if _, ok := signature.Headers["x-original-retry-count"]; !ok {
+		signature.Headers["x-original-retry-count"] = signature.RetryCount
+	}
+
+	err := taskProcessor.Process(signature)
+	if err != nil {
+		queue := getQueueGR(b.GetConfig(), taskProcessor)
+		if err == tasks.ErrTaskFailed {
+			dlqQueue := b.GetConfig().DefaultQueue + ".dlx"
+			if orig, ok := signature.Headers["x-original-retry-count"]; ok {
+				switch v := orig.(type) {
+				case int:
+					signature.RetryCount = v
+				case float64:
+					signature.RetryCount = int(v)
+				case json.Number:
+					n, _ := v.Int64()
+					signature.RetryCount = int(n)
+				}
+			}
+			if body, e := json.Marshal(signature); e == nil {
+				delivery = body
+			}
+			log.WARNING.Printf("DLQ PUSH %s -> %s RetryCount=%d", signature.UUID, dlqQueue, signature.RetryCount)
+			b.rclient.RPush(context.Background(), dlqQueue, delivery)
+			return nil
+		}
+		if signature.RetryCount > 0 {
+			signature.RetryCount--
+			log.WARNING.Printf("RETRY %s count=%d", signature.UUID, signature.RetryCount)
+			if body, e := json.Marshal(signature); e == nil {
+				if signature.RetryCount > 0 {
+					b.rclient.RPush(context.Background(), queue, string(body))
+				} else {
+					dlqQueue := b.GetConfig().DefaultQueue + ".dlx"
+					if orig, ok := signature.Headers["x-original-retry-count"]; ok {
+						switch v := orig.(type) {
+						case int:
+							signature.RetryCount = v
+						case float64:
+							signature.RetryCount = int(v)
+						case json.Number:
+							n, _ := v.Int64()
+							signature.RetryCount = int(n)
+						}
+					}
+					if body2, e2 := json.Marshal(signature); e2 == nil {
+						body = []byte(body2)
+					}
+					log.WARNING.Printf("DLQ PUSH (exhausted) %s -> %s RetryCount=%d", signature.UUID, dlqQueue, signature.RetryCount)
+					b.rclient.RPush(context.Background(), dlqQueue, string(body))
+				}
+				time.Sleep(2 * time.Second)
+			}
+		}
+	}
+
+	return err
 }
 
 // nextTask pops next available task from the default queue
@@ -427,4 +486,41 @@ func getQueueGR(config *config.Config, taskProcessor iface.TaskProcessor) string
 		return config.DefaultQueue
 	}
 	return customQueue
+}
+
+func (b *BrokerGR) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) error {
+	pollPeriod := time.Duration(1000) * time.Millisecond
+	log.WARNING.Printf("[*] DLQ(redis) consuming from: %s", dlqQueue)
+
+	for {
+		select {
+		case <-b.GetStopChan():
+			return nil
+		default:
+			items, err := b.rclient.BLPop(context.Background(), pollPeriod, dlqQueue).Result()
+			if err != nil || len(items) != 2 {
+				continue
+			}
+			sig := new(tasks.Signature)
+			if err := json.Unmarshal([]byte(items[1]), sig); err != nil {
+				log.ERROR.Printf("DLQ unmarshal error: %s", err)
+				continue
+			}
+			log.WARNING.Printf("DLQ RECEIVED %s RetryCount=%d", sig.UUID, sig.RetryCount)
+			if err := handler(sig); err != nil {
+				if sig.RetryCount > 0 {
+					log.WARNING.Printf("DLQ RETRY %s count=%d", sig.UUID, sig.RetryCount)
+					sig.RetryCount--
+					if body, e := json.Marshal(sig); e == nil {
+						b.rclient.RPush(context.Background(), dlqQueue, string(body))
+						time.Sleep(2 * time.Second)
+					}
+				} else {
+					log.WARNING.Printf("DLQ EXHAUSTED %s", sig.UUID)
+				}
+			} else {
+				log.WARNING.Printf("DLQ SUCCESS %s", sig.UUID)
+			}
+		}
+	}
 }

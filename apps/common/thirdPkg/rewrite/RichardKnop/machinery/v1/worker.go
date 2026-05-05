@@ -398,7 +398,7 @@ func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) erro
 		return errs.ErrStopTaskDeletion
 	}
 
-	return nil
+	return tasks.ErrTaskFailed
 }
 
 // Returns true if the worker uses AMQP backend

@@ -30,3 +30,6 @@ func NewErrRetryTaskLater(msg string, retryIn time.Duration) ErrRetryTaskLater {
 type Retriable interface {
 	RetryIn() time.Duration
 }
+
+// ErrTaskFailed is returned when task permanently fails (retries exhausted)
+var ErrTaskFailed = fmt.Errorf("task permanently failed")

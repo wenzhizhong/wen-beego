@@ -61,7 +61,6 @@ func main() {
 			err := reflectCallback(cb, args)
 			if err != nil {
 				global.Log.Error("DLQ task failed:", sig.UUID, sig.Name, err)
-				fmt.Printf("sig.RetryCount=%d\n", sig.RetryCount)
 				if sig.RetryCount <= 0 {
 					saveDLXFailedMsg(sig, err)
 				}

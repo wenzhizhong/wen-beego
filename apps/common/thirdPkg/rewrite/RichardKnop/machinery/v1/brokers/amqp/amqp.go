@@ -477,6 +477,14 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 	err := taskProcessor.Process(signature)
 	if ack {
 		if err != nil {
+			if err == tasks.ErrTaskFailed {
+				log.WARNING.Printf("Task exhausted %s, moving to DLQ", signature.UUID)
+				if e := b.PublishToDLQ(context.Background(), signature); e != nil {
+					log.ERROR.Printf("PublishToDLQ error: %v", e)
+				}
+				delivery.Ack(false)
+				return nil
+			}
 			// 任务失败 -> 进入【死信队列】
 			log.ERROR.Printf("Task failed: %v", err)
 			delivery.Nack(false, false) // 不重入队，进入死信
