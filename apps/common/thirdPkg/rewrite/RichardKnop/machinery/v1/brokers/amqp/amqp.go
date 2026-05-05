@@ -134,6 +134,63 @@ func (b *Broker) StopConsuming() {
 	b.processingWG.Wait()
 }
 
+type DLQHandler func(signature *tasks.Signature) error
+
+func (b *Broker) StartDLQConsuming(dlqQueue string, handler DLQHandler) error {
+	conn, channel, queue, _, amqpCloseChan, err := b.Connect(
+		b.GetConfig().Broker,
+		b.GetConfig().MultipleBrokerSeparator,
+		b.GetConfig().TLSConfig,
+		b.GetConfig().AMQP.Exchange,
+		b.GetConfig().AMQP.ExchangeType,
+		dlqQueue,
+		true,
+		false,
+		dlqQueue,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("DLQ connect error: %s", err)
+	}
+	defer b.Close(channel, conn)
+
+	if err = channel.Qos(1, 0, false); err != nil {
+		return fmt.Errorf("DLQ Qos error: %s", err)
+	}
+
+	deliveries, err := channel.Consume(
+		queue.Name, "dlq_consumer", false, false, false, false, nil,
+	)
+	if err != nil {
+		return fmt.Errorf("DLQ consume error: %s", err)
+	}
+
+	log.INFO.Printf("[*] DLQ consuming from: %s", queue.Name)
+
+	for {
+		select {
+		case amqpErr := <-amqpCloseChan:
+			return amqpErr
+		case d, ok := <-deliveries:
+			if !ok {
+				return nil
+			}
+			sig := new(tasks.Signature)
+			if err := json.Unmarshal(d.Body, sig); err != nil {
+				log.ERROR.Printf("DLQ unmarshal error: %s", err)
+				d.Nack(false, true)
+				continue
+			}
+			_ = handler(sig)
+			d.Ack(false)
+		case <-b.GetStopChan():
+			return nil
+		}
+	}
+}
+
 // GetOrOpenConnection returns a connection for a queue
 // ... existing code ...
 func (b *Broker) GetOrOpenConnection(queueName string, queueBindingKey string, exchangeDeclareArgs, queueDeclareArgs, queueBindingArgs amqp.Table) (*AMQPConnection, error) {

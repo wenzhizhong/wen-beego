@@ -3,47 +3,83 @@ package main
 import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/middleware/mq"
+	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models_ar"
+	amqpBroker "WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/amqp"
+	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
 	cmdCommon "WenBeego/cmd/common"
 	"WenBeego/routers"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"runtime"
 	"strings"
+	"time"
 
 	_ "github.com/beego/beego/v2/core/config/yaml"
-	// beego "github.com/beego/beego/v2/server/web"
 )
 
 func main() {
-	// 注册自己资源服务
 	cmdCommon.RunBefore()
 	cmdCommon.InitCommonSource("pathMq")
 	cmdCommon.InitMqClient()
 
-	tasks := routers.GetMqTasks()
-	if len(tasks) == 0 {
+	taskDefs := routers.GetMqTasks()
+	if len(taskDefs) == 0 {
 		fmt.Println("No mq task……")
 		return
 	}
 
-	// 启动mq服务
 	mqServer, err := (&mq.MqServer{}).NewMq()
 	if err != nil {
 		global.Log.Error("MqServer.NewMq() error:", err)
 		panic(err)
 	}
-	// 注册任务
-	for _, task := range tasks {
+	for _, task := range taskDefs {
 		mqServer.RegisterTask(task.Name, func(args ...interface{}) error {
 			return reflectCallback(task.CallBack, args)
 		})
 	}
 
 	fmt.Println("Mq starting")
-	// 启动Worker"服务"
-	// worker := mqServer.Server.NewWorker("worker_1", 10)
 	DefaultQueue := mqServer.Server.GetConfig().DefaultQueue
+
+	if len(os.Args) > 1 && os.Args[1] == "dlx" {
+		dlxQueue := DefaultQueue + ".dlx"
+		b, ok := mqServer.Server.GetBroker().(*amqpBroker.Broker)
+		if !ok {
+			fmt.Println("DLQ consumer only supports amqp broker")
+			return
+		}
+		fmt.Printf("DLX mode, consuming from: %s\n", dlxQueue)
+		if err := b.StartDLQConsuming(dlxQueue, func(sig *tasks.Signature) error {
+			cb := findCallback(taskDefs, sig.Name)
+			if cb == nil {
+				global.Log.Error("DLQ task not registered:", sig.Name)
+				return nil
+			}
+			args := make([]interface{}, len(sig.Args))
+			for i, a := range sig.Args {
+				args[i] = a.Value
+			}
+			err := reflectCallback(cb, args)
+			if err != nil {
+				global.Log.Error("DLQ task failed:", sig.UUID, sig.Name, err)
+				saveDLXFailedMsg(sig, err)
+			} else {
+				global.Log.Info("DLQ task processed:", sig.UUID, sig.Name)
+			}
+			return err
+		}); err != nil {
+			global.Log.Error("StartDLQConsuming error:", err)
+			panic(err)
+		}
+		fmt.Println("DLX consumer stopped")
+		return
+	}
+
 	worker := mqServer.Server.NewCustomQueueWorker("worker_"+DefaultQueue, 10, DefaultQueue)
 	if err := worker.Launch(); err != nil {
 		global.Log.Error("MqServer.Launch() error:", err)
@@ -52,65 +88,68 @@ func main() {
 	fmt.Println("Mq stoped!")
 }
 
-/**
- * 反射获取回调函数
- * @param f 订阅回调函数
- * @param args 参数
- * @return callbackValue 获取反射回调函数
- * @return paramTypes 参数类型
- * @return callbackToString 方法名（包含路径）
- */
+func saveDLXFailedMsg(sig *tasks.Signature, taskErr error) {
+	record := &models.QueueDlxFailedLog{
+		TaskUUID:   sig.UUID,
+		TaskName:   sig.Name,
+		ErrorMsg:   taskErr.Error(),
+		CreateTime: time.Now(),
+	}
+	if argsJSON, err := json.Marshal(sig.Args); err == nil {
+		record.TaskArgs = string(argsJSON)
+	}
+	ar := &models_ar.QueueDlxFailedLogAR{}
+	if err := ar.Insert(record); err != nil {
+		global.Log.Error("saveDLXFailedMsg db error:", err)
+	}
+}
+
+func findCallback(taskDefs []routers.MqTasks, name string) interface{} {
+	for _, t := range taskDefs {
+		if t.Name == name {
+			return t.CallBack
+		}
+	}
+	return nil
+}
+
 func reflectCallback(f interface{}, args interface{}) error {
 	callbackValue := reflect.ValueOf(f)
-	// 检查是否是函数类型
 	if callbackValue.Kind() != reflect.Func {
-		err := errors.New("callback is not a function")
-		return err
+		return errors.New("callback is not a function")
 	}
 	funcObj := runtime.FuncForPC(callbackValue.Pointer())
 	if funcObj == nil {
-		err := errors.New("cannot find the method")
-		return err
+		return errors.New("cannot find the method")
 	}
 
-	// 获取方法的类型信息
 	callbackToString := funcObj.Name()
 	methodType := callbackValue.Type()
 	funcNameSli := strings.Split(callbackToString, ".")
 	lFuncSli := len(funcNameSli)
 	if lFuncSli == 0 {
-		err := errors.New("invalid method full name: " + callbackToString)
-		return err
+		return errors.New("invalid method full name: " + callbackToString)
 	}
 
 	method := funcNameSli[lFuncSli-1]
 	if len(method) == 0 {
-		err := errors.New("method name is empty")
-		return err
+		return errors.New("method name is empty")
 	} else if method[0] > 96 || method[0] < 65 {
-		err := fmt.Errorf("%s is not a public method", method)
-		return err
+		return fmt.Errorf("%s is not a public method", method)
 	}
-	// check only one param which is the method receiver
 	if numIn := methodType.NumIn(); numIn < 2 {
-		err := errors.New("invalid number of param in, more than one param is allowed")
-		return err
+		return errors.New("invalid number of param in, more than one param is allowed")
 	}
 
-	// 方法的第一个参数是接收者类型（例如 *controllers.ActionXxx）
 	controllerType := methodType.In(0)
 	var receiver reflect.Value
-	// 动态创建接收者实例
 	if controllerType.Kind() == reflect.Ptr {
-		// 如果接收者是指针类型（如 *controllers.ActionXxx），创建新实例并获取指针
-		elemType := controllerType.Elem() // 获取指针指向的元素类型，即 controllers.ActionXxx
-		receiver = reflect.New(elemType)  // 创建该元素类型的新实例，并返回其指针的reflect.Value
+		elemType := controllerType.Elem()
+		receiver = reflect.New(elemType)
 	} else {
-		// 如果接收者是值类型，创建值的实例
 		receiver = reflect.New(controllerType).Elem()
 	}
 
-	// 准备调用参数：第一个是接收者，后面是方法本身的参数
 	in := make([]reflect.Value, 1)
 	in[0] = receiver
 	if args != nil {
@@ -118,11 +157,10 @@ func reflectCallback(f interface{}, args interface{}) error {
 		if !ok {
 			return errors.New("args is not a slice of interface{}")
 		}
-
 		if len(argsSlice) != methodType.NumIn()-1 {
-			return fmt.Errorf("%s 参数数量不匹配，期望 %d，实际 %d", callbackToString, methodType.NumIn()-1, len(argsSlice))
+			return fmt.Errorf("%s param count mismatch, expected %d got %d",
+				callbackToString, methodType.NumIn()-1, len(argsSlice))
 		}
-
 		for _, arg := range argsSlice {
 			in = append(in, reflect.ValueOf(arg))
 		}
@@ -131,7 +169,7 @@ func reflectCallback(f interface{}, args interface{}) error {
 	res := callbackValue.Call(in)
 	if len(res) > 0 {
 		if err, ok := res[0].Interface().(error); ok {
-			fmt.Println("mq exec error, callback: ", err)
+			fmt.Println("mq exec error, callback:", err)
 			return err
 		}
 	}

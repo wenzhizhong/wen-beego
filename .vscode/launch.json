@@ -51,6 +51,21 @@
         // "-vendor=true",
         // "-runmode=dev"
       ]
+    },
+    {
+      "name": "Debug MQ.dlq",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/mq",
+      "env": {
+        // "BEEGO_RUNMODE": "dev"
+      },
+      "args": [
+        // "-vendor=true",
+        // "-runmode=dev"
+        "dlx"
+      ]
     }
   ]
 }
