@@ -165,7 +165,7 @@ func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) er
 		return fmt.Errorf("DLQ consume error: %s", err)
 	}
 
-	log.INFO.Printf("[*] DLQ consuming from: %s", queue.Name)
+	log.WARNING.Printf("[*] DLQ consuming from: %s", queue.Name)
 
 	for {
 		select {
@@ -181,8 +181,22 @@ func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) er
 				d.Nack(false, true)
 				continue
 			}
-			_ = handler(sig)
-			d.Ack(false)
+			log.WARNING.Printf("DLQ RECEIVED %s RetryCount=%d", sig.UUID, sig.RetryCount)
+			if err := handler(sig); err != nil {
+				if sig.RetryCount > 0 {
+					log.WARNING.Printf("DLQ RETRY %s count=%d", sig.UUID, sig.RetryCount)
+					sig.RetryCount--
+					if e := b.PublishToDLQ(context.Background(), sig); e != nil {
+						log.ERROR.Printf("DLQ republish error: %v", e)
+					}
+				} else {
+					log.WARNING.Printf("DLQ EXHAUSTED %s", sig.UUID)
+				}
+				d.Ack(false)
+			} else {
+				log.WARNING.Printf("DLQ SUCCESS %s", sig.UUID)
+				d.Ack(false)
+			}
 		case <-b.GetStopChan():
 			return nil
 		}
@@ -425,6 +439,16 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 		signature.Headers = tasks.Headers(delivery.Headers)
 	}
 
+	// 在delivery层面读取x-death count（可靠），存入signature供Process使用
+	if signature.RetryCount > 0 {
+		if c := _getXDeathRetryCount(delivery.Headers, b.GetConfig().DefaultQueue); c > 0 {
+			if signature.Headers == nil {
+				signature.Headers = make(tasks.Headers)
+			}
+			signature.Headers["x-retry-rejected-count"] = c
+		}
+	}
+
 	// 兜底保护：若重试次数已超过配置上限，发布到DLQ后Ack
 	if signature.RetryCount > 0 {
 		queueName := b.GetConfig().DefaultQueue
@@ -435,8 +459,6 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 			}
 			delivery.Ack(false)
 			return nil
-		} else {
-			log.DEBUG.Printf("Task %s retry safety check: attempts=%d limit=%d, passing through", signature.UUID, retryAttempts, signature.RetryCount)
 		}
 	}
 
@@ -562,6 +584,16 @@ func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) e
 		return fmt.Errorf("JSON marshal error: %s", err)
 	}
 
+	publishHeaders := amqp.Table{}
+	for k, v := range signature.Headers {
+		if k == "x-death" || k == "x-first-death-exchange" || k == "x-first-death-queue" ||
+			k == "x-first-death-reason" || k == "x-last-death-exchange" || k == "x-last-death-queue" ||
+			k == "x-last-death-reason" {
+			continue
+		}
+		publishHeaders[k] = v
+	}
+
 	conn, err := b.getOrOpenDLQConn(dlqName, dlxName)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to get DLQ connection for %s", dlqName)
@@ -573,7 +605,7 @@ func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) e
 		false,
 		false,
 		amqp.Publishing{
-			Headers:      amqp.Table(signature.Headers),
+			Headers:      publishHeaders,
 			ContentType:  "application/json",
 			Body:         msg,
 			DeliveryMode: amqp.Persistent,

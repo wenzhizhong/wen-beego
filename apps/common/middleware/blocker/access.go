@@ -26,7 +26,7 @@ var (
 	cacheApiStatistics = make([]interface{}, 0)
 	cacheMutex         = sync.Mutex{}
 	maxBatchSize       = 500
-	flushCacheInterval = 60 * time.Second
+	flushCacheInterval = 1 * time.Second
 )
 
 func init() {

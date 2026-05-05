@@ -61,11 +61,14 @@ func main() {
 			err := reflectCallback(cb, args)
 			if err != nil {
 				global.Log.Error("DLQ task failed:", sig.UUID, sig.Name, err)
-				saveDLXFailedMsg(sig, err)
-			} else {
-				global.Log.Info("DLQ task processed:", sig.UUID, sig.Name)
+				fmt.Printf("sig.RetryCount=%d\n", sig.RetryCount)
+				if sig.RetryCount <= 0 {
+					saveDLXFailedMsg(sig, err)
+				}
+				return err
 			}
-			return err
+			global.Log.Info("DLQ task processed:", sig.UUID, sig.Name)
+			return nil
 		}); err != nil {
 			global.Log.Error("StartDLQConsuming error:", err)
 			panic(err)

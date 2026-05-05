@@ -450,6 +450,16 @@ func RedactURL(urlString string) string {
 }
 
 func getXDeathRetryCount(headers tasks.Headers, queueName string) int {
+	if headers != nil {
+		if c, ok := headers["x-retry-rejected-count"]; ok {
+			return _getInt(c)
+		}
+		return _getXDeathRetryCountRaw(headers, queueName)
+	}
+	return 0
+}
+
+func _getXDeathRetryCountRaw(headers tasks.Headers, queueName string) int {
 	if headers == nil || queueName == "" {
 		return 0
 	}
