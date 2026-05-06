@@ -17,6 +17,7 @@ wen-beego 框架是基于 beego 的 web 开发框架，包含平台端（`apps/a
 ### 运行服务
 - **HTTP 服务**：`go run cmd/http/main.go`
 - **MQ 服务**：`go run cmd/mq/main.go`
+- **MQ 死信队列服务**：`go run cmd/mq/main.go dlx`
 
 ### 测试登录接口
 开发环境验证码固定为 `1234`，`authCodeId` 可任意填写。
@@ -225,9 +226,11 @@ func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.Re
 测试文件位于 `tests/xxx_test.go`，调用 Service 层方法验证。
 > ✅ **检查点**：每个步骤完成后，确认文件路径、包名、导入路径正确。
 
-### 步骤 8：接口文档
-执行命令`swag init -g cmd/http/main.go  --output apps/swagger `生成文档
-
+### 步骤 8：结束
+- 提示用户执行命令`swag init -g cmd/http/main.go  --output apps/swagger `生成文档
+- 提示用户执行命令`go mod tidy`更新依赖包
+- 提示用户执行命令`go build -o app`编译项目
+- 提示用户，添加权限菜单
 
 
 ## 框架全局变量与工具
