@@ -462,6 +462,12 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 	if ack {
 		if err != nil {
 			if err == tasks.ErrTaskFailed {
+				if c := _getXDeathRetryCount(delivery.Headers, b.GetConfig().DefaultQueue); c > 0 {
+					if signature.Headers == nil {
+						signature.Headers = make(tasks.Headers)
+					}
+					signature.Headers["x-retry-attempts"] = c
+				}
 				log.WARNING.Printf("Task exhausted %s, moving to DLQ", signature.UUID)
 				if e := b.PublishToDLQ(context.Background(), signature); e != nil {
 					log.ERROR.Printf("PublishToDLQ error: %v", e)

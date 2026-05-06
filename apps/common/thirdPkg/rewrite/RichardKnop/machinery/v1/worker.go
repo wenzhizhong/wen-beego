@@ -2,12 +2,10 @@ package machinery
 
 import (
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/backends/amqp"
-	amqpBroker "WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/amqp"
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/brokers/errs"
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/log"
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tracing"
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -375,23 +373,6 @@ func (worker *Worker) taskFailed(signature *tasks.Signature, taskErr error) erro
 		}}, errorTask.Args...)
 		errorTask.Args = args
 		worker.server.SendTask(errorTask)
-	}
-
-	// 发布到死信队列
-	if amqpBrokerInst, ok := worker.server.GetBroker().(*amqpBroker.Broker); ok {
-		retryAttempts := getXDeathRetryCount(signature.Headers, worker.Queue)
-		if worker.Queue == "" {
-			retryAttempts = getXDeathRetryCount(signature.Headers, worker.server.GetConfig().DefaultQueue)
-		}
-		if signature.Headers == nil {
-			signature.Headers = make(tasks.Headers)
-		}
-		signature.Headers["x-retry-attempts"] = retryAttempts
-		if err := amqpBrokerInst.PublishToDLQ(context.Background(), signature); err != nil {
-			log.ERROR.Printf("Failed to publish task %s to DLQ: %v, acking to prevent loop", signature.UUID, err)
-		} else {
-			log.INFO.Printf("Task %s moved to DLQ after %d retries", signature.UUID, retryAttempts)
-		}
 	}
 
 	if signature.StopTaskDeletionOnError {
