@@ -181,6 +181,9 @@ func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) er
 				d.Nack(false, true)
 				continue
 			}
+			if d.Headers != nil {
+				sig.Headers = tasks.Headers(d.Headers)
+			}
 			log.WARNING.Printf("DLQ RECEIVED %s RetryCount=%d", sig.UUID, sig.RetryCount)
 			if err := handler(sig); err != nil {
 				if sig.RetryCount > 0 {
@@ -189,6 +192,7 @@ func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) er
 					if e := b.PublishToDLQ(context.Background(), sig); e != nil {
 						log.ERROR.Printf("DLQ republish error: %v", e)
 					}
+					time.Sleep(2 * time.Second)
 				} else {
 					log.WARNING.Printf("DLQ EXHAUSTED %s", sig.UUID)
 				}
@@ -437,28 +441,8 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 
 	if delivery.Headers != nil {
 		signature.Headers = tasks.Headers(delivery.Headers)
-	}
-
-	// 在delivery层面读取x-death count（可靠），存入signature供Process使用
-	if signature.RetryCount > 0 {
 		if c := _getXDeathRetryCount(delivery.Headers, b.GetConfig().DefaultQueue); c > 0 {
-			if signature.Headers == nil {
-				signature.Headers = make(tasks.Headers)
-			}
 			signature.Headers["x-retry-rejected-count"] = c
-		}
-	}
-
-	// 兜底保护：若重试次数已超过配置上限，发布到DLQ后Ack
-	if signature.RetryCount > 0 {
-		queueName := b.GetConfig().DefaultQueue
-		if retryAttempts := _getXDeathRetryCount(delivery.Headers, queueName); retryAttempts > signature.RetryCount {
-			log.WARNING.Printf("Task %s exceeded retry limit (%d > %d), moving to DLQ", signature.UUID, retryAttempts, signature.RetryCount)
-			if err := b.PublishToDLQ(context.Background(), signature); err != nil {
-				log.ERROR.Printf("Failed to publish %s to DLQ in safety net: %v", signature.UUID, err)
-			}
-			delivery.Ack(false)
-			return nil
 		}
 	}
 
@@ -594,9 +578,7 @@ func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) e
 
 	publishHeaders := amqp.Table{}
 	for k, v := range signature.Headers {
-		if k == "x-death" || k == "x-first-death-exchange" || k == "x-first-death-queue" ||
-			k == "x-first-death-reason" || k == "x-last-death-exchange" || k == "x-last-death-queue" ||
-			k == "x-last-death-reason" {
+		if k == "x-death" {
 			continue
 		}
 		publishHeaders[k] = v
