@@ -46,7 +46,7 @@ func main() {
 	DefaultQueue := mqServer.Server.GetConfig().DefaultQueue
 
 	if len(os.Args) > 1 && os.Args[1] == "dlx" {
-		dlxQueue := DefaultQueue + ".dlx"
+		dlxQueue := DefaultQueue + ".dlq"
 		fmt.Printf("DLX mode, consuming from: %s\n", dlxQueue)
 		if err := mqServer.Server.StartDLQConsuming(dlxQueue, func(sig *tasks.Signature) error {
 			cb := findCallback(taskDefs, sig.Name)

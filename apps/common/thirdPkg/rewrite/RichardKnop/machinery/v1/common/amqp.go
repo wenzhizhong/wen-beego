@@ -63,20 +63,20 @@ func (ac *AMQPConnector) Connect(urls string, urlSeparator string, tlsConfig *tl
 				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLX [%s]: %s", dlxName, err)
 			}
 
-		// 2. 声明死信队列（最终目的地，绑定独立key，仅由taskFailed显式发布）
-		dlqFinalName := queueName + ".dlx"
-		_, err = channel.QueueDeclare(
-			dlqFinalName, true, false, false, false, nil,
-		)
-		if err != nil {
-			return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLQ [%s]: %s", dlqFinalName, err)
-		}
-		err = channel.QueueBind(
-			dlqFinalName, dlqFinalName, dlxName, false, nil,
-		)
-		if err != nil {
-			return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Bind DLQ [%s] to DLX [%s]: %s", dlqFinalName, dlxName, err)
-		}
+			// 2. 声明死信队列（最终目的地，绑定独立key，仅由taskFailed显式发布）
+			dlqFinalName := queueName + ".dlq"
+			_, err = channel.QueueDeclare(
+				dlqFinalName, true, false, false, false, nil,
+			)
+			if err != nil {
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Declare DLQ [%s]: %s", dlqFinalName, err)
+			}
+			err = channel.QueueBind(
+				dlqFinalName, dlqFinalName, dlxName, false, nil,
+			)
+			if err != nil {
+				return nil, nil, amqp.Queue{}, nil, nil, fmt.Errorf("Bind DLQ [%s] to DLX [%s]: %s", dlqFinalName, dlxName, err)
+			}
 
 			// 3. 声明重试队列（带TTL，过期后回到主交换机）
 			retryQueueName := queueName + ".retry"

@@ -192,7 +192,7 @@ func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) er
 					if e := b.PublishToDLQ(context.Background(), sig); e != nil {
 						log.ERROR.Printf("DLQ republish error: %v", e)
 					}
-					time.Sleep(2 * time.Second)
+					time.Sleep(1 * time.Second)
 				} else {
 					log.WARNING.Printf("DLQ EXHAUSTED %s", sig.UUID)
 				}
@@ -571,7 +571,7 @@ func (b *Broker) AdjustRoutingKey(s *tasks.Signature) {
 }
 
 func (b *Broker) PublishToDLQ(ctx context.Context, signature *tasks.Signature) error {
-	dlqName := b.GetConfig().DefaultQueue + ".dlx"
+	dlqName := b.GetConfig().DefaultQueue + ".dlq"
 	dlxName := b.GetConfig().AMQP.DeadLetterExchange
 	if dlxName == "" {
 		return fmt.Errorf("DeadLetterExchange not configured")

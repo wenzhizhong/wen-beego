@@ -40,7 +40,7 @@ func (mq *MqServer) NewMq() (*MqServer, error) {
 		err = helper.Ternary(err != nil, err, err2)
 		return mq, err
 	}
-	cnf2.DefaultQueue = cnf2.DefaultQueue + ".dlx"
+	cnf2.DefaultQueue = cnf2.DefaultQueue + ".dlq"
 
 	server, err := machinery.NewServer(cnf)
 	serverDlx, err1 := machinery.NewServer(cnf2)
@@ -120,7 +120,7 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		exchangeDlx := tmpRabitMqConfig["exchangeDlx"].(string)
 		exchangeType := tmpRabitMqConfig["exchangeType"].(string)
 		bindingKey := defaultQueue // tmpRabitMqConfig["bindingKey"].(string)
-		bindingKeyDlx := bindingKey + ".dlx"
+		bindingKeyDlx := bindingKey + ".dlq"
 
 		brokerURL = fmt.Sprintf("amqp://%s:%s@%s:%d/",
 			user,

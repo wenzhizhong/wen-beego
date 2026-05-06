@@ -357,7 +357,7 @@ func (b *Broker) consumeOne(delivery []byte, taskProcessor iface.TaskProcessor) 
 	if err != nil {
 		queue := getQueue(b.GetConfig(), taskProcessor)
 		if err == tasks.ErrTaskFailed {
-			dlqQueue := b.GetConfig().DefaultQueue + ".dlx"
+			dlqQueue := b.GetConfig().DefaultQueue + ".dlq"
 			if orig, ok := signature.Headers["x-original-retry-count"]; ok {
 				switch v := orig.(type) {
 				case int:
@@ -386,7 +386,7 @@ func (b *Broker) consumeOne(delivery []byte, taskProcessor iface.TaskProcessor) 
 				if signature.RetryCount > 0 {
 					conn.Do("RPUSH", queue, body)
 				} else {
-					dlqQueue := b.GetConfig().DefaultQueue + ".dlx"
+					dlqQueue := b.GetConfig().DefaultQueue + ".dlq"
 					if orig, ok := signature.Headers["x-original-retry-count"]; ok {
 						switch v := orig.(type) {
 						case int:
@@ -405,8 +405,9 @@ func (b *Broker) consumeOne(delivery []byte, taskProcessor iface.TaskProcessor) 
 					conn.Do("RPUSH", dlqQueue, body)
 				}
 				conn.Close()
-				time.Sleep(2 * time.Second)
+				time.Sleep(1 * time.Second)
 			}
+			return nil
 		}
 	}
 
@@ -577,7 +578,7 @@ func (b *Broker) StartDLQConsuming(dlqQueue string, handler iface.DLQHandler) er
 					sig.RetryCount--
 					if body, e := json.Marshal(sig); e == nil {
 						conn.Do("RPUSH", dlqQueue, body)
-						time.Sleep(2 * time.Second)
+						time.Sleep(1 * time.Second)
 					}
 				} else {
 					log.WARNING.Printf("DLQ EXHAUSTED %s", sig.UUID)
