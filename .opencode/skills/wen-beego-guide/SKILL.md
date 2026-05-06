@@ -233,6 +233,46 @@ func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.Re
 - 提示用户，添加权限菜单
 
 
+
+
+## 新增MQ任务流程
+### 1. 创建任务名称：
+    在`apps\common\global\constant\mq.go`，添加任务名称为常量`MQ_XXXXXX`
+### 2. 调用生产者：
+    ```go
+    args := []tasks.Arg{{Name: "action", Type: "string", Value: dataStr}}
+    result, err := (&MqClient{}).SendTask(constant.MQ_XXXXXX, args)
+    ```
+### 4. 创建消费者：
+    `apps\mq_task`目录结构是mvc类型，在`apps\mq_task\controllers`目录下创建消费者文件，并实现`ActionXXXXXX`方法，返回`error`类型。    
+
+### 3. 添加消费者路由（方便统一管理）：
+    在`routers\mq_task_router.go` GetMqTasks()函数内，添加路由切片。
+    ```
+    import "WenBeego/apps/mq_task/controllers"
+    TasksList = append(TasksList, MqTasks{Name: string(constant.MQ_XXXXXX), CallBack: (*controllers.XXXXXX).ActionXXXXXX})
+    ```
+
+
+
+## 新增crontab任务流程
+### 1. 创建任务名称：
+    在`apps\common\global\constant\crontab.go`，添加任务名称为常量`CRON_XXXXXX`
+### 2. 创建任务：
+    `apps\cron_task`目录结构是mvc类型，在`apps\cron_task\controllers`目录下创建任务文件，并实现`ActionXXXXXX`方法。
+### 3. 添加任务路由（方便统一管理）：
+    在`routers\crontab_task\router.go` GetCronTasks()函数内，添加路由切片。
+    ```go
+    TasksList = append(TasksList, CronTasks{
+		Name:     string(constant.CRON_XXXXXX),
+		NameText: "生日提醒",
+		CallBack: func() {
+			(&controllers.XXX{}).ActionXXXXXX()
+		},
+	})
+    ```
+
+
 ## 框架全局变量与工具
 全局变量集中在 `apps/common/global`，可按需导入。
 
