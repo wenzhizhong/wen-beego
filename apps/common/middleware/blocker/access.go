@@ -136,7 +136,7 @@ func mqSendTask(data interface{}) {
 		return
 	}
 	args := []tasks.Arg{{Name: "actionSaveToDbData", Type: "string", Value: dataStr}}
-	res, err := (&mq.MqClient{}).SendTask("ApiLog.ActionSaveToDb", args)
+	res, err := (&mq.MqClient{}).SendTask(constant.MQ_API_LOG_SAVE_TO_DB, args)
 	if err != nil {
 		global.Log.Error("mqSendTask() SendTask err:", err)
 		global.Log.Error("mqSendTask() SendTask res:", res)

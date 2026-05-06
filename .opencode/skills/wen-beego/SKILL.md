@@ -221,8 +221,9 @@ global.GetWriteDb().Create(&record)
 
 ### MQ 任务
 ```go
+import "WenBeego/apps/common/global/constant"
 args := []tasks.Arg{{Name: "action", Type: "string", Value: dataStr}}
-result, err := (&MqClient{}).SendTask("TaskName", args)
+result, err := (&MqClient{}).SendTask(constant.MQ_XXXXXX, args)
 ```
 
 ## 常用助手函数（分类摘要）

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/middleware/mq"
 	"encoding/json"
 	"fmt"
@@ -27,6 +28,6 @@ func TestMqSendTask(t *testing.T) {
 		{Name: "age", Type: "string", Value: "23"},
 	}
 
-	asyncResult, err := (&mq.MqClient{}).SendTask("Test.ActionTestMsg", options)
+	asyncResult, err := (&mq.MqClient{}).SendTask(constant.MQ_TEST_MSG, options)
 	fmt.Println("\n", asyncResult, err)
 }

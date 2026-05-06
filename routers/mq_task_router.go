@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/mq_task/controllers"
 )
 
@@ -12,7 +13,8 @@ type MqTasks struct {
 func GetMqTasks() []MqTasks {
 	TasksList := []MqTasks{}
 
-	TasksList = append(TasksList, MqTasks{Name: "ApiLog.ActionSaveToDb", CallBack: (*controllers.ApiLog).ActionSaveToDb})
-	TasksList = append(TasksList, MqTasks{Name: "Test.ActionTestMsg", CallBack: (*controllers.Test).ActionTestMsg})
+	TasksList = append(TasksList, MqTasks{Name: string(constant.MQ_TEST_MSG), CallBack: (*controllers.Test).ActionTestMsg})
+	TasksList = append(TasksList, MqTasks{Name: string(constant.MQ_API_LOG_SAVE_TO_DB), CallBack: (*controllers.ApiLog).ActionSaveToDb})
+
 	return TasksList
 }

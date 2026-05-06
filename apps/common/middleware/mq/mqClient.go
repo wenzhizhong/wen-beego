@@ -2,6 +2,7 @@ package mq
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"fmt"
 
@@ -54,12 +55,12 @@ func (mq *MqClient) GetNewBaseSignature() (*tasks.Signature, error) {
   - @param taskName string 任务名称
   - @param args []tasks.Arg 任务参数，
 */
-func (mq *MqClient) SendTask(taskName string, args []tasks.Arg) (asyncResult *result.AsyncResult, err error) {
+func (mq *MqClient) SendTask(taskName constant.MqNameType, args []tasks.Arg) (asyncResult *result.AsyncResult, err error) {
 	signature, err := mq.GetNewBaseSignature()
 	if err != nil {
 		return nil, err
 	}
-	signature.Name = taskName
+	signature.Name = string(taskName)
 	signature.Args = args
 
 	asyncResult, err = global.MqClient.SendTask(signature)
