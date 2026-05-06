@@ -1,5 +1,5 @@
 ---
-name: wen-beego
+name: wen-beego-guide
 description: 指导在 wen-beego 框架（基于 beego 的二次开发框架）中新增接口、使用全局变量和助手函数、遵循目录结构规范。当用户提及“在 wen-beego 中开发”、“新增接口”或询问框架用法时，应加载此 Skill。
 license: MIT
 compatibility: OpenCode >= 1.0
@@ -72,7 +72,69 @@ Content-Type: application/json
 
 ## 新增接口完整流程（以平台端“获取组织单位”为例）
 
-### 步骤 1：定义路由
+### 步骤 1：创建数据表
+根据需求，创建表及其字段，并添加索引，输出表结构并同步到`doc\数据库表结构.sql`。如果存在则跳过。
+
+### 步骤 2：实现 Model 层
+- 根据表结构创建模型层，文件已经存在则跳过。
+- 如果不需要区分平台和商户类别的模型, 比如附件就直接创建`apps/common/models/file.go`即可。
+但这里‘组织单位’区分商户组织和平台组织，但是组织字段大同小异,相同字段放base_model：`apps/common/models/base_model/unit.go`；
+再新增平台组织模型`apps/common/models/plat.go`、商户组织模型`apps/common/models/mchnt.go`, 然后这两个文件里面结构体继承于unit.go，再添加放各自差异字段。
+
+```go
+package base_model
+
+type Unit struct {
+	Id                string `json:"id" gorm:"type:bpchar(36);not null;primaryKey;comment:ID"`
+	// 其他字段....
+	Status            int    `json:"status" gorm:"type:int4;not null;default:0;comment:0未审核，1审核通过，2审核不通过，3禁用"`
+}
+
+var UNIT_STATUS_UNREVIEWED = 0
+var UNIT_STATUS_PASSED = 1
+var UNIT_STATUS_UNPASSED = 2
+var UNIT_STATUS_DISABLED = 3
+var UNIT_STATUS_MAP = map[int]string{
+	UNIT_STATUS_UNREVIEWED: "未审核",
+	UNIT_STATUS_PASSED:     "审核通过",
+	UNIT_STATUS_UNPASSED:   "审核不通过",
+	UNIT_STATUS_DISABLED:   "已禁用",
+}
+```
+
+### 步骤 3：实现 ActiveRecord层（数据访问层）
+代码文件已经存在则跳过。
+如果逻辑可通用，放在common/system路径下 `apps/common/services/system/unit.go`；否则放在对应客户端目录（如：平台`apps\admin_plat\services`）。
+```go
+package system
+
+import (
+    "WenBeego/apps/common/dto"
+    "WenBeego/apps/common/dto/page_dto"
+    "WenBeego/apps/common/helper"
+    "WenBeego/apps/common/models/base_model"
+)
+
+type UnitAr struct{}
+
+func (s *UnitAr) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDataListDto, error) {
+    var data []base_model.Unit
+    var count int64
+    
+	switch unitDto.ModuleName {
+	case "admin_plat":
+        // ... 平台组织数据库查询逻辑
+	case "mchnt_plat":
+        // ... 商户组织数据库查询逻辑
+	default:
+		err = errors.New("模块名称错误")
+	}
+    
+    return helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
+}
+```
+
+### 步骤 4：定义路由
 在对应路由文件（如 `routers/admin_plat_router.go`）中添加路由切片函数。
 - **函数命名格式**：`平台类型+模块类型+slices`，例如 `platSystemSlices()`
 - **路由元素格式**：`beego.NSCtrl<HTTP方法>("/path", (*控制器包.控制器).方法)`
@@ -86,11 +148,13 @@ func platSystemSlices() []beego.LinkNamespace {
 ```
 最后将返回的切片合并到总路由中。
 
-### 步骤 2：创建 Controller
+### 步骤 4：创建 Controller
 文件路径：`apps/admin_plat/controllers/system/unit.go`
 - **结构体定义**：嵌入 `commonControllers.AdminBaseController`
 - **Swagger 注解**：包含 `@Summary`, `@Description`, `@Tags`, `@Param`, `@Success`, `@Router`
 - **方法实现**：解析参数，调用 Service，返回 JSON
+接受参数如果需要自定义dto传参，则在`apps/common/dto/<dtoType>/<Name>.go`
+
 ```go
 package system
 
@@ -135,7 +199,7 @@ func (c *UnitController) Get() {
 }
 ```
 
-### 步骤 3：创建 Service
+### 步骤 6：创建 Service
 文件路径：`apps/admin_plat/services/system/unit.go`
 - 调用 Common 层的 Model 方法，组合业务逻辑
 ```go
@@ -156,32 +220,15 @@ func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.Re
 }
 ```
 
-### 步骤 4：实现 Model 层（数据访问）
-如果逻辑可通用，放在 `apps/common/services/system/unit.go`；否则放在对应客户端目录。
-```go
-package system
 
-import (
-    "WenBeego/apps/common/dto"
-    "WenBeego/apps/common/dto/page_dto"
-    "WenBeego/apps/common/helper"
-    "WenBeego/apps/common/models/base_model"
-)
-
-type Unit struct{}
-
-func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDataListDto, error) {
-    var data []base_model.Unit
-    var count int64
-    // ... 数据库查询逻辑
-    return helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
-}
-```
-
-### 步骤 5：编写单元测试
+### 步骤 7：编写单元测试
 测试文件位于 `tests/xxx_test.go`，调用 Service 层方法验证。
-
 > ✅ **检查点**：每个步骤完成后，确认文件路径、包名、导入路径正确。
+
+### 步骤 8：接口文档
+执行命令`swag init -g cmd/http/main.go  --output apps/swagger `生成文档
+
+
 
 ## 框架全局变量与工具
 全局变量集中在 `apps/common/global`，可按需导入。
@@ -271,6 +318,12 @@ result, err := (&MqClient{}).SendTask(constant.MQ_XXXXXX, args)
 - `ConvertSliceToTree(slice interface{}, idField, parentIdField, childrenField string)`：反射版通用树构建。
 
 > 📘 **完整函数列表**：请直接阅读源码目录 `apps/common/helper/` 中的对应文件，需要具体实现时可打开 `.go` 文件查看。
+
+## 常用DTO 
+### 基本参数dto 
+- `apps\common\dto\base_param.go`：包含http请求`ReqDataListDto`、响应的参数`Response`；包含系统业务必须基本参数`BaseParamDto`, BaseParamDto包含：请求头Host，应用模块名ModuleName，组织单位UnitId, 主体用户UserId，组织单位下独立的用户UnitUserId
+- 自定义参数dto（如：`apps\common\dto\page_dto\system-user.go`）, system-user.go里面结构体直接继承base_param.go 即可，自行阅读源码
+
 
 ## ⚠️ 安全与注意事项
 - **数据库写操作**（如 `global.GetWriteDb().Create`）应确保在事务中或数据已验证。
