@@ -105,35 +105,32 @@ var UNIT_STATUS_MAP = map[int]string{
 
 ### 步骤 3：实现 ActiveRecord层（数据访问层）
 代码文件已经存在则跳过。
-如果逻辑可通用，放在common/system路径下 `apps/common/services/system/unit.go`；否则放在对应客户端目录（如：平台`apps\admin_plat\services`）。
-```go
-package system
+1.如果商户平台端和平台端逻辑可通用，放在`apps\common\models_ar\base_ar`路径下 `apps\common\models_ar\base_ar\common_unit.go`, 通过泛型去查询不同平台的数据:
+```go 
+package base_ar
+// import ...
 
-import (
-    "WenBeego/apps/common/dto"
-    "WenBeego/apps/common/dto/page_dto"
-    "WenBeego/apps/common/helper"
-    "WenBeego/apps/common/models/base_model"
-)
+func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []base_model.Unit, count int64, err error) {
+	// other code ...
+	query := global.GetReadDb().
+		Model(unitModel).
+		Joins(joinStr).
+		Where(tableUnitUserName+".user_id = ?", unitDto.UserId).
+		Where(tableUnitUserName + ".deleted = 0").
+		Where(tableUnitName + ".deleted = 0")
+    // other code ...
 
-type UnitAr struct{}
+	err = query.Select(tableUnitName + ".id").Count(&count).Error
+	// other code ...
 
-func (s *UnitAr) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDataListDto, error) {
-    var data []base_model.Unit
-    var count int64
-    
-	switch unitDto.ModuleName {
-	case "admin_plat":
-        // ... 平台组织数据库查询逻辑
-	case "mchnt_plat":
-        // ... 商户组织数据库查询逻辑
-	default:
-		err = errors.New("模块名称错误")
-	}
-    
-    return helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
+	err = query.Select(selectStr).Order(tableUnitName + ".created_by," + tableUnitName + ".sort").Find(&listData).Error
+	return
 }
 ```
+
+2. 只针对单个商户或平台的管理系统，则放在对应客户端目录（如：平台`apps\admin_plat\services`）。
+
+
 
 ### 步骤 4：定义路由
 在对应路由文件（如 `routers/admin_plat_router.go`）中添加路由切片函数。
@@ -201,8 +198,8 @@ func (c *UnitController) Get() {
 ```
 
 ### 步骤 6：创建 Service
-文件路径：`apps/admin_plat/services/system/unit.go`
-- 调用 Common 层的 Model 方法，组合业务逻辑
+1.若需要支持商户端、平台端，`apps/<平台>/services/system/unit.go`调用共用`apps/common/services` 内的共用方法，
+- 文件路径：`apps/admin_plat/services/system/unit.go`
 ```go
 package system
 
@@ -220,6 +217,38 @@ func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.Re
     return s.commonSystemUnit.GetUnitList(unitDto)
 }
 ```
+- 文件路径 `apps\common\services\system\system-unit.go`
+```go
+package system
+
+import (
+    "WenBeego/apps/common/dto"
+    "WenBeego/apps/common/dto/page_dto"
+    "WenBeego/apps/common/helper"
+    "WenBeego/apps/common/models/base_model"
+)
+
+type UnitAr struct{}
+
+func (s *UnitAr) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDataListDto, error) {
+    var data []base_model.Unit
+    var count int64
+    
+	switch unitDto.ModuleName {        
+	case "admin_plat":
+        // ... 平台组织数据库查询逻辑
+		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Plat{}, &models.PlatUser{})
+	case "mchnt_plat":
+        // ... 商户组织数据库查询逻辑
+		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Mchnt{}, &models.MchntUser{})
+	default:
+		err = errors.New("模块名称错误")
+	}
+    
+    return helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
+}
+```
+2.若不需要支持商户端、平台端，`apps/<平台>/services/xxx/xxx.go`直接调用共用ActiveRecord 层（`apps\common\models_ar\file.go`）的方法返回数据即可
 
 
 ### 步骤 7：编写单元测试
