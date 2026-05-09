@@ -60,3 +60,8 @@ func TimestampToTime(timestamp int64, format ...string) string {
 	}
 	return time.Unix(timestamp, 0).Format(formatStr)
 }
+
+// 时间加n秒
+func TimeAddSeconds(timeStr string, seconds int64) string {
+	return time.Unix(GetTimestamp(timeStr)+seconds, 0).Format("2006-01-02 15:04:05")
+}

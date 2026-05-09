@@ -95,7 +95,11 @@ func platSystemSlices() []beego.LinkNamespace {
 		beego.NSCtrlPost("/monitor-cron/edit", (*adminMonitor.CronController).Edit),
 		beego.NSCtrlPost("/monitor-cron/del", (*adminMonitor.CronController).Del),
 		beego.NSCtrlPost("/monitor-cron/change-status", (*adminMonitor.CronController).ChangeStatus),
+		beego.NSCtrlGet("/monitor-cron/get-avaible", (*adminMonitor.CronController).GetAvaibleCronList),
 		beego.NSCtrlGet("/monitor-cron-log/get", (*adminMonitor.CronLogController).Get),
+
+		beego.NSCtrlGet("/monitor-queue-dlq/get", (*adminMonitor.QueueDlqController).Get),
+		beego.NSCtrlPost("/monitor-queue-dlq/requeue", (*adminMonitor.QueueDlqController).Requeue),
 		// system end
 	}
 }

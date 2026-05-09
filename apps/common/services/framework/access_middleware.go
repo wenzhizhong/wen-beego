@@ -11,6 +11,7 @@ import (
 	"WenBeego/apps/common/models_ar"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	beecontext "github.com/beego/beego/v2/server/web/context"
@@ -153,8 +154,11 @@ func (s *AccessMiddlewate) verifyBodySign(ctx *beecontext.Context, configModel m
 
 	err = goJose.JwsSignVerify([]byte(payload), signatureStr, publicKey, jose.RS512)
 	if err != nil {
-		global.Log.Error("签名验证失败：" + err.Error())
-		return errors.New("签名验证失败")
+		logErrStr := fmt.Sprintf("签名验证失败：%s\npayload=%s", err.Error(), payload)
+		global.Log.Error(logErrStr)
+
+		logErrStr = helper.Ternary(helper.IsDevRunMode(), logErrStr, "签名验证失败")
+		return errors.New(logErrStr)
 	}
 	return nil
 }

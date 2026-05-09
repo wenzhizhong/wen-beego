@@ -4,7 +4,6 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
-	"fmt"
 
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/backends/result"
 	"WenBeego/apps/common/thirdPkg/rewrite/RichardKnop/machinery/v1/tasks"
@@ -43,7 +42,7 @@ func (mq *MqClient) GetNewBaseSignature() (*tasks.Signature, error) {
 	}
 	runMode, _ := helper.AppRunmode()
 	signature := &tasks.Signature{}
-	signature.UUID = fmt.Sprintf("task_%v", uuid)
+	signature.UUID = uuid
 	signature.RetryCount = 3
 	signature.IgnoreWhenTaskNotRegistered = runMode == "prod"
 	return signature, nil
@@ -55,11 +54,16 @@ func (mq *MqClient) GetNewBaseSignature() (*tasks.Signature, error) {
   - @param taskName string 任务名称
   - @param args []tasks.Arg 任务参数，
 */
-func (mq *MqClient) SendTask(taskName constant.MqNameType, args []tasks.Arg) (asyncResult *result.AsyncResult, err error) {
+func (mq *MqClient) SendTask(taskName constant.MqNameType, args []tasks.Arg, defUuid ...string) (asyncResult *result.AsyncResult, err error) {
 	signature, err := mq.GetNewBaseSignature()
 	if err != nil {
 		return nil, err
 	}
+
+	if len(defUuid) > 0 {
+		signature.UUID = defUuid[0]
+	}
+
 	signature.Name = string(taskName)
 	signature.Args = args
 

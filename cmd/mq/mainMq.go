@@ -85,7 +85,7 @@ func main() {
 }
 
 func saveDLXFailedMsg(sig *tasks.Signature, taskErr error) {
-	record := &models.QueueDlxFailedLog{
+	record := &models.QueueDlqFailedLog{
 		TaskUUID:   sig.UUID,
 		TaskName:   sig.Name,
 		ErrorMsg:   taskErr.Error(),
@@ -94,7 +94,7 @@ func saveDLXFailedMsg(sig *tasks.Signature, taskErr error) {
 	if argsJSON, err := json.Marshal(sig.Args); err == nil {
 		record.TaskArgs = string(argsJSON)
 	}
-	ar := &models_ar.QueueDlxFailedLogAR{}
+	ar := &models_ar.QueueDlqFailedLogAR{}
 	if err := ar.Insert(record); err != nil {
 		global.Log.Error("saveDLXFailedMsg db error:", err)
 	}

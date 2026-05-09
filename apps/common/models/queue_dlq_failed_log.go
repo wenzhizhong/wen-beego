@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type QueueDlxFailedLog struct {
+type QueueDlqFailedLog struct {
 	TaskUUID   string    `json:"task_uuid" gorm:"column:task_uuid;type:varchar(64);primaryKey;not null;comment:任务UUID"`
 	TaskName   string    `json:"task_name" gorm:"column:task_name;type:varchar(128);comment:任务名称"`
 	TaskArgs   string    `json:"task_args" gorm:"column:task_args;type:text;comment:任务参数JSON"`
@@ -12,6 +12,6 @@ type QueueDlxFailedLog struct {
 	Deleted    string    `json:"deleted" gorm:"column:deleted;type:varchar;default:0;comment:软删除"`
 }
 
-func (m *QueueDlxFailedLog) TableName() string {
-	return "queue_dlx_failed_log"
+func (m *QueueDlqFailedLog) TableName() string {
+	return "queue_dlq_failed_log"
 }

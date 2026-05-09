@@ -1,3 +1,47 @@
+-- public.config definition
+
+-- Drop table
+
+-- DROP TABLE public.config;
+
+CREATE TABLE public.config (
+	id bpchar(36) NOT NULL, -- ID
+	"name" varchar(255) NOT NULL, -- 配置名称
+	value text NULL, -- 配置值
+	description text NULL, -- 备注
+	value_type varchar(20) NULL DEFAULT 'string'::character varying, -- 数据类型
+	category varchar(50) NULL, -- 分类
+	is_readonly bool NULL DEFAULT false, -- 是否可修改
+	"version" int4 NULL DEFAULT 1, -- 版本
+	created_at timestamptz NULL DEFAULT now(), -- 创建时间
+	updated_at timestamptz NULL DEFAULT now(), -- 更新时间
+	created_by varchar(50) NULL, -- 创建者
+	updated_by varchar(50) NULL, -- 更新人
+	deleted bool NULL DEFAULT false, -- 是否删除
+	CONSTRAINT config_name_key UNIQUE (name),
+	CONSTRAINT config_pkey PRIMARY KEY (id)
+);
+CREATE INDEX idx_config_category ON public.config USING btree (category);
+CREATE INDEX idx_config_deleted ON public.config USING btree (deleted);
+COMMENT ON TABLE public.config IS '配置参数表';
+
+-- Column comments
+
+COMMENT ON COLUMN public.config.id IS 'ID';
+COMMENT ON COLUMN public.config."name" IS '配置名称';
+COMMENT ON COLUMN public.config.value IS '配置值';
+COMMENT ON COLUMN public.config.description IS '备注';
+COMMENT ON COLUMN public.config.value_type IS '数据类型';
+COMMENT ON COLUMN public.config.category IS '分类';
+COMMENT ON COLUMN public.config.is_readonly IS '是否可修改';
+COMMENT ON COLUMN public.config."version" IS '版本';
+COMMENT ON COLUMN public.config.created_at IS '创建时间';
+COMMENT ON COLUMN public.config.updated_at IS '更新时间';
+COMMENT ON COLUMN public.config.created_by IS '创建者';
+COMMENT ON COLUMN public.config.updated_by IS '更新人';
+COMMENT ON COLUMN public.config.deleted IS '是否删除';
+
+
 -- public.file definition
 
 -- Drop table
@@ -1043,6 +1087,52 @@ COMMENT ON COLUMN public.plat_user_role.id IS 'ID';
 COMMENT ON COLUMN public.plat_user_role.user_id IS '员工id';
 COMMENT ON COLUMN public.plat_user_role.role_id IS '员工角色id';
 COMMENT ON COLUMN public.plat_user_role.deleted IS '删除：0否,1是';
+
+
+-- public.queue_dlq_failed_log definition
+
+-- Drop table
+
+-- DROP TABLE public.queue_dlq_failed_log;
+
+CREATE TABLE public.queue_dlq_failed_log (
+	task_uuid varchar(36) NOT NULL, -- UUID
+	task_name varchar(128) NULL, -- 任务名称
+	task_args text NULL, -- 任务参数
+	error_msg text NULL, -- 错误信息
+	create_time timestamp NULL DEFAULT now(), -- 创建时间
+	status int4 NULL DEFAULT 0, -- 状态：0未处理，1已经处理
+	deleted varchar NULL DEFAULT 0, -- 是否删除：0否1是
+	CONSTRAINT queue_dlq_failed_log_pkey PRIMARY KEY (task_uuid)
+);
+COMMENT ON TABLE public.queue_dlq_failed_log IS '队列：死信队列消费失败记录';
+
+-- Column comments
+
+COMMENT ON COLUMN public.queue_dlq_failed_log.task_uuid IS 'UUID';
+COMMENT ON COLUMN public.queue_dlq_failed_log.task_name IS '任务名称';
+COMMENT ON COLUMN public.queue_dlq_failed_log.task_args IS '任务参数';
+COMMENT ON COLUMN public.queue_dlq_failed_log.error_msg IS '错误信息';
+COMMENT ON COLUMN public.queue_dlq_failed_log.create_time IS '创建时间';
+COMMENT ON COLUMN public.queue_dlq_failed_log.status IS '状态：0未处理，1已经处理';
+COMMENT ON COLUMN public.queue_dlq_failed_log.deleted IS '是否删除：0否1是';
+
+
+-- public.queue_dlq_failed_retry definition
+
+-- Drop table
+
+-- DROP TABLE public.queue_dlq_failed_retry;
+
+CREATE TABLE public.queue_dlq_failed_retry (
+	id varchar(64) NOT NULL, -- 原任务UUID
+	new_id varchar(64) NOT NULL -- 新任务UUID
+	CONSTRAINT queue_dlq_failed_retry_pkey PRIMARY KEY (id)
+);
+COMMENT ON TABLE public.queue_dlq_failed_retry IS '队列：死信队列重新入队记录';
+
+COMMENT ON COLUMN public.queue_dlq_failed_retry.id IS '原任务UUID';
+COMMENT ON COLUMN public.queue_dlq_failed_retry.new_id IS '新任务UUID';
 
 
 -- public."user" definition
