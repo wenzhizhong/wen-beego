@@ -1330,3 +1330,23 @@ UNION ALL
   GROUP BY y.id;
 
 COMMENT ON VIEW public.plat_menu_view IS '平台端菜单视图：合并平台端、商户端菜单';
+
+-- ----------------------------
+-- 代码生成配置表
+-- ----------------------------
+DROP TABLE IF EXISTS public.generate_code;
+CREATE TABLE public.generate_code (
+    id bpchar(36) NOT NULL,
+    table_name varchar(100),
+    data text,
+    create_time timestamptz(6),
+    deleted int2 DEFAULT 0,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.generate_code IS '代码生成配置表';
+COMMENT ON COLUMN public.generate_code.id IS 'ID';
+COMMENT ON COLUMN public.generate_code.table_name IS '表名';
+COMMENT ON COLUMN public.generate_code.data IS '数据';
+COMMENT ON COLUMN public.generate_code.create_time IS '创建时间';
+COMMENT ON COLUMN public.generate_code.deleted IS '是否删除';

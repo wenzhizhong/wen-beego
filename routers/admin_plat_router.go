@@ -4,6 +4,7 @@ import (
 	adminAuth "WenBeego/apps/admin_plat/controllers/auth"
 	adminMonitor "WenBeego/apps/admin_plat/controllers/monitor"
 	adminSystem "WenBeego/apps/admin_plat/controllers/system"
+	adminSystemTools "WenBeego/apps/admin_plat/controllers/systemtools"
 	adminUpload "WenBeego/apps/admin_plat/controllers/upload"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/middleware/blocker"
@@ -101,6 +102,17 @@ func platSystemSlices() []beego.LinkNamespace {
 		beego.NSCtrlGet("/monitor-queue-dlq/get", (*adminMonitor.QueueDlqController).Get),
 		beego.NSCtrlPost("/monitor-queue-dlq/requeue", (*adminMonitor.QueueDlqController).Requeue),
 		// system end
+
+		// system-tools begin
+		beego.NSCtrlPost("/system-tools/generate-code/get-db-tables", (*adminSystemTools.GenerateCodeController).GetDbTables),
+		beego.NSCtrlPost("/system-tools/generate-code/get-db-table-detail", (*adminSystemTools.GenerateCodeController).GetDbTableDetail),
+		beego.NSCtrlPost("/system-tools/generate-code/save", (*adminSystemTools.GenerateCodeController).Save),
+		beego.NSCtrlPost("/system-tools/generate-code/del", (*adminSystemTools.GenerateCodeController).Del),
+		beego.NSCtrlGet("/system-tools/generate-code/list", (*adminSystemTools.GenerateCodeController).List),
+		beego.NSCtrlGet("/system-tools/generate-code/get-gen-params", (*adminSystemTools.GenerateCodeController).GetGenParams),
+		beego.NSCtrlPost("/system-tools/generate-code/run", (*adminSystemTools.GenerateCodeController).Run),
+		beego.NSCtrlPost("/system-tools/generate-code/download", (*adminSystemTools.GenerateCodeController).Download),
+		// system-tools end
 	}
 }
 

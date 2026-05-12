@@ -105,6 +105,7 @@ var UNIT_STATUS_MAP = map[int]string{
 
 ### 步骤 3：实现 ActiveRecord层（数据访问层）
 代码文件已经存在则跳过。
+注：反正涉及到不同的主体，需要共用逻辑的，可以在`apps\common\models_ar\base_ar`创建泛型函数
 1.如果商户平台端和平台端逻辑可通用，放在`apps\common\models_ar\base_ar`路径下 `apps\common\models_ar\base_ar\common_unit.go`, 通过泛型去查询不同平台的数据:
 ```go 
 package base_ar
@@ -127,8 +128,8 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 	return
 }
 ```
+2. 如果不区分商户或平台的管理系统，则直接在`apps\common\models_ar`创建（如附件：`apps\common\models_ar\file.go`）。
 
-2. 只针对单个商户或平台的管理系统，则放在对应客户端目录（如：平台`apps\admin_plat\services`）。
 
 
 
@@ -198,7 +199,8 @@ func (c *UnitController) Get() {
 ```
 
 ### 步骤 6：创建 Service
-1.若需要支持商户端、平台端，`apps/<平台>/services/system/unit.go`调用共用`apps/common/services` 内的共用方法，
+1.若需要支持商户端管理系统、平台端管理系统，`apps/<商户或者平台>/services/system/unit.go`调用共用`apps/common/services` 方法GetUnitList(unitDto page_dto.SystemUnitListReqDto)，再在GetUnitList()里面调用‘步骤 3’泛型函数实现；
+反正涉及到共用的
 - 文件路径：`apps/admin_plat/services/system/unit.go`
 ```go
 package system
@@ -248,7 +250,24 @@ func (s *UnitAr) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDat
     return helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
 }
 ```
-2.若不需要支持商户端、平台端，`apps/<平台>/services/xxx/xxx.go`直接调用共用ActiveRecord 层（`apps\common\models_ar\file.go`）的方法返回数据即可
+2.若不针对单个管理系统（商户端管理系统、平台端管理系统）入库操作，`apps/<平台>/services/xxx/xxx.go`直接调用共用ActiveRecord 层（`apps\common\models_ar\file.go`）的方法返回数据即可
+
+3. services层，如果存在多个数据库操作，必须使用事务, 如：
+```go 
+
+func (s *MenuService) Save(baseParamDto dto.BaseParamDto, data1Dto xxx1, data2Dto xxx2) (data map[string]string, err error) {
+    // other code ...
+	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		err := xxxx1.Save(tx, baseParamDto, &data1Dto)
+		if err != nil {
+			return err
+		}
+		err = = xxxx2.Save(tx, baseParamDto, &data2Dto)
+		return err
+	})
+	return
+}
+```
 
 
 ### 步骤 7：编写单元测试
