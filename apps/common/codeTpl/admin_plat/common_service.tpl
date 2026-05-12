@@ -1,0 +1,174 @@
+{{if .IsMultiTenant}}
+package {{.MenuModule}}
+
+import (
+	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models_ar/base_ar"
+	"errors"
+	"fmt"
+
+	"gorm.io/gorm"
+)
+
+type {{.ModelName}}Service struct{}
+
+func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuModule}}_dto.{{.ModelName}}Dto) error {
+	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		id, err := helper.GetUuid()
+		if err != nil {
+			return err
+		}
+		data.Id = id
+		switch baseParamDto.ModuleName {
+		case "admin_plat":
+			return base_ar.Insert{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.PlatModelName}}{})
+		case "mchnt_plat":
+			return base_ar.Insert{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.MchntModelName}}{})
+		default:
+			return errors.New("模块名称错误")
+		}
+	})
+}
+
+func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.MenuModule}}_dto.{{.ModelName}}Dto) error {
+	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		switch baseParamDto.ModuleName {
+		case "admin_plat":
+			return base_ar.Update{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.PlatModelName}}{})
+		case "mchnt_plat":
+			return base_ar.Update{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.MchntModelName}}{})
+		default:
+			return errors.New("模块名称错误")
+		}
+	})
+}
+
+func (s *{{.ModelName}}Service) Del(baseParamDto dto.BaseParamDto, id string) error {
+	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		switch baseParamDto.ModuleName {
+		case "admin_plat":
+			return base_ar.Delete{{.ModelName}}(tx, id, &models.{{.PlatModelName}}{})
+		case "mchnt_plat":
+			return base_ar.Delete{{.ModelName}}(tx, id, &models.{{.MchntModelName}}{})
+		default:
+			return errors.New("模块名称错误")
+		}
+	})
+}
+
+func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id string) (models.{{.ModelName}}, error) {
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		data, err := base_ar.Get{{.ModelName}}ById(id, &models.{{.PlatModelName}}{})
+		if err != nil {
+			return models.{{.ModelName}}{}, err
+		}
+		return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
+	case "mchnt_plat":
+		data, err := base_ar.Get{{.ModelName}}ById(id, &models.{{.MchntModelName}}{})
+		if err != nil {
+			return models.{{.ModelName}}{}, err
+		}
+		return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
+	default:
+		return models.{{.ModelName}}{}, errors.New("模块名称错误")
+	}
+}
+
+func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, keyword string) (*dto.RespDataListDto, error) {
+	var data []models.{{.ModelName}}
+	var count int64
+	var err error
+
+	switch baseParamDto.ModuleName {
+	case "admin_plat":
+		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, keyword, &models.{{.PlatModelName}}{})
+	case "mchnt_plat":
+		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, keyword, &models.{{.MchntModelName}}{})
+	default:
+		return nil, errors.New("模块名称错误")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("获取列表失败: %v", err)
+	}
+	res := &dto.RespDataListDto{}
+	res.List = data
+	res.Total = count
+	res.PageSize = pageSize
+	res.CurrentPage = offset/pageSize + 1
+	return res, nil
+}
+
+{{else}}
+package {{.MenuModule}}
+
+import (
+	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models_ar"
+	"fmt"
+
+	"gorm.io/gorm"
+)
+
+type {{.ModelName}}Service struct {
+	{{.ModelName}}Model models.{{.ModelName}}
+	{{.ModelName}}Ar    models_ar.{{.ModelName}}Ar
+}
+
+func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuModule}}_dto.{{.ModelName}}Dto) error {
+	_ = baseParamDto
+	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		id, err := helper.GetUuid()
+		if err != nil {
+			return err
+		}
+		data.Id = id
+		return s.{{.ModelName}}Ar.Insert(tx, &data.{{.ModelName}})
+	})
+}
+
+func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.MenuModule}}_dto.{{.ModelName}}Dto) error {
+	_ = baseParamDto
+	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		return s.{{.ModelName}}Ar.Update(tx, &data.{{.ModelName}})
+	})
+}
+
+func (s *{{.ModelName}}Service) Del(baseParamDto dto.BaseParamDto, id string) error {
+	_ = baseParamDto
+	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		return s.{{.ModelName}}Ar.Delete(tx, id)
+	})
+}
+
+func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id string) (models.{{.ModelName}}, error) {
+	_ = baseParamDto
+	data, err := s.{{.ModelName}}Ar.GetById(id)
+	if err != nil {
+		return models.{{.ModelName}}{}, err
+	}
+	return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
+}
+
+func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, keyword string) (*dto.RespDataListDto, error) {
+	_ = baseParamDto
+	data, count, err := s.{{.ModelName}}Ar.GetList(pageSize, offset, keyword)
+	if err != nil {
+		return nil, fmt.Errorf("获取列表失败: %v", err)
+	}
+	res := &dto.RespDataListDto{}
+	res.List = data
+	res.Total = count
+	res.PageSize = pageSize
+	res.CurrentPage = offset/pageSize + 1
+	return res, nil
+}
+{{end}}

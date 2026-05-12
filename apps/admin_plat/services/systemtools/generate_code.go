@@ -177,14 +177,21 @@ type TemplateData struct {
 	Columns        []ColumnConfig
 	HasDeleted     bool
 	HasCreateTime  bool
+	IsMultiApp     bool
+	IsMultiTenant  bool
+	PlatModelName  string
+	MchntModelName string
+	PlatTableName  string
+	MchntTableName string
 }
 
 func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDto) (map[string]string, error) {
 	if reqDto.TableGenerateCodeId == "" {
 		return nil, fmt.Errorf("tableGenerateCodeId不能为空")
 	}
-	if reqDto.AppModule == "" {
-		reqDto.AppModule = "admin_plat"
+	appModules := reqDto.AppModules
+	if len(appModules) == 0 {
+		appModules = []string{"admin_plat"}
 	}
 	if reqDto.MenuModule == "" {
 		reqDto.MenuModule = "system"
@@ -228,34 +235,28 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	if bizModule == "" {
 		bizModule = snakeToPascal(genCodeDetail.TableName)
 	}
-	bizModuleLower := snakeToCamel(bizModule)
 	tableName := genCodeDetail.TableName
-
-	appModule := reqDto.AppModule
 	menuModule := reqDto.MenuModule
 
-	apiUrlPrefix := "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
-	apiNamePrefix := strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+	isMultiApp := len(appModules) > 1
+	isMultiTenant := strings.HasPrefix(tableName, "plat_") || strings.HasPrefix(tableName, "mchnt_")
 
-	td := TemplateData{
-		ModelName:      bizModule,
-		ModelNameLower: bizModuleLower,
-		TableName:      tableName,
-		AppModule:      appModule,
-		MenuModule:     menuModule,
-		BizModule:      bizModule,
-		MenuName:       reqDto.MenuName,
-		ApiUrlPrefix:   apiUrlPrefix,
-		ApiNamePrefix:  apiNamePrefix,
-		Columns:        columnConfigs,
-		HasDeleted:     hasColumn(columnConfigs, "deleted"),
-		HasCreateTime:  hasColumn(columnConfigs, "create_time") || hasColumn(columnConfigs, "created_at"),
+	modelName := bizModule
+	modelNameLower := snakeToCamel(modelName)
+	platModelName := "Plat" + modelName
+	mchntModelName := "Mchnt" + modelName
+	platTableName := tableName
+	mchntTableName := tableName
+	if isMultiTenant && strings.HasPrefix(tableName, "plat_") {
+		mchntTableName = "mchnt_" + strings.TrimPrefix(tableName, "plat_")
+	} else if isMultiTenant && strings.HasPrefix(tableName, "mchnt_") {
+		platTableName = "plat_" + strings.TrimPrefix(tableName, "mchnt_")
 	}
 
 	timestamp := time.Now().Format("20060102150405")
-	tempDir := filepath.Join(global.TempDir, "code", bizModuleLower)
+	tempDir := filepath.Join(global.TempDir, "code", modelNameLower)
 	zipDir := filepath.Join(global.UploadsDir, "public", "code")
-	zipName := bizModuleLower + "-" + timestamp + ".zip"
+	zipName := modelNameLower + "-" + timestamp + ".zip"
 	zipPath := filepath.Join(zipDir, zipName)
 
 	if err := os.RemoveAll(tempDir); err != nil {
@@ -270,45 +271,125 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 	tplDir := filepath.Join(global.AppDir, "common", "codeTpl")
 
-	for _, codeType := range codeTypes {
-		switch codeType {
-		case CODE_TYPE_MODEL:
-			if err := s.renderTemplate(tplDir, "admin_plat", "base_model.tpl", tempDir, "apps/common/models/base_model/"+bizModuleLower+".go", td); err != nil {
+	td := TemplateData{
+		ModelName:      modelName,
+		ModelNameLower: modelNameLower,
+		TableName:      tableName,
+		MenuModule:     menuModule,
+		BizModule:      bizModule,
+		MenuName:       reqDto.MenuName,
+		Columns:        columnConfigs,
+		HasDeleted:     hasColumn(columnConfigs, "deleted"),
+		HasCreateTime:  hasColumn(columnConfigs, "create_time") || hasColumn(columnConfigs, "created_at"),
+		IsMultiApp:     isMultiApp,
+		IsMultiTenant:  isMultiTenant,
+		PlatModelName:  platModelName,
+		MchntModelName: mchntModelName,
+		PlatTableName:  platTableName,
+		MchntTableName: mchntTableName,
+	}
+
+	// shared code: base_model, model, dto (always generated once)
+	if contains(codeTypes, CODE_TYPE_MODEL) {
+		if err := s.renderTemplate(tplDir, "admin_plat", "base_model.tpl", tempDir, "apps/common/models/base_model/"+modelNameLower+".go", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "admin_plat", "model.tpl", tempDir, "apps/common/models/"+modelNameLower+".go", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "apps/common/dto/"+menuModule+"_dto/"+modelNameLower+".go", td); err != nil {
+			return nil, err
+		}
+		// multi-tenant: additionally generate Plat/Mchnt entity models
+		if isMultiTenant {
+			if err := s.renderTemplate(tplDir, "admin_plat", "plat_model.tpl", tempDir, "apps/common/models/plat_"+modelNameLower+".go", td); err != nil {
 				return nil, err
 			}
-			if err := s.renderTemplate(tplDir, "admin_plat", "model.tpl", tempDir, "apps/common/models/"+bizModuleLower+".go", td); err != nil {
+			if err := s.renderTemplate(tplDir, "admin_plat", "mchnt_model.tpl", tempDir, "apps/common/models/mchnt_"+modelNameLower+".go", td); err != nil {
 				return nil, err
 			}
-			if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "apps/common/dto/"+menuModule+"_dto/"+bizModuleLower+".go", td); err != nil {
+		}
+	}
+
+	if isMultiApp {
+		// multi-app: generate common shared service + AR, then per-app wrappers
+		if contains(codeTypes, CODE_TYPE_AR) {
+			// always generate common AR struct
+			if err := s.renderTemplate(tplDir, "admin_plat", "common_ar.tpl", tempDir, "apps/common/models_ar/"+modelNameLower+".go", td); err != nil {
 				return nil, err
 			}
-		case CODE_TYPE_AR:
-			if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "apps/"+appModule+"/models_ar/"+bizModuleLower+"_ar.go", td); err != nil {
-				return nil, err
-			}
-		case CODE_TYPE_SERVICE:
-			if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "apps/"+appModule+"/services/"+menuModule+"/"+bizModuleLower+".go", td); err != nil {
-				return nil, err
-			}
-		case CODE_TYPE_CONTROLLER:
-			if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "apps/"+appModule+"/controllers/"+menuModule+"/"+bizModuleLower+".go", td); err != nil {
-				return nil, err
-			}
-		case CODE_TYPE_VIEW:
-			if viewType == VIEW_TYPE_ELEMENT_PLUS {
-				if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, "web/"+bizModuleLower+"/index.vue", td); err != nil {
+			// multi-tenant: additionally generate generic functions in base_ar
+			if isMultiTenant {
+				if err := s.renderTemplate(tplDir, "admin_plat", "base_ar.tpl", tempDir, "apps/common/models_ar/base_ar/common_"+modelNameLower+".go", td); err != nil {
 					return nil, err
 				}
-				if err := s.renderTemplate(tplDir, "web/element-plus", "form.vue.tpl", tempDir, "web/"+bizModuleLower+"/form.vue", td); err != nil {
-					return nil, err
-				}
-				if err := s.renderTemplate(tplDir, "web/element-plus", "hook.tsx.tpl", tempDir, "web/"+bizModuleLower+"/hook.tsx", td); err != nil {
-					return nil, err
-				}
-				if err := s.renderTemplate(tplDir, "web/element-plus", "api.ts.tpl", tempDir, "web/"+bizModuleLower+"/api.ts", td); err != nil {
+			}
+		}
+		if contains(codeTypes, CODE_TYPE_SERVICE) {
+			if err := s.renderTemplate(tplDir, "admin_plat", "common_service.tpl", tempDir, "apps/common/services/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+				return nil, err
+			}
+		}
+
+		for _, appModule := range appModules {
+			td.AppModule = appModule
+			td.ApiUrlPrefix = "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
+			td.ApiNamePrefix = strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+
+			if contains(codeTypes, CODE_TYPE_AR) {
+				if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "apps/"+appModule+"/models_ar/"+modelNameLower+"_ar.go", td); err != nil {
 					return nil, err
 				}
 			}
+			if contains(codeTypes, CODE_TYPE_SERVICE) {
+				if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "apps/"+appModule+"/services/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+					return nil, err
+				}
+			}
+			if contains(codeTypes, CODE_TYPE_CONTROLLER) {
+				if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "apps/"+appModule+"/controllers/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+					return nil, err
+				}
+			}
+		}
+	} else {
+		// single-app: generate everything for one app
+		appModule := appModules[0]
+		td.AppModule = appModule
+		td.ApiUrlPrefix = "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
+		td.ApiNamePrefix = strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+
+		for _, codeType := range codeTypes {
+			switch codeType {
+			case CODE_TYPE_AR:
+				if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "apps/"+appModule+"/models_ar/"+modelNameLower+"_ar.go", td); err != nil {
+					return nil, err
+				}
+			case CODE_TYPE_SERVICE:
+				if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "apps/"+appModule+"/services/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+					return nil, err
+				}
+			case CODE_TYPE_CONTROLLER:
+				if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "apps/"+appModule+"/controllers/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	// frontend code
+	if contains(codeTypes, CODE_TYPE_VIEW) && viewType == VIEW_TYPE_ELEMENT_PLUS {
+		if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, "web/"+modelNameLower+"/index.vue", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "web/element-plus", "form.vue.tpl", tempDir, "web/"+modelNameLower+"/form.vue", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "web/element-plus", "hook.tsx.tpl", tempDir, "web/"+modelNameLower+"/hook.tsx", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "web/element-plus", "api.ts.tpl", tempDir, "web/"+modelNameLower+"/api.ts", td); err != nil {
+			return nil, err
 		}
 	}
 
@@ -321,7 +402,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		return nil, err
 	}
 
-	dmlContent := s.generateMenuDML(genCodeDetail.TableName, reqDto.MenuName, apiUrlPrefix)
+	dmlContent := s.generateMenuDML(genCodeDetail.TableName, reqDto.MenuName, td.ApiUrlPrefix)
 	dmlPath := filepath.Join(tempDir, "sql", tableName+"_menu.sql")
 	if err := os.WriteFile(dmlPath, []byte(dmlContent), 0644); err != nil {
 		return nil, err
@@ -336,8 +417,8 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	}
 
 	result := map[string]string{
-		"zipPath": bizModuleLower + "-" + timestamp + ".zip",
-		"zipName": bizModuleLower + "-" + timestamp + ".zip",
+		"zipPath": modelNameLower + "-" + timestamp + ".zip",
+		"zipName": modelNameLower + "-" + timestamp + ".zip",
 	}
 	return result, nil
 }

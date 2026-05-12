@@ -11,7 +11,7 @@ metadata:
 # wen-beego 二次开发指南
 
 ## 项目简介
-wen-beego 框架是基于 beego 的 web 开发框架，包含平台端（`apps/admin_plat`）、商户端（`apps/admin_mchnt`）、对外端（`apps/api`），适用于二次开发。
+wen-beego 框架是基于 beego 的 web 开发框架，包含平台端（`apps/admin_plat`）、商户端（`apps/admin_mchnt`）、对外端（`apps/api`）的多用户体系管理系统，适用于二次开发。
 
 ## 快速开始
 ### 运行服务
@@ -105,8 +105,8 @@ var UNIT_STATUS_MAP = map[int]string{
 
 ### 步骤 3：实现 ActiveRecord层（数据访问层）
 代码文件已经存在则跳过。
-注：反正涉及到不同的主体，需要共用逻辑的，可以在`apps\common\models_ar\base_ar`创建泛型函数
-1.如果商户平台端和平台端逻辑可通用，放在`apps\common\models_ar\base_ar`路径下 `apps\common\models_ar\base_ar\common_unit.go`, 通过泛型去查询不同平台的数据:
+注：如果考虑多用户体系需要共用逻辑的，可以在`apps\common\models_ar\base_ar\xxx.go`创建curd的泛型函数,否则`apps\common\models_ar\xxx.go` 写curd的方法，供`apps/common/services/xxx.go`调用
+1.区分多用户体系, `apps\common\models_ar\base_ar\xxx.go`泛型函数:
 ```go 
 package base_ar
 // import ...
@@ -128,7 +128,7 @@ func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](u
 	return
 }
 ```
-2. 如果不区分商户或平台的管理系统，则直接在`apps\common\models_ar`创建（如附件：`apps\common\models_ar\file.go`）。
+2. 如果不区分多用户体系，但是可以共用逻辑，则直接在`apps\common\models_ar`创建（如附件：`apps\common\models_ar\file.go`，编写curd逻辑）。
 
 
 
@@ -199,7 +199,7 @@ func (c *UnitController) Get() {
 ```
 
 ### 步骤 6：创建 Service
-1.若需要支持商户端管理系统、平台端管理系统，`apps/<商户或者平台>/services/system/unit.go`调用共用`apps/common/services` 方法GetUnitList(unitDto page_dto.SystemUnitListReqDto)，再在GetUnitList()里面调用‘步骤 3’泛型函数实现；
+1.若curd业务需要支持多用户体系逻辑，`apps/<商户或者平台>/services/system/unit.go`调用共用`apps\common\services\system\system-unit.go`的GetUnitList(unitDto page_dto.SystemUnitListReqDto)方法，再在GetUnitList()里面调用‘步骤 3’ base_ar下`apps\common\models_ar\base_ar\common_unit.go`泛型函数；
 反正涉及到共用的
 - 文件路径：`apps/admin_plat/services/system/unit.go`
 ```go
@@ -250,7 +250,7 @@ func (s *UnitAr) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDat
     return helper.GetRespDataListDto(unitDto.PageSize, unitDto.CurrentPage, count, data)
 }
 ```
-2.若不针对单个管理系统（商户端管理系统、平台端管理系统）入库操作，`apps/<平台>/services/xxx/xxx.go`直接调用共用ActiveRecord 层（`apps\common\models_ar\file.go`）的方法返回数据即可
+2.若不管多用户体系与否，curd逻辑共用，那么`apps/<平台>/services/xxx/xxx.go`直接调用共用ActiveRecord 层（`apps\common\models_ar\file.go`）的方法返回数据即可
 
 3. services层，如果存在多个数据库操作，必须使用事务, 如：
 ```go 

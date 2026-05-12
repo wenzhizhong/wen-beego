@@ -19,7 +19,7 @@ type GetTableDetailDto struct {
 type GenCodeRunDto struct {
 	TableGenerateCodeId string   `json:"tableGenerateCodeId"`
 	MenuName            string   `json:"menuName"`
-	AppModule           string   `json:"appModule"`
+	AppModules          []string `json:"appModules"`
 	MenuModule          string   `json:"menuModule"`
 	BizModule           string   `json:"bizModule"`
 	CodeType            []string `json:"codeType"`

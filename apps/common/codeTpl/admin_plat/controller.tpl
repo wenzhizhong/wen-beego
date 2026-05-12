@@ -22,9 +22,8 @@ func (c *{{.ModelName}}Controller) Get() {
 		c.ServeJSON()
 		return
 	}
-	_ = baseParamDto
 	keyword := c.GetString("keyword")
-	data, err := c.Service.GetList(reqDataListDto.PageSize, reqDataListDto.Offset, keyword)
+	data, err := c.Service.GetList(baseParamDto, reqDataListDto.PageSize, reqDataListDto.Offset, keyword)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
@@ -42,8 +41,7 @@ func (c *{{.ModelName}}Controller) Add() {
 		c.ServeJSON()
 		return
 	}
-	_ = baseParamDto
-	err = c.Service.Add(dtoData)
+	err = c.Service.Add(baseParamDto, dtoData)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
@@ -61,8 +59,7 @@ func (c *{{.ModelName}}Controller) Edit() {
 		c.ServeJSON()
 		return
 	}
-	_ = baseParamDto
-	err = c.Service.Edit(dtoData)
+	err = c.Service.Edit(baseParamDto, dtoData)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
@@ -72,13 +69,15 @@ func (c *{{.ModelName}}Controller) Edit() {
 }
 
 func (c *{{.ModelName}}Controller) Del() {
-	dtoData, err := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
-	if err != nil {
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	dtoData, err1 := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
+	if err != nil || err1 != nil {
+		err = helper.Ternary(err != nil, err, err1)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	err = c.Service.Del(dtoData.Id)
+	err = c.Service.Del(baseParamDto, dtoData.Id)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
@@ -88,13 +87,15 @@ func (c *{{.ModelName}}Controller) Del() {
 }
 
 func (c *{{.ModelName}}Controller) Detail() {
-	dtoData, err := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
-	if err != nil {
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	dtoData, err1 := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
+	if err != nil || err1 != nil {
+		err = helper.Ternary(err != nil, err, err1)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
-	data, err := c.Service.GetDetail(dtoData.Id)
+	data, err := c.Service.GetDetail(baseParamDto, dtoData.Id)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {

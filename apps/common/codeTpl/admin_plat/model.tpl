@@ -7,5 +7,5 @@ type {{.ModelName}} struct {
 }
 
 func (m *{{.ModelName}}) TableName() string {
-	return ` + "`{{.TableName}}`" + `
+	return `{{.TableName}}`
 }

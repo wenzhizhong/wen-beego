@@ -1,16 +1,3 @@
-{{if .IsMultiApp}}
-package models_ar
-
-import (
-	_ "WenBeego/apps/common/models"
-	commonAr "WenBeego/apps/common/models_ar"
-)
-
-type {{.ModelName}}Ar struct {
-	commonAr.{{.ModelName}}Ar
-}
-
-{{else}}
 package models_ar
 
 import (
@@ -85,4 +72,3 @@ func (ar *{{.ModelName}}Ar) GetById(id string) (data base_model.{{.ModelName}}, 
 		Take(&data).Error
 	return
 }
-{{end}}
