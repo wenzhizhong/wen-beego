@@ -56,8 +56,8 @@ func (s *GenerateCodeService) GetDbTableList() (interface{}, error) {
 }
 
 type TableDetailData struct {
-	FullName string                  `json:"fullName"`
-	Comment  string                  `json:"comment"`
+	FullName string                   `json:"fullName"`
+	Comment  string                   `json:"comment"`
 	Columns  []models_ar.DbColumnInfo `json:"columns"`
 }
 
@@ -151,17 +151,19 @@ func (s *GenerateCodeService) DownloadCode(zipPath string) (string, error) {
 }
 
 type ColumnConfig struct {
-	Name       string `json:"name"`
-	Type       string `json:"type"`
-	Required   bool   `json:"required"`
-	DefVal     interface{} `json:"defVal"`
-	FormType   string `json:"formType"`
-	FormParam  string `json:"formParam"`
-	Comment    string `json:"comment"`
-	GoFieldName string `json:"-"`
-	GoType      string `json:"-"`
-	PgType      string `json:"-"`
-	JsonName    string `json:"-"`
+	Name        string      `json:"name"`
+	Type        string      `json:"type"`
+	Required    bool        `json:"required"`
+	DefVal      interface{} `json:"defVal"`
+	FormType    string      `json:"formType"`
+	FormParam   string      `json:"formParam"`
+	Comment     string      `json:"comment"`
+	GoFieldName string      `json:"-"`
+	GoType      string      `json:"-"`
+	PgType      string      `json:"-"`
+	JsonName    string      `json:"-"`
+	TsType      string      `json:"-"`
+	SkipForm    bool        `json:"-"`
 }
 
 type TemplateData struct {
@@ -215,6 +217,8 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		goType, pgType := getGoPgType(columnConfigs[i].Type)
 		columnConfigs[i].GoType = goType
 		columnConfigs[i].PgType = pgType
+		columnConfigs[i].TsType = getTsType(columnConfigs[i].Type)
+		columnConfigs[i].SkipForm = isSkipFormField(columnConfigs[i].Name)
 	}
 
 	codeTypes := reqDto.CodeType
@@ -379,16 +383,22 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 	// frontend code
 	if contains(codeTypes, CODE_TYPE_VIEW) && viewType == VIEW_TYPE_ELEMENT_PLUS {
-		if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, "web/"+modelNameLower+"/index.vue", td); err != nil {
+		if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/index.vue", td); err != nil {
 			return nil, err
 		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "form.vue.tpl", tempDir, "web/"+modelNameLower+"/form.vue", td); err != nil {
+		if err := s.renderTemplate(tplDir, "web/element-plus", "form.vue.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/form.vue", td); err != nil {
 			return nil, err
 		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "hook.tsx.tpl", tempDir, "web/"+modelNameLower+"/hook.tsx", td); err != nil {
+		if err := s.renderTemplate(tplDir, "web/element-plus", "hook.tsx.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/utils/hook.tsx", td); err != nil {
 			return nil, err
 		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "api.ts.tpl", tempDir, "web/"+modelNameLower+"/api.ts", td); err != nil {
+		if err := s.renderTemplate(tplDir, "web/element-plus", "types.ts.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/utils/types.ts", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "web/element-plus", "rule.ts.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/utils/rule.ts", td); err != nil {
+			return nil, err
+		}
+		if err := s.renderTemplate(tplDir, "web/element-plus", "api.ts.tpl", tempDir, "src/api/"+modelNameLower+".ts", td); err != nil {
 			return nil, err
 		}
 	}
@@ -402,7 +412,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		return nil, err
 	}
 
-	dmlContent := s.generateMenuDML(genCodeDetail.TableName, reqDto.MenuName, td.ApiUrlPrefix)
+	dmlContent := s.generateMenuDML(tableName, reqDto.MenuName, td.ApiUrlPrefix, menuModule, modelNameLower, td.AppModule)
 	dmlPath := filepath.Join(tempDir, "sql", tableName+"_menu.sql")
 	if err := os.WriteFile(dmlPath, []byte(dmlContent), 0644); err != nil {
 		return nil, err
@@ -472,13 +482,48 @@ func (s *GenerateCodeService) generateDDL(tableName string, columns []ColumnConf
 	return sb.String()
 }
 
-func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix string) string {
+func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix, menuModule, bizModuleLower, appModule string) string {
+	menuTable := "plat_menu"
+	if strings.HasPrefix(tableName, "mchnt_") {
+		menuTable = "mchnt_menu"
+	}
+
+	menuId, _ := helper.GetUuid()
+	listId, _ := helper.GetUuid()
+	addId, _ := helper.GetUuid()
+	editId, _ := helper.GetUuid()
+	delId, _ := helper.GetUuid()
+	detailId, _ := helper.GetUuid()
+
+	viewPath := "/" + menuModule + "/" + bizModuleLower + "/index"
+	authPrefix := appModule + ":" + menuModule + "-" + bizModuleLower
+
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("-- Menu DML for: %s (%s)\n", tableName, menuName))
 	sb.WriteString("-- Generated by wen-beego code generator\n\n")
-	sb.WriteString(fmt.Sprintf("-- INSERT INTO plat_menu (id, name, path, ...) VALUES (...);\n"))
-	sb.WriteString(fmt.Sprintf("-- API prefix: %s\n", apiUrlPrefix))
-	sb.WriteString(fmt.Sprintf("-- Menu name: %s\n", menuName))
+
+	sb.WriteString(fmt.Sprintf("-- 主菜单\n"))
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
+	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/list", viewPath, authPrefix+":list"))
+	sb.WriteString(");\n\n")
+
+	sb.WriteString(fmt.Sprintf("-- 按钮权限\n"))
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '', 1, '%s', false, false, false\n", listId, menuId, authPrefix+":list"))
+	sb.WriteString(");\n")
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '', 2, '%s', false, false, false\n", addId, menuId, authPrefix+":add"))
+	sb.WriteString(");\n")
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', 'edit', '', '', 3, '%s', false, false, false\n", editId, menuId, authPrefix+":edit"))
+	sb.WriteString(");\n")
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', 'del', '', '', 4, '%s', false, false, false\n", delId, menuId, authPrefix+":del"))
+	sb.WriteString(");\n")
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', 'detail', '', '', 5, '%s', false, false, false\n", detailId, menuId, authPrefix+":detail"))
+	sb.WriteString(");\n")
+
 	return sb.String()
 }
 
@@ -535,6 +580,23 @@ func snakeToCamel(s string) string {
 	return strings.ToLower(pascal[:1]) + pascal[1:]
 }
 
+func getTsType(dbType string) string {
+	switch strings.ToLower(dbType) {
+	case "bpchar", "char", "varchar", "text", "uuid":
+		return "string"
+	case "int2", "int4", "int8", "integer", "bigint", "smallint", "float4", "float8", "numeric", "decimal":
+		return "number"
+	case "bool", "boolean":
+		return "boolean"
+	case "timestamptz", "timestamp", "date":
+		return "string"
+	case "json", "jsonb":
+		return "any"
+	default:
+		return "string"
+	}
+}
+
 func getGoPgType(dbType string) (goType, pgType string) {
 	switch strings.ToLower(dbType) {
 	case "bpchar", "char":
@@ -566,6 +628,21 @@ func getGoPgType(dbType string) (goType, pgType string) {
 	default:
 		return "string", "text"
 	}
+}
+
+func isSkipFormField(name string) bool {
+	skipNames := []string{"id",
+		"created_at", "updated_at", "deleted_at", "create_at", "update_at", "delete_at",
+		"created_time", "updated_time", "deleted_time", "create_time", "update_time", "delete_time",
+		"create_user_id", "update_user_id", "delete_user_id", "create_uid", "update_uid", "delete_uid", "created_by", "updated_by", "deleted_by", "create_by", "update_by", "delete_by",
+		"deleted",
+	}
+	for _, s := range skipNames {
+		if name == s {
+			return true
+		}
+	}
+	return false
 }
 
 func hasColumn(columns []ColumnConfig, name string) bool {
