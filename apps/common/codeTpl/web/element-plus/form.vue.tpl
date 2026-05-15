@@ -36,12 +36,12 @@
         </el-checkbox-group>
       </el-form-item>
       {{else if eq .FormType "imageUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParam}}{{.FormParam}}{{end}}>
+        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParam}}{{.FormParam}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
           <el-icon><Plus /></el-icon>
         </el-upload>
       </el-form-item>
       {{else if eq .FormType "fileUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" :auto-upload="false" {{if .FormParam}}{{.FormParam}}{{end}}>
+        <el-upload action="#" :auto-upload="false" {{if .FormParam}}{{.FormParam}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
           <el-button type="primary">上传文件</el-button>
         </el-upload>
       </el-form-item>
@@ -67,6 +67,7 @@ import { message } from "@/utils/message";
 import { formRules } from "./utils/rule";
 import type { FormInstance } from "element-plus";
 import {upload} from "@/api/upload";
+import { getVarType } from "@/components/sliceUpload/common";
 
 const emit = defineEmits(["refresh"]);
 const visible = ref(false);
@@ -75,8 +76,33 @@ const submitLoading = ref(false);
 const formRef = ref<FormInstance>();
 const editId = ref("");
 
+const fileListObj = ref({
+  {{range .Columns}}{{if eq .FormType "imageUpload"}} {{.Name}}: [],
+  {{else if eq .FormType "fileUpload"}} {{.Name}}: [],
+  {{end}}{{end}}
+});
+const needStringifyFields = reactive([
+  {{range .Columns}}{{if eq .FormType "checkbox"}}  "{{.Name}}",
+  {{else if eq .FormType "select"}}  "{{.Name}}",
+  {{end}}{{end}}
+  ...(Object.keys(fileListObj.value))
+]);
+const needConvertBoolFields = reactive([
+  {{range .Columns}}{{if eq .FormType "switch"}}  "{{.Name}}",
+  {{end}}{{end}}
+]);
+
 const form = reactive({
-  {{range .Columns}}{{if not .SkipForm}}  {{.Name}}: "" as string | number,
+  {{range .Columns}}{{if not .SkipForm}}
+    {{- if inSliceArrayFields .FormType -}}
+      {{- if and (eq .FormType "select") (isMultipleCompt .FormParam) -}}
+        {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}{{.DefVal}}{{else}}{{.DefVal}}{{end}},
+      {{- else -}}
+        {{.Name}}: [],
+      {{- end -}}
+    {{- else -}}
+      {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}""{{else}}{{.DefVal}}{{end}},
+    {{- end}}
   {{end}}{{end}}
 });
 
@@ -107,14 +133,36 @@ async function handleSubmit() {
   if (!valid) return;
   submitLoading.value = true;
   try {
-    if (editId.value) {
-      await edit{{.ModelName}}({ id: editId.value, ...form });
-    } else {
-      await add{{.ModelName}}(form);
+    let tmpForm = JSON.parse(JSON.stringify(form));
+    for (let i = 0; i < needStringifyFields.length; i++) {
+      if (!form[needStringifyFields[i]] || getVarType(form[needStringifyFields[i]]) == 'array') {
+        console.log("needStringifyFields", needStringifyFields[i], getVarType(form[needStringifyFields[i]]));
+        tmpForm[needStringifyFields[i]] = form[needStringifyFields[i]].join(",");
+      }
     }
-    message(editId.value ? "修改成功" : "新增成功", { type: "success" });
+    for (let i = 0; i < needConvertBoolFields.length; i++) {
+      tmpForm[needConvertBoolFields[i]] = Number(!!(tmpForm[needConvertBoolFields[i]]))
+    }
+    
+    let result
+    if (editId.value) {
+      result =  await editGenerateForm({ id: editId.value, ...tmpForm })
+    } else {
+      result =  await addGenerateForm(tmpForm)
+    }
+    let msg = ""
+    if  (result && result.code === 200) {
+      msg = editId.value ? "修改成功" : "新增成功"
+      message(msg, { type: "success" });
+    } else {
+      msg = result.message || "操作失败"
+      message(msg, { type: "error" });
+    }
     emit("refresh");
     handleClose();
+  }catch(error) {
+    let errMsg = typeof error === "string" ? error : error.message;
+    message(errMsg || "修改失败", { type: "error" });
   } finally {
     submitLoading.value = false;
   }
@@ -131,12 +179,28 @@ async function uploadFile(file: any, key: string, multiple: boolean = false) {
   upload(file.raw, file.name, file.size).then(async (res) => { 
     if (res.code === 200 && res?.data?.filePath) {
       message("上传成功", { type: "success" });
-      form[key] = multiple ? [...form[key], res.data.filePath] : res.data.filePath;
+
+      let fileItem = {id: res.data.fileId, name: file.name, url: res.data.filePath}
+      form[key] = multiple ? [...form[key], res.data.fileId] : [res.data.fileId];
+      multiple? fileListObj.value[key].push(fileItem) : fileListObj.value[key] = [fileItem];
     } else {
       message(res.message ||"上传失败", { type: "error" });
     }
   });
 }
+function removeFile(e :any, key:string){
+  if (fileListObj.value[key]){
+    let fileId = e?.raw && e.raw instanceof File ? e.raw.fileId : e.id;
+    if (!fileId) {
+      message("请选择文件", { type: "error" });
+      return
+    }
+    
+    fileListObj.value[key] = fileListObj.value[key].filter(item=>item.id != fileId);
+    form[key] = form[key].filter(item=>item != fileId);
+  }
+}
+
 defineExpose({ open });
 </script>
 

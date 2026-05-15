@@ -1,6 +1,12 @@
 package base_model
 
-import _ "time"
+{{$isTimeField := false }}
+{{- range .Columns -}}	
+{{- if contains .GoType "time" -}}
+	{{- $isTimeField = true -}}
+{{- end -}}
+{{- end -}}
+{{if $isTimeField}} import "time"{{end}}
 
 type {{.ModelName}} struct {
 	// Id         string     `gorm:"column:id;type:bpchar(36);primaryKey;comment:ID" json:"id"`

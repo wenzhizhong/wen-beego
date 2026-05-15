@@ -46,6 +46,22 @@ var CODE_TYPES_MAP = map[string]string{
 var VIEW_TYPES_MAP = map[string]string{
 	VIEW_TYPE_ELEMENT_PLUS: "Element-Plus",
 }
+var arrayFields = []string{"select", "checkbox", "fileUpload", "imageUpload"}
+
+var funcMap = template.FuncMap{
+	"contains":           strings.Contains,
+	"inSliceArrayFields": func(ft string) bool { return inSlice(ft, arrayFields) },
+	"isMultipleCompt":    func(ft string) bool { return strings.Contains(ft, "multiple") },
+}
+
+func inSlice(needle string, haystack []string) bool {
+	for _, v := range haystack {
+		if v == needle {
+			return true
+		}
+	}
+	return false
+}
 
 func (s *GenerateCodeService) GetDbTableList() (interface{}, error) {
 	data, err := s.GenerateCodeAr.GetAllDbTables()
@@ -215,6 +231,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		columnConfigs[i].GoFieldName = snakeToPascal(columnConfigs[i].Name)
 		columnConfigs[i].JsonName = columnConfigs[i].Name
 		goType, pgType := getGoPgType(columnConfigs[i].Type)
+
 		columnConfigs[i].GoType = goType
 		columnConfigs[i].PgType = pgType
 		columnConfigs[i].TsType = getTsType(columnConfigs[i].Type)
@@ -439,7 +456,8 @@ func (s *GenerateCodeService) renderTemplate(tplDir, subDir, tplFile, tempDir, o
 		return fmt.Errorf("模板文件不存在: %s", tplPath)
 	}
 
-	tmpl, err := template.ParseFiles(tplPath)
+	tmpl := template.New(filepath.Base(tplPath)).Funcs(funcMap)
+	tmpl, err := tmpl.ParseFiles(tplPath)
 	if err != nil {
 		return fmt.Errorf("解析模板失败 %s: %v", tplFile, err)
 	}
@@ -504,24 +522,24 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix,
 
 	sb.WriteString(fmt.Sprintf("-- 主菜单\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/list", viewPath, authPrefix+":list"))
+	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/get", viewPath, authPrefix+":list"))
 	sb.WriteString(");\n\n")
 
 	sb.WriteString(fmt.Sprintf("-- 按钮权限\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '', 1, '%s', false, false, false\n", listId, menuId, authPrefix+":list"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '%s', 1, '%s', false, false, false\n", listId, menuId, apiUrlPrefix+"/get", authPrefix+":list"))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '', 2, '%s', false, false, false\n", addId, menuId, authPrefix+":add"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '%s', 2, '%s', false, false, false\n", addId, menuId, apiUrlPrefix+"/add", authPrefix+":add"))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', 'edit', '', '', 3, '%s', false, false, false\n", editId, menuId, authPrefix+":edit"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', 'edit', '', '%s', 3, '%s', false, false, false\n", editId, menuId, apiUrlPrefix+"/edit", authPrefix+":edit"))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', 'del', '', '', 4, '%s', false, false, false\n", delId, menuId, authPrefix+":del"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', 'del', '', '%s', 4, '%s', false, false, false\n", delId, menuId, apiUrlPrefix+"/del", authPrefix+":del"))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', 'detail', '', '', 5, '%s', false, false, false\n", detailId, menuId, authPrefix+":detail"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', 'detail', '', '%s', 5, '%s', false, false, false\n", detailId, menuId, apiUrlPrefix+"/detail", authPrefix+":detail"))
 	sb.WriteString(");\n")
 
 	return sb.String()
@@ -582,13 +600,13 @@ func snakeToCamel(s string) string {
 
 func getTsType(dbType string) string {
 	switch strings.ToLower(dbType) {
-	case "bpchar", "char", "varchar", "text", "uuid":
+	case "character varying", "character", "char", "bpchar", "text", "uuid":
 		return "string"
-	case "int2", "int4", "int8", "integer", "bigint", "smallint", "float4", "float8", "numeric", "decimal":
+	case "smallint", "integer", "int2", "int4", "bigint", "int8", "real", "float4", "double precision", "float8", "numeric", "decimal":
 		return "number"
-	case "bool", "boolean":
+	case "boolean", "bool":
 		return "boolean"
-	case "timestamptz", "timestamp", "date":
+	case "timestamp without time zone", "timestamp with time zone", "timestamptz", "timestamp", "date", "time without time zone", "time with time zone":
 		return "string"
 	case "json", "jsonb":
 		return "any"
@@ -599,32 +617,40 @@ func getTsType(dbType string) string {
 
 func getGoPgType(dbType string) (goType, pgType string) {
 	switch strings.ToLower(dbType) {
-	case "bpchar", "char":
-		return "string", "bpchar(36)"
-	case "varchar":
+	case "character varying":
 		return "string", "varchar(255)"
+	case "character", "char", "bpchar":
+		return "string", "bpchar(36)"
 	case "text":
 		return "string", "text"
-	case "int2":
+	case "smallint", "int2":
 		return "int", "int2"
-	case "int4", "integer":
+	case "integer", "int4":
 		return "int", "int4"
-	case "int8", "bigint":
+	case "bigint", "int8":
 		return "int64", "int8"
-	case "float4":
+	case "real", "float4":
 		return "float32", "float4"
-	case "float8":
+	case "double precision", "float8":
 		return "float64", "float8"
-	case "bool":
+	case "numeric", "decimal":
+		return "float64", "numeric"
+	case "boolean", "bool":
 		return "bool", "bool"
-	case "timestamptz", "timestamp":
+	case "timestamp without time zone", "timestamp with time zone", "timestamptz", "timestamp":
 		return "time.Time", "timestamptz(6)"
 	case "date":
 		return "time.Time", "date"
-	case "json", "jsonb":
+	case "time without time zone", "time with time zone":
+		return "string", "time"
+	case "json":
+		return "string", "json"
+	case "jsonb":
 		return "string", "jsonb"
 	case "uuid":
 		return "string", "uuid"
+	case "bytea":
+		return "[]byte", "bytea"
 	default:
 		return "string", "text"
 	}
