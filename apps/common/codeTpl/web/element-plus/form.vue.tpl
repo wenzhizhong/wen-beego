@@ -9,47 +9,43 @@
     <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
       {{range .Columns}}{{if not .SkipForm}}
       {{if eq .FormType "textarea"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-input type="textarea" v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParam}}{{.FormParam}}{{end}} />
+        <el-input type="textarea" v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{else if eq .FormType "datetime"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-date-picker v-model="form.{{.Name}}" type="datetime" placeholder="请选择{{.Comment}}" {{if .FormParam}}{{.FormParam}}{{end}} style="width: 100%" />
+        <el-date-picker v-model="form.{{.Name}}" type="datetime" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} style="width: 100%" />
       </el-form-item>
       {{else if eq .FormType "switch"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-switch v-model="form.{{.Name}}" {{if .FormParam}}{{.FormParam}}{{end}} />
+        <el-switch v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{else if eq .FormType "select"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-select v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" style="width: 100%" {{if .FormParam}}{{.FormParam}}{{end}}>
+        <el-select v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" style="width: 100%" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
           <el-option label="选项1" value="1" />
           <el-option label="选项2" value="2" />
         </el-select>
       </el-form-item>
       {{else if eq .FormType "radio"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-radio-group v-model="form.{{.Name}}" {{if .FormParam}}{{.FormParam}}{{end}}>
-          <el-radio :value="1">选项1</el-radio>
-          <el-radio :value="2">选项2</el-radio>
+        <el-radio-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
         </el-radio-group>
       </el-form-item>
       {{else if eq .FormType "checkbox"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-checkbox-group v-model="form.{{.Name}}" {{if .FormParam}}{{.FormParam}}{{end}}>
-          <el-checkbox label="选项1" value="1" />
-          <el-checkbox label="选项2" value="2" />
+        <el-checkbox-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
         </el-checkbox-group>
       </el-form-item>
       {{else if eq .FormType "imageUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParam}}{{.FormParam}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
+        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
           <el-icon><Plus /></el-icon>
         </el-upload>
       </el-form-item>
       {{else if eq .FormType "fileUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" :auto-upload="false" {{if .FormParam}}{{.FormParam}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
+        <el-upload action="#" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
           <el-button type="primary">上传文件</el-button>
         </el-upload>
       </el-form-item>
       {{else if eq .FormType "editor"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <div class="editor-placeholder" {{if .FormParam}}{{.FormParam}}{{end}}>富文本编辑器（请自行引入组件）</div>
+        <div class="editor-placeholder" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>富文本编辑器（请自行引入组件）</div>
       </el-form-item>
       {{else}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-input v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParam}}{{.FormParam}}{{end}} />
+        <el-input v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{end}}
       {{end}}{{end}}    </el-form>
@@ -64,10 +60,15 @@
 import { ref, reactive, nextTick } from "vue";
 import { get{{.ModelName}}Detail, add{{.ModelName}}, edit{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
 import { message } from "@/utils/message";
+import { ElMessageBox } from "element-plus";
 import { formRules } from "./utils/rule";
 import type { FormInstance } from "element-plus";
 import {upload} from "@/api/upload";
 import { getVarType } from "@/components/sliceUpload/common";
+
+{{range .Columns}}{{if .FormParamTs}}
+{{.FormParamTs}}
+{{end}}{{end}}
 
 const emit = defineEmits(["refresh"]);
 const visible = ref(false);
@@ -133,6 +134,8 @@ async function handleSubmit() {
   if (!valid) return;
   submitLoading.value = true;
   try {
+    await ElMessageBox.confirm(editId.value ? "是否修改?" : "是否新增?");
+
     let tmpForm = JSON.parse(JSON.stringify(form));
     for (let i = 0; i < needStringifyFields.length; i++) {
       if (!form[needStringifyFields[i]] || getVarType(form[needStringifyFields[i]]) == 'array') {

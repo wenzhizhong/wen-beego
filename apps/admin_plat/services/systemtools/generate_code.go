@@ -175,19 +175,21 @@ func (s *GenerateCodeService) DownloadCode(zipPath string) (string, error) {
 }
 
 type ColumnConfig struct {
-	Name        string      `json:"name"`
-	Type        string      `json:"type"`
-	Required    bool        `json:"required"`
-	DefVal      interface{} `json:"defVal"`
-	FormType    string      `json:"formType"`
-	FormParam   string      `json:"formParam"`
-	Comment     string      `json:"comment"`
-	GoFieldName string      `json:"-"`
-	GoType      string      `json:"-"`
-	PgType      string      `json:"-"`
-	JsonName    string      `json:"-"`
-	TsType      string      `json:"-"`
-	SkipForm    bool        `json:"-"`
+	Name         string      `json:"name"`
+	Type         string      `json:"type"`
+	Required     bool        `json:"required"`
+	DefVal       interface{} `json:"defVal"`
+	FormType     string      `json:"formType"`
+	FormParam    string      `json:"formParam"`
+	FormParamVue string      `json:"-"`
+	FormParamTs  string      `json:"-"`
+	Comment      string      `json:"comment"`
+	GoFieldName  string      `json:"-"`
+	GoType       string      `json:"-"`
+	PgType       string      `json:"-"`
+	JsonName     string      `json:"-"`
+	TsType       string      `json:"-"`
+	SkipForm     bool        `json:"-"`
 }
 
 type TemplateData struct {
@@ -277,6 +279,11 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		updateTimeField = helper.Ternary(tmpUpdateTimeField != "", tmpUpdateTimeField, updateTimeField)
 		deleteTimeField = helper.Ternary(tmpDeleteTimeField != "", tmpDeleteTimeField, deleteTimeField)
 
+	}
+
+	// parse FormParam JSON to extract vue component attrs and ts variable declarations
+	for i := range columnConfigs {
+		columnConfigs[i].FormParamVue, columnConfigs[i].FormParamTs = parseFormParam(columnConfigs[i].FormParam)
 	}
 
 	codeTypes := reqDto.CodeType
@@ -701,6 +708,23 @@ func getGoPgType(dbType string) (goType, pgType string) {
 	default:
 		return "string", "text"
 	}
+}
+
+type FormParamData struct {
+	Vue string `json:"vue"`
+	Ts  string `json:"ts"`
+}
+
+func parseFormParam(formParam string) (vue, ts string) {
+	if formParam == "" {
+		return "", ""
+	}
+	var data FormParamData
+	if err := json.Unmarshal([]byte(formParam), &data); err != nil {
+		// old plain string format: treat as vue attrs
+		return formParam, ""
+	}
+	return data.Vue, data.Ts
 }
 
 func isSkipFormField(name string) bool {
