@@ -48,19 +48,27 @@ var VIEW_TYPES_MAP = map[string]string{
 }
 var arrayFields = []string{"select", "checkbox", "fileUpload", "imageUpload"}
 
-var funcMap = template.FuncMap{
-	"contains":           strings.Contains,
-	"inSliceArrayFields": func(ft string) bool { return inSlice(ft, arrayFields) },
-	"isMultipleCompt":    func(ft string) bool { return strings.Contains(ft, "multiple") },
-}
+var createTimeFields = []string{"created_at", "create_at", "created_time", "create_time"}
+var updateTimeFields = []string{"updated_at", "update_at", "updated_time", "update_time"}
+var deletedTimeFields = []string{"deleted_at", "delete_at", "deleted_time", "delete_time"}
+var createUserIdFields = []string{"create_user_id", "created_user_id", "created_uid", "create_uid", "created_by", "create_by"}
+var updateUserIdFields = []string{"update_user_id", "updated_user_id", "updated_uid", "update_uid", "updated_by", "update_by"}
+var deleteUserIdFields = []string{"delete_user_id", "deleted_user_id", "deleted_uid", "delete_uid", "deleted_by", "delete_by"}
+var hasDeletedFields = []string{"deleted", "is_deleted", "is_delete", "is_del"}
 
-func inSlice(needle string, haystack []string) bool {
-	for _, v := range haystack {
-		if v == needle {
-			return true
-		}
-	}
-	return false
+var funcMap = template.FuncMap{
+	"contains": strings.Contains,
+
+	"isMultipleCompt":       func(ft string) bool { return strings.Contains(ft, "multiple") },
+	"isMultipleComptFields": func(ft string) bool { return contains(arrayFields, ft) },
+
+	"isCreateTimeFields":   func(ft string) bool { return contains(createTimeFields, ft) },
+	"isUpdateTimeFields":   func(ft string) bool { return contains(updateTimeFields, ft) },
+	"isDeletedTimeFields":  func(ft string) bool { return contains(deletedTimeFields, ft) },
+	"isCreateUserIdFields": func(ft string) bool { return contains(createUserIdFields, ft) },
+	"isUpdateUserIdFields": func(ft string) bool { return contains(updateUserIdFields, ft) },
+	"isDeleteUserIdFields": func(ft string) bool { return contains(deleteUserIdFields, ft) },
+	"isHasDeletedFields":   func(ft string) bool { return contains(hasDeletedFields, ft) },
 }
 
 func (s *GenerateCodeService) GetDbTableList() (interface{}, error) {
@@ -183,24 +191,30 @@ type ColumnConfig struct {
 }
 
 type TemplateData struct {
-	ModelName      string
-	ModelNameLower string
-	TableName      string
-	AppModule      string
-	MenuModule     string
-	BizModule      string
-	MenuName       string
-	ApiUrlPrefix   string
-	ApiNamePrefix  string
-	Columns        []ColumnConfig
-	HasDeleted     bool
-	HasCreateTime  bool
-	IsMultiApp     bool
-	IsMultiTenant  bool
-	PlatModelName  string
-	MchntModelName string
-	PlatTableName  string
-	MchntTableName string
+	ModelName       string
+	ModelNameLower  string
+	TableName       string
+	AppModule       string
+	MenuModule      string
+	BizModule       string
+	MenuName        string
+	ApiUrlPrefix    string
+	ApiNamePrefix   string
+	Columns         []ColumnConfig
+	HasDeleted      bool
+	HasUpdateTime   bool
+	HasCreateTime   bool
+	HasDeleteTime   bool
+	DeletedField    string
+	CreateTimeField string
+	UpdateTimeField string
+	CeleteTimeField string
+	IsMultiApp      bool
+	IsMultiTenant   bool
+	PlatModelName   string
+	MchntModelName  string
+	PlatTableName   string
+	MchntTableName  string
 }
 
 func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDto) (map[string]string, error) {
@@ -226,16 +240,43 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 			return nil, fmt.Errorf("解析字段配置失败: %v", err)
 		}
 	}
+	hasDeleted := false
+	deletedField := ""
+	hasCreateTime := false
+	createTimeField := ""
+	hasUpdateTime := false
+	updateTimeField := ""
+	hasDeleteTime := false
+	deleteTimeField := ""
 
 	for i := range columnConfigs {
 		columnConfigs[i].GoFieldName = snakeToPascal(columnConfigs[i].Name)
 		columnConfigs[i].JsonName = columnConfigs[i].Name
 		goType, pgType := getGoPgType(columnConfigs[i].Type)
 
+		if goType == "time.Time" && contains(updateTimeFields, columnConfigs[i].Name) {
+			goType = "*time.Time"
+		}
 		columnConfigs[i].GoType = goType
 		columnConfigs[i].PgType = pgType
 		columnConfigs[i].TsType = getTsType(columnConfigs[i].Type)
 		columnConfigs[i].SkipForm = isSkipFormField(columnConfigs[i].Name)
+
+		tmpHasDeleted, tmpDeletedField := hasColumn(hasDeletedFields, columnConfigs[i].Name)
+		tmpHasCreateTime, tmpCreateTimeField := hasColumn(createTimeFields, columnConfigs[i].Name)
+		tmpHasUpdateTime, tmpUpdateTimeField := hasColumn(updateTimeFields, columnConfigs[i].Name)
+		tmpHasDeleteTime, tmpDeleteTimeField := hasColumn(deletedTimeFields, columnConfigs[i].Name)
+
+		hasDeleted = helper.Ternary(hasDeleted, hasDeleted, tmpHasDeleted)
+		hasCreateTime = helper.Ternary(hasCreateTime, hasCreateTime, tmpHasCreateTime)
+		hasUpdateTime = helper.Ternary(hasUpdateTime, hasUpdateTime, tmpHasUpdateTime)
+		hasDeleteTime = helper.Ternary(hasDeleteTime, hasDeleteTime, tmpHasDeleteTime)
+
+		deletedField = helper.Ternary(tmpDeletedField != "", tmpDeletedField, deletedField)
+		createTimeField = helper.Ternary(tmpCreateTimeField != "", tmpCreateTimeField, createTimeField)
+		updateTimeField = helper.Ternary(tmpUpdateTimeField != "", tmpUpdateTimeField, updateTimeField)
+		deleteTimeField = helper.Ternary(tmpDeleteTimeField != "", tmpDeleteTimeField, deleteTimeField)
+
 	}
 
 	codeTypes := reqDto.CodeType
@@ -293,21 +334,27 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	tplDir := filepath.Join(global.AppDir, "common", "codeTpl")
 
 	td := TemplateData{
-		ModelName:      modelName,
-		ModelNameLower: modelNameLower,
-		TableName:      tableName,
-		MenuModule:     menuModule,
-		BizModule:      bizModule,
-		MenuName:       reqDto.MenuName,
-		Columns:        columnConfigs,
-		HasDeleted:     hasColumn(columnConfigs, "deleted"),
-		HasCreateTime:  hasColumn(columnConfigs, "create_time") || hasColumn(columnConfigs, "created_at"),
-		IsMultiApp:     isMultiApp,
-		IsMultiTenant:  isMultiTenant,
-		PlatModelName:  platModelName,
-		MchntModelName: mchntModelName,
-		PlatTableName:  platTableName,
-		MchntTableName: mchntTableName,
+		ModelName:       modelName,
+		ModelNameLower:  modelNameLower,
+		TableName:       tableName,
+		MenuModule:      menuModule,
+		BizModule:       bizModule,
+		MenuName:        reqDto.MenuName,
+		Columns:         columnConfigs,
+		HasDeleted:      hasDeleted,
+		HasUpdateTime:   hasUpdateTime,
+		HasCreateTime:   hasCreateTime,
+		HasDeleteTime:   hasDeleteTime,
+		DeletedField:    deletedField,
+		CreateTimeField: createTimeField,
+		UpdateTimeField: updateTimeField,
+		CeleteTimeField: deleteTimeField,
+		IsMultiApp:      isMultiApp,
+		IsMultiTenant:   isMultiTenant,
+		PlatModelName:   platModelName,
+		MchntModelName:  mchntModelName,
+		PlatTableName:   platTableName,
+		MchntTableName:  mchntTableName,
 	}
 
 	// shared code: base_model, model, dto (always generated once)
@@ -522,12 +569,12 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix,
 
 	sb.WriteString(fmt.Sprintf("-- 主菜单\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/get", viewPath, authPrefix+":list"))
+	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/get", viewPath, authPrefix+":get"))
 	sb.WriteString(");\n\n")
 
 	sb.WriteString(fmt.Sprintf("-- 按钮权限\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '%s', 1, '%s', false, false, false\n", listId, menuId, apiUrlPrefix+"/get", authPrefix+":list"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '%s', 1, '%s', false, false, false\n", listId, menuId, apiUrlPrefix+"/get", authPrefix+":get"))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
 	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '%s', 2, '%s', false, false, false\n", addId, menuId, apiUrlPrefix+"/add", authPrefix+":add"))
@@ -657,12 +704,14 @@ func getGoPgType(dbType string) (goType, pgType string) {
 }
 
 func isSkipFormField(name string) bool {
-	skipNames := []string{"id",
-		"created_at", "updated_at", "deleted_at", "create_at", "update_at", "delete_at",
-		"created_time", "updated_time", "deleted_time", "create_time", "update_time", "delete_time",
-		"create_user_id", "update_user_id", "delete_user_id", "create_uid", "update_uid", "delete_uid", "created_by", "updated_by", "deleted_by", "create_by", "update_by", "delete_by",
-		"deleted",
-	}
+	skipNames := []string{"id"}
+	skipNames = append(skipNames, createTimeFields...)
+	skipNames = append(skipNames, updateTimeFields...)
+	skipNames = append(skipNames, deletedTimeFields...)
+	skipNames = append(skipNames, createUserIdFields...)
+	skipNames = append(skipNames, updateUserIdFields...)
+	skipNames = append(skipNames, deleteUserIdFields...)
+	skipNames = append(skipNames, hasDeletedFields...)
 	for _, s := range skipNames {
 		if name == s {
 			return true
@@ -671,13 +720,13 @@ func isSkipFormField(name string) bool {
 	return false
 }
 
-func hasColumn(columns []ColumnConfig, name string) bool {
+func hasColumn(columns []string, name string) (bool, string) {
 	for _, col := range columns {
-		if col.Name == name {
-			return true
+		if col == name {
+			return true, name
 		}
 	}
-	return false
+	return false, ""
 }
 
 func contains(slice []string, item string) bool {

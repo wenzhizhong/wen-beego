@@ -4,6 +4,9 @@ package models_ar
 import (
 	_ "WenBeego/apps/common/models"
 	commonAr "WenBeego/apps/common/models_ar"
+	{{if .HasDeleted -}}
+	_ "context"
+	{{- end}}
 )
 
 type {{.ModelName}}Ar struct {
@@ -20,6 +23,9 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
+	{{if .HasDeleted -}}
+	_ "context"
+	{{- end}}
 )
 
 type {{.ModelName}}Ar struct {
@@ -39,7 +45,7 @@ func (ar *{{.ModelName}}Ar) Update(tx *gorm.DB, data *base_model.{{.ModelName}})
 	}
 	return tx.Model(&models.{{.ModelName}}{}).
 		Select("*").
-		Omit("id", "created_at", "deleted").
+		Omit("id", {{if .HasCreateTime}}"{{.CreateTimeField}}",{{end}}  {{if .HasDeleted}}"{{.DeletedField}}",{{end}} ).
 		Where("id = ?", data.Id).
 		Updates(data).Error
 }
@@ -48,7 +54,12 @@ func (ar *{{.ModelName}}Ar) Delete(tx *gorm.DB, id string) error {
 	if id == "" {
 		return fmt.Errorf("{{.ModelName}}Ar Delete(): Id 不能为空")
 	}
-	return tx.Model(&models.{{.ModelName}}{}).Where("id = ?", id).Update("deleted", 1).Error
+	{{if .HasDeleted}}
+	return tx.Model(&models.{{.ModelName}}{}).Where("id = ?", id).Update("{{.DeletedField}}", 1).Error
+	{{else}}
+	ctx := context.Background()
+	return tx.Model(&models.{{.ModelName}}{}).Where("id = ?", id).Delete(ctx).Error
+	{{end}}
 }
 
 func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, keyword string) (data []models.{{.ModelName}}, count int64, err error) {
@@ -57,11 +68,11 @@ func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, keyword string) (data 
 	tableName := model.TableName()
 
 	query := global.GetReadDb().
-		Model(model).
-		Where(tableName + ".deleted = 0")
+		Model(model){{if .HasDeleted}}.
+		Where(tableName + ".{{.DeletedField}} = 0"){{end}}
 
 	if keyword != "" {
-		query = query.Where(tableName+".\"name\" LIKE ?", "%"+keyword+"%")
+		// query = query.Where(tableName+".\"name\" LIKE ?", "%"+keyword+"%")
 	}
 
 	err = query.Count(&count).Error
@@ -73,7 +84,7 @@ func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, keyword string) (data 
 		Select(tableName + ".*").
 		Limit(pageSize).
 		Offset(offset).
-		Order(tableName + ".created_at desc").
+		{{if .HasCreateTime}}Order(tableName + ".{{.CreateTimeField}} desc").{{end}}
 		Find(&data).Error
 	return
 }
@@ -81,7 +92,7 @@ func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, keyword string) (data 
 func (ar *{{.ModelName}}Ar) GetById(id string) (data base_model.{{.ModelName}}, err error) {
 	err = global.GetReadDb().
 		Model(&models.{{.ModelName}}{}).
-		Where("deleted = 0 AND id = ?", id).
+		Where("{{if .HasDeleted}}{{.DeletedField}} = 0 AND {{end}}id = ?", id).
 		Take(&data).Error
 	return
 }

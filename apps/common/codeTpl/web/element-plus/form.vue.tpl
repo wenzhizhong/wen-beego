@@ -94,7 +94,7 @@ const needConvertBoolFields = reactive([
 
 const form = reactive({
   {{range .Columns}}{{if not .SkipForm}}
-    {{- if inSliceArrayFields .FormType -}}
+    {{- if isMultipleComptFields .FormType -}}
       {{- if and (eq .FormType "select") (isMultipleCompt .FormParam) -}}
         {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}{{.DefVal}}{{else}}{{.DefVal}}{{end}},
       {{- else -}}

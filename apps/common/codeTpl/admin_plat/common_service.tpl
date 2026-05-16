@@ -23,6 +23,21 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 			return err
 		}
 		data.Id = id
+		{{range .Columns}}
+			{{- if eq .Name "unit_id" }}		
+		data.{{.GoFieldName}} = baseParamDto.UnitId
+			{{else if isCreateUserIdFields .Name -}}	
+		data.{{.GoFieldName}} = baseParamDto.UnitUserId
+			{{else if isCreateTimeFields .Name }}
+				{{- if eq .GoType "string" }}
+		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
+				{{ else -}}
+		curTime := helper.GetTime()
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+				{{- end -}}
+			{{end -}}
+		{{end}}
+
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
 			return base_ar.Insert{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.PlatModelName}}{})
@@ -36,6 +51,19 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 
 func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.MenuModule}}_dto.{{.ModelName}}Dto) error {
 	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		{{ range .Columns}} 
+			{{- if isUpdateTimeFields .Name }}
+				{{- if eq .GoType "string" }}	
+		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
+				{{ else }}	
+		curTime := helper.GetTime()
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+				{{- end -}}
+			{{ else if isUpdateUserIdFields .Name -}}	
+		data.{{.GoFieldName}} = baseParamDto.UnitUserId 
+			{{end -}}
+		{{end}}
+
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
 			return base_ar.Update{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.PlatModelName}}{})
@@ -131,6 +159,21 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 			return err
 		}
 		data.Id = id
+		{{range .Columns}}
+			{{- if eq .Name "unit_id" }}		
+		data.{{.GoFieldName}} = baseParamDto.UnitId
+			{{else if isCreateUserIdFields .Name -}}	
+		data.{{.GoFieldName}} = baseParamDto.UnitUserId
+			{{else if isCreateTimeFields .Name }}
+				{{- if eq .GoType "string" }}
+		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
+				{{ else -}}
+		curTime := helper.GetTime()
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+				{{- end -}}
+			{{end -}}
+		{{end}}
+
 		return s.{{.ModelName}}Ar.Insert(tx, &data.{{.ModelName}})
 	})
 }
@@ -138,6 +181,18 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.MenuModule}}_dto.{{.ModelName}}Dto) error {
 	_ = baseParamDto
 	return global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
+		{{ range .Columns}} 
+			{{- if isUpdateTimeFields .Name }}
+				{{- if eq .GoType "string" }}	
+		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
+				{{ else }}	
+		curTime := helper.GetTime()
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+				{{- end -}}
+			{{ else if isUpdateUserIdFields .Name -}}	
+		data.{{.GoFieldName}} = baseParamDto.UnitUserId 
+			{{end -}}
+		{{end}}
 		return s.{{.ModelName}}Ar.Update(tx, &data.{{.ModelName}})
 	})
 }

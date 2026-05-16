@@ -15,11 +15,11 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 	tableName := model.TableName()
 
 	query := global.GetReadDb().
-		Model(model).
-		Where(tableName + ".deleted = 0")
+		Model(model){{if .HasDeleted}}.
+		Where(tableName + ".{{.DeletedField}} = 0"){{end}}
 
 	if keyword != "" {
-		query = query.Where(tableName+".\"name\" LIKE ?", "%"+keyword+"%")
+		// query = query.Where(tableName+".\"name\" LIKE ?", "%"+keyword+"%")
 	}
 
 	err = query.Count(&count).Error
@@ -31,7 +31,7 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 		Select(tableName + ".*").
 		Limit(pageSize).
 		Offset(offset).
-		Order(tableName + ".created_at desc").
+		{{if .HasCreateTime}}Order(tableName + ".{{.CreateTimeField}} desc").{{end}}
 		Find(&data).Error
 	return
 }
@@ -40,7 +40,7 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 func Get{{.ModelName}}ById[M interface{ TableName() string }](id string, model M) (data base_model.{{.ModelName}}, err error) {
 	err = global.GetReadDb().
 		Model(model).
-		Where("deleted = 0 AND id = ?", id).
+		Where("{{if .HasDeleted}}{{.DeletedField}} = 0 AND {{end}}id = ?", id).
 		Take(&data).Error
 	return
 }
@@ -54,7 +54,7 @@ func Insert{{.ModelName}}[M interface{ TableName() string }](tx *gorm.DB, data *
 func Update{{.ModelName}}[M interface{ TableName() string }](tx *gorm.DB, data *base_model.{{.ModelName}}, model M) error {
 	return tx.Model(model).
 		Select("*").
-		Omit("id", "created_at", "deleted").
+		Omit("id", {{if .HasCreateTime}}"{{.CreateTimeField}}",{{end}}  {{if .HasDeleted}}"{{.DeletedField}}",{{end}} ).
 		Where("id = ?", data.Id).
 		Updates(data).Error
 }
@@ -64,5 +64,10 @@ func Delete{{.ModelName}}[M interface{ TableName() string }](tx *gorm.DB, id str
 	if id == "" {
 		return fmt.Errorf("Delete{{.ModelName}}: Id 不能为空")
 	}
-	return tx.Model(model).Where("id = ?", id).Update("deleted", 1).Error
+	{{if .HasDeleted}}
+	return tx.Model(model).Where("id = ?", id).Update("{{.DeletedField}}", 1).Error
+	{{else}}
+	ctx := context.Background()
+	return tx.Model(model).Where("id = ?", id).Delete(ctx).Error
+	{{end}}
 }
