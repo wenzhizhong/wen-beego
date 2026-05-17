@@ -12,16 +12,16 @@
         <el-input type="textarea" v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{else if eq .FormType "datetime"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-date-picker v-model="form.{{.Name}}" type="datetime" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} style="width: 100%" />
+        <el-date-picker v-model="form.{{.Name}}" type="{{if eq .Type "date"}}{{.Type}}{{else}}{{.FormType}}{{end}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="{{if eq .Type "date"}}YYYY-MM-DD{{else}}YYYY-MM-DD HH:mm:ss{{end}}" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{dateParsingInZone(dateStr, '{{.Name}}')}"/>
+      </el-form-item>
+      {{else if eq .FormType "time"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
+        <el-time-picker v-model="form.{{.Name}}" type="{{.FormType}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{dateParsingInZone(dateStr, '{{.Name}}')}"/>
       </el-form-item>
       {{else if eq .FormType "switch"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-switch v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{else if eq .FormType "select"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-select v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" style="width: 100%" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
-          <el-option label="选项1" value="1" />
-          <el-option label="选项2" value="2" />
-        </el-select>
+        <el-select v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" style="width: 100%" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-select>
       </el-form-item>
       {{else if eq .FormType "radio"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-radio-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
@@ -32,12 +32,12 @@
         </el-checkbox-group>
       </el-form-item>
       {{else if eq .FormType "imageUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
+        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if hasMultipleProp .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
           <el-icon><Plus /></el-icon>
         </el-upload>
       </el-form-item>
       {{else if eq .FormType "fileUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if isMultipleCompt .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
+        <el-upload action="#" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if hasMultipleProp .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
           <el-button type="primary">上传文件</el-button>
         </el-upload>
       </el-form-item>
@@ -58,13 +58,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, nextTick } from "vue";
-import { get{{.ModelName}}Detail, add{{.ModelName}}, edit{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
-import { message } from "@/utils/message";
-import { ElMessageBox } from "element-plus";
-import { formRules } from "./utils/rule";
 import type { FormInstance } from "element-plus";
-import {upload} from "@/api/upload";
+import { ElMessageBox } from "element-plus";
+import dayjs from "dayjs";
+import { message } from "@/utils/message";
 import { getVarType } from "@/components/sliceUpload/common";
+import { get{{.ModelName}}Detail, add{{.ModelName}}, edit{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
+import { formRules } from "./utils/rule";
+import {upload} from "@/api/upload";
 
 {{range .Columns}}{{if .FormParamTs}}
 {{.FormParamTs}}
@@ -95,9 +96,9 @@ const needConvertBoolFields = reactive([
 
 const form = reactive({
   {{range .Columns}}{{if not .SkipForm}}
-    {{- if isMultipleComptFields .FormType -}}
-      {{- if and (eq .FormType "select") (isMultipleCompt .FormParam) -}}
-        {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}{{.DefVal}}{{else}}{{.DefVal}}{{end}},
+    {{- if isMultipleCompt .FormType -}}
+      {{- if and (eq .FormType "select") (not (hasMultipleProp .FormParam)) -}}
+        {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}""{{else}}{{.DefVal}}{{end}},
       {{- else -}}
         {{.Name}}: [],
       {{- end -}}
@@ -138,8 +139,10 @@ async function handleSubmit() {
 
     let tmpForm = JSON.parse(JSON.stringify(form));
     for (let i = 0; i < needStringifyFields.length; i++) {
-      if (!form[needStringifyFields[i]] || getVarType(form[needStringifyFields[i]]) == 'array') {
-        console.log("needStringifyFields", needStringifyFields[i], getVarType(form[needStringifyFields[i]]));
+      if (form[needStringifyFields[i]] === null || form[needStringifyFields[i]] === undefined) continue;
+
+      let type = form[needStringifyFields[i]] && getVarType(form[needStringifyFields[i]]) || ''
+      if (type == 'array') {
         tmpForm[needStringifyFields[i]] = form[needStringifyFields[i]].join(",");
       }
     }
@@ -203,6 +206,10 @@ function removeFile(e :any, key:string){
     form[key] = form[key].filter(item=>item != fileId);
   }
 }
+const dateParsingInZone = (dateStr, key:string)=>{ 
+  form[key] = dayjs.tz(dateStr, 'Asia/Shanghai').format()
+}
+
 
 defineExpose({ open });
 </script>

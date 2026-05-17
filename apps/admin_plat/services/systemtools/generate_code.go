@@ -46,7 +46,7 @@ var CODE_TYPES_MAP = map[string]string{
 var VIEW_TYPES_MAP = map[string]string{
 	VIEW_TYPE_ELEMENT_PLUS: "Element-Plus",
 }
-var arrayFields = []string{"select", "checkbox", "fileUpload", "imageUpload"}
+var multipleComptSlice = []string{"select", "checkbox", "fileUpload", "imageUpload"}
 
 var createTimeFields = []string{"created_at", "create_at", "created_time", "create_time"}
 var updateTimeFields = []string{"updated_at", "update_at", "updated_time", "update_time"}
@@ -59,8 +59,8 @@ var hasDeletedFields = []string{"deleted", "is_deleted", "is_delete", "is_del"}
 var funcMap = template.FuncMap{
 	"contains": strings.Contains,
 
-	"isMultipleCompt":       func(ft string) bool { return strings.Contains(ft, "multiple") },
-	"isMultipleComptFields": func(ft string) bool { return contains(arrayFields, ft) },
+	"hasMultipleProp": func(ft string) bool { return strings.Contains(ft, "multiple") },
+	"isMultipleCompt": func(ft string) bool { return contains(multipleComptSlice, ft) },
 
 	"isCreateTimeFields":   func(ft string) bool { return contains(createTimeFields, ft) },
 	"isUpdateTimeFields":   func(ft string) bool { return contains(updateTimeFields, ft) },
