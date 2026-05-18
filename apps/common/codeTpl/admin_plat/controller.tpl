@@ -88,9 +88,11 @@ func (c *{{.ModelName}}Controller) Del() {
 
 func (c *{{.ModelName}}Controller) Detail() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
-	dtoData, err1 := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
-	if err != nil || err1 != nil {
-		err = helper.Ternary(err != nil, err, err1)
+	
+	id := c.Controller.GetString("id")
+	dtoData := system_dto.GenerateFormDto{}
+	dtoData.Id = id
+	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

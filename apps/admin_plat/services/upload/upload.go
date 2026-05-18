@@ -26,3 +26,6 @@ func (s *UploadService) VueSliceUploadCheck(userId string, unitId string, fileMd
 func (s *UploadService) LinkSign(host, urls string) (interface{}, error) {
 	return s.commonUploadService.LinkSign(host, urls)
 }
+func (s *UploadService) GetLinkById(host, ids string) (interface{}, error) {
+	return s.commonUploadService.GetLinkById(host, ids)
+}

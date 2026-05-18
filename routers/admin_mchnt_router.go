@@ -31,6 +31,7 @@ var mchntAuthApiList = []string{
 	"/admin_mchnt/upload/upload",
 	"/admin_mchnt/upload/vue-slice-upload",
 	"/admin_mchnt/upload/link-sign",
+	"/admin_mchnt/upload/get-link-by-id",
 }
 
 func commonSlices(gotoModuleName string) []beego.LinkNamespace {
@@ -130,6 +131,7 @@ func mchntAuthSlices() []beego.LinkNamespace {
 		beego.NSCtrlGet("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUploadCheck),
 		beego.NSCtrlPost("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUpload),
 		beego.NSCtrlGet("/upload/link-sign", (*adminUpload.UploadController).LinkSign),
+		beego.NSCtrlGet("/upload/get-link-by-id", (*adminUpload.UploadController).GetLinkById),
 		// auth end
 	}
 }

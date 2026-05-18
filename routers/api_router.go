@@ -24,6 +24,7 @@ var apiAuthApiList = []string{
 	"/api/v1/upload/upload",
 	"/api/v1/upload/vue-slice-upload",
 	"/api/v1/upload/link-sign",
+	"/api/v1/upload/get-link-by-id",
 }
 
 func apiAuthSlices() []beego.LinkNamespace {
@@ -37,6 +38,7 @@ func apiAuthSlices() []beego.LinkNamespace {
 		beego.NSCtrlGet("/v1/upload/vue-slice-upload", (*apiUploadV1.UploadController).VueSliceUploadCheck),
 		beego.NSCtrlPost("/v1/upload/vue-slice-upload", (*apiUploadV1.UploadController).VueSliceUpload),
 		beego.NSCtrlGet("/v1/upload/link-sign", (*apiUploadV1.UploadController).LinkSign),
+		beego.NSCtrlGet("/v1/upload/get-link-by-id", (*apiUploadV1.UploadController).GetLinkById),
 		// auth end
 	}
 }

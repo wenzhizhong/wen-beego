@@ -12,10 +12,10 @@
         <el-input type="textarea" v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{else if eq .FormType "datetime"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-date-picker v-model="form.{{.Name}}" type="{{if eq .Type "date"}}{{.Type}}{{else}}{{.FormType}}{{end}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="{{if eq .Type "date"}}YYYY-MM-DD{{else}}YYYY-MM-DD HH:mm:ss{{end}}" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{dateParsingInZone(dateStr, '{{.Name}}')}"/>
+        <el-date-picker v-model="form.{{.Name}}" type="{{if eq .Type "date"}}{{.Type}}{{else}}{{.FormType}}{{end}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="{{if eq .Type "date"}}YYYY-MM-DD{{else}}YYYY-MM-DD HH:mm:ss{{end}}" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{form.{{.Name}} = dateParsingInZone(dateStr)}"/>
       </el-form-item>
       {{else if eq .FormType "time"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-time-picker v-model="form.{{.Name}}" type="{{.FormType}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{dateParsingInZone(dateStr, '{{.Name}}')}"/>
+        <el-time-picker v-model="form.{{.Name}}" type="{{.FormType}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{form.{{.Name}} = dateParsingInZone(dateStr)}"/>
       </el-form-item>
       {{else if eq .FormType "switch"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-switch v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
@@ -42,7 +42,7 @@
         </el-upload>
       </el-form-item>
       {{else if eq .FormType "editor"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <div class="editor-placeholder" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>富文本编辑器（请自行引入组件）</div>
+        <EditorBase v-model="form.t_editor"/>
       </el-form-item>
       {{else}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-input v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
@@ -60,9 +60,10 @@
 import { ref, reactive, nextTick } from "vue";
 import type { FormInstance } from "element-plus";
 import { ElMessageBox } from "element-plus";
-import dayjs from "dayjs";
 import { message } from "@/utils/message";
+import  { dateParsingInZone } from "@/utils/time";
 import { getVarType } from "@/components/sliceUpload/common";
+import { EditorBase, EditorMulti, EditorUpload } from "@/components/Editor/components";
 import { get{{.ModelName}}Detail, add{{.ModelName}}, edit{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
 import { formRules } from "./utils/rule";
 import {upload} from "@/api/upload";
@@ -116,6 +117,20 @@ function open(title = "新增", row?: any) {
       editId.value = row.id;
       const res = await get{{.ModelName}}Detail({ id: row.id });
       const data = res.data ?? {};
+
+      for (let i = 0; i < needStringifyFields.length; i++) {
+        if (data[needStringifyFields[i]] === null || data[needStringifyFields[i]] === undefined) continue;
+
+        let type = form[needStringifyFields[i]] && getVarType(form[needStringifyFields[i]]) || ''
+        if (type == 'array') {
+          data[needStringifyFields[i]] = data[needStringifyFields[i]].split(",");
+        }
+      }
+      for (let i = 0; i < needConvertBoolFields.length; i++) {
+        if (data[needConvertBoolFields[i]] === null || data[needConvertBoolFields[i]] === undefined) continue;
+        data[needConvertBoolFields[i]] = Boolean(data[needConvertBoolFields[i]]);
+      }
+
       Object.assign(form, data);
     } else {
       editId.value = "";
@@ -147,6 +162,7 @@ async function handleSubmit() {
       }
     }
     for (let i = 0; i < needConvertBoolFields.length; i++) {
+      if (form[needConvertBoolFields[i]] === null || form[needConvertBoolFields[i]] === undefined) continue;
       tmpForm[needConvertBoolFields[i]] = Number(!!(tmpForm[needConvertBoolFields[i]]))
     }
     
@@ -206,19 +222,9 @@ function removeFile(e :any, key:string){
     form[key] = form[key].filter(item=>item != fileId);
   }
 }
-const dateParsingInZone = (dateStr, key:string)=>{ 
-  form[key] = dayjs.tz(dateStr, 'Asia/Shanghai').format()
-}
-
 
 defineExpose({ open });
 </script>
 
 <style scoped>
-.editor-placeholder {
-  border: 1px solid var(--el-border-color);
-  border-radius: 4px;
-  padding: 8px;
-  color: var(--el-text-color-placeholder);
-}
 </style>

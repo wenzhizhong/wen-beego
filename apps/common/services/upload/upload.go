@@ -4,6 +4,7 @@ import (
 	"WenBeego/apps/common/dto/upload_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
+	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/services/upload/itf"
 	"errors"
@@ -204,4 +205,38 @@ func (s *Upload) LinkSign(host, urls string) (interface{}, error) {
 	}
 	data.List = newUrlsArr
 	return data, nil
+}
+
+func (s *Upload) GetLinkById(host, ids string) (interface{}, error) {
+	tmpIdSlice := strings.Split(ids, ",")
+	idSlice := make([]string, 0)
+	if len(tmpIdSlice) > 0 {
+		for _, v := range tmpIdSlice {
+			v = strings.TrimSpace(v)
+			if v == "" {
+				continue
+			}
+			idSlice = append(idSlice, v)
+		}
+	}
+	if len(idSlice) == 0 {
+		return nil, errors.New("参数错误")
+	}
+
+	data, err := (&models_ar.FileAr{}).GetLinkById(idSlice)
+	if err != nil {
+		return nil, err
+	}
+	for i, v := range data {
+		data[i].Path, err = helper.LocalFileSign(host, v.Path)
+		if err != nil {
+			return nil, err
+		}
+	}
+	result := struct {
+		List []models.File `json:"list"`
+	}{
+		List: data,
+	}
+	return result, nil
 }

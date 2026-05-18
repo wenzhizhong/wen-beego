@@ -144,3 +144,26 @@ func (c *UploadController) LinkSign() {
 	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }
+
+// 获取链接by ids
+// @Summary 通过id获取访问链接
+// @Description 通过id获取访问链接
+// @Tags 上传
+// @Accept application/x-wwww-form-urlencoded
+// @Produce  json
+// @Param ids path string true "ids"
+// @Success 200 {object} dto.Response "返回结果"
+// @Router /admin_mchnt/upload/get-link-by-id [get]
+// @Security ApiKeyAuth
+func (c *UploadController) GetLinkById() {
+	host := c.Ctx.Request.Host
+	ids := c.GetString("ids")
+	data, err := c.uploadService.GetLinkById(host, ids)
+	if err != nil {
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", data)
+	c.ServeJSON()
+}

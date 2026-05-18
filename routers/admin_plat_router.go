@@ -32,6 +32,7 @@ var platAuthApiList = []string{
 	"/admin_plat/upload/upload",
 	"/admin_plat/upload/vue-slice-upload",
 	"/admin_plat/upload/link-sign",
+	"/admin_plat/upload/get-link-by-id",
 }
 
 func platAuthSlices() []beego.LinkNamespace {
@@ -49,6 +50,7 @@ func platAuthSlices() []beego.LinkNamespace {
 		beego.NSCtrlGet("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUploadCheck),
 		beego.NSCtrlPost("/upload/vue-slice-upload", (*adminUpload.UploadController).VueSliceUpload),
 		beego.NSCtrlGet("/upload/link-sign", (*adminUpload.UploadController).LinkSign),
+		beego.NSCtrlGet("/upload/get-link-by-id", (*adminUpload.UploadController).GetLinkById),
 		// auth end
 	}
 }
