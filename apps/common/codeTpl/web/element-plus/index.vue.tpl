@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { use{{.ModelName}}, previewVisible, previewFileList } from "./utils/hook";
+import { use{{.ModelName}}, previewVisible, previewFileList{{range .Columns}}{{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio") (eq .FormType "select") (eq .FormType "checkbox")}}, {{.Name}}Options{{end}}{{end}}{{end}} } from "./utils/hook";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import {{.ModelName}}Form from "./form.vue";
@@ -16,6 +16,7 @@ defineOptions({
 
 const formRef = ref();
 const tableRef = ref();
+const searchFormRef = ref();
 const {
   loading,
   dataList,
@@ -43,17 +44,20 @@ const {
       :model="searchForm"
       class="search-form bg-bg_color w-full pl-8 pt-[12px]"
     >
-      <el-form-item label="关键词：">
-        <el-input
-          v-model="searchForm.keyword"
-          placeholder="请输入关键词"
-          clearable
-          class="!w-[200px]"
-        />
+{{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-form-item label="{{.Comment}}：" prop="{{.Name}}">
+        {{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio")}}<el-select v-model="searchForm.{{.Name}}" placeholder="{{.Comment}}" clearable class="!w-[160px]">
+          <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
+        </el-select>
+        {{else if or (eq .FormType "select") (eq .FormType "checkbox")}}<el-select v-model="searchForm.{{.Name}}" multiple placeholder="{{.Comment}}" clearable class="!w-[200px]">
+          <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
+        </el-select>
+        {{end}}{{else if eq .FormType "datetime"}}<el-date-picker v-model="searchForm.{{.Name}}" type="daterange" start-placeholder="开始" end-placeholder="结束" value-format="YYYY-MM-DD" class="!w-[240px]" />
+        {{else}}<el-input v-model="searchForm.{{.Name}}" placeholder="请输入{{.Comment}}" clearable class="!w-[180px]" />
+        {{end}}
       </el-form-item>
-      <el-form-item>
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-form-item>
         <el-button type="primary" :icon="useRenderIcon('ri/search-line')" :loading="loading" @click="onSearch">搜索</el-button>
-        <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(formRef)">重置</el-button>
+        <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(searchFormRef)">重置</el-button>
       </el-form-item>
     </el-form>
 

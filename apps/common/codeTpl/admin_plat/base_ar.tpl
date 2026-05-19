@@ -4,23 +4,34 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
 
 // Get{{.ModelName}}List 多用户体系通用列表查询
-func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset int, keyword string, model M) (data []models.{{.ModelName}}, count int64, err error) {
+func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M) (data []models.{{.ModelName}}, count int64, err error) {
 	data = make([]models.{{.ModelName}}, 0)
 	tableName := model.TableName()
 
 	query := global.GetReadDb().
 		Model(model){{if .HasDeleted}}.
 		Where(tableName + ".{{.DeletedField}} = 0"){{end}}
-
-	if keyword != "" {
-		// query = query.Where(tableName+".\"name\" LIKE ?", "%"+keyword+"%")
-	}
+{{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}	{{if or (eq .GoType "time.Time") (eq .GoType "*time.Time")}}	if !searchDto.{{.GoFieldName}}Start.IsZero() {
+			query = query.Where(tableName+".{{.Name}} >= ?", searchDto.{{.GoFieldName}}Start)
+		}
+		if !searchDto.{{.GoFieldName}}End.IsZero() {
+			endVal := searchDto.{{.GoFieldName}}End
+			{{if eq .Type "date"}}endVal = endVal.AddDate(0, 0, 1){{else}}endVal = endVal.Add(time.Second){{end}}
+			query = query.Where(tableName+".{{.Name}} < ?", endVal)
+		}
+	{{else if or (eq .GoType "int") (eq .GoType "int64") (eq .GoType "float32") (eq .GoType "float64")}}	if searchDto.{{.GoFieldName}} != 0 { query = query.Where(tableName+".{{.Name}} = ?", searchDto.{{.GoFieldName}}) }
+	{{else if eq .GoType "bool"}}	if searchDto.{{.GoFieldName}} { query = query.Where(tableName+".{{.Name}} = ?", searchDto.{{.GoFieldName}}) }
+	{{else}}	if searchDto.{{.GoFieldName}} != "" { query = query.Where(tableName+".{{.Name}} = ?", searchDto.{{.GoFieldName}}) }
+	{{end}}
+{{end}}{{end}}{{end}}{{end}}
 
 	err = query.Count(&count).Error
 	if err != nil || count == 0 {

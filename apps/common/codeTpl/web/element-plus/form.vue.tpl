@@ -24,10 +24,22 @@
         <el-select v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" style="width: 100%" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-select>
       </el-form-item>
       {{else if eq .FormType "radio"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-radio-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-radio-group>
+       {{/* <el-radio-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}> */ -}}
+        <el-radio-group v-model="form.{{.Name}}" >
+          <template v-slot:default>
+            <el-radio-button v-for="item in {{.Name}}Options" :key="item.id" :value="item.id">
+              {{"{{"}} item.name {{"}}"}} 
+            </el-radio-button>
+          </template>
+        </el-radio-group>
       </el-form-item>
       {{else if eq .FormType "checkbox"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-checkbox-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-checkbox-group>
+        {{/* <el-checkbox-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-checkbox-group> */ -}}
+        <el-checkbox-group v-model="form.{{.Name}}">
+          <el-checkbox-button v-for="item in {{.Name}}Options" :key="item.id" :value="item.id">
+            {{"{{"}} item.name {{"}}"}} 
+          </el-checkbox-button>
+        </el-checkbox-group>
       </el-form-item>
       {{else if eq .FormType "imageUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <sliceUploadV2

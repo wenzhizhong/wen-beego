@@ -27,8 +27,8 @@ func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id stri
 	return s.common{{.ModelName}}.GetDetail(baseParamDto, id)
 }
 
-func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, keyword string) (*dto.RespDataListDto, error) {
-	return s.common{{.ModelName}}.GetList(baseParamDto, pageSize, offset, keyword)
+func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (*dto.RespDataListDto, error) {
+	return s.common{{.ModelName}}.GetList(baseParamDto, pageSize, offset, searchDto)
 }
 
 {{else}}
@@ -113,9 +113,9 @@ func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id stri
 	return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
 }
 
-func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, keyword string) (*dto.RespDataListDto, error) {
+func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (*dto.RespDataListDto, error) {
 	_ = baseParamDto
-	data, count, err := s.{{.ModelName}}Ar.GetList(pageSize, offset, keyword)
+	data, count, err := s.{{.ModelName}}Ar.GetList(pageSize, offset, searchDto)
 	if err != nil {
 		return nil, fmt.Errorf("获取列表失败: %v", err)
 	}

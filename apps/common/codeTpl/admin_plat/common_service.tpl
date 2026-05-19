@@ -107,16 +107,16 @@ func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id stri
 	}
 }
 
-func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, keyword string) (*dto.RespDataListDto, error) {
+func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (*dto.RespDataListDto, error) {
 	var data []models.{{.ModelName}}
 	var count int64
 	var err error
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, keyword, &models.{{.PlatModelName}}{})
+		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.PlatModelName}}{})
 	case "mchnt_plat":
-		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, keyword, &models.{{.MchntModelName}}{})
+		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.MchntModelName}}{})
 	default:
 		return nil, errors.New("模块名称错误")
 	}
@@ -213,9 +213,9 @@ func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id stri
 	return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
 }
 
-func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, keyword string) (*dto.RespDataListDto, error) {
+func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (*dto.RespDataListDto, error) {
 	_ = baseParamDto
-	data, count, err := s.{{.ModelName}}Ar.GetList(pageSize, offset, keyword)
+	data, count, err := s.{{.ModelName}}Ar.GetList(pageSize, offset, searchDto)
 	if err != nil {
 		return nil, fmt.Errorf("获取列表失败: %v", err)
 	}

@@ -6,6 +6,8 @@ import (
 	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
 	"WenBeego/apps/common/helper"
 	{{.MenuModule}}Service "WenBeego/apps/{{.AppModule}}/services/{{.MenuModule}}"
+	"encoding/json"
+	"net/url"
 )
 
 type {{.ModelName}}Controller struct {
@@ -22,8 +24,13 @@ func (c *{{.ModelName}}Controller) Get() {
 		c.ServeJSON()
 		return
 	}
-	keyword := c.GetString("keyword")
-	data, err := c.Service.GetList(baseParamDto, reqDataListDto.PageSize, reqDataListDto.Offset, keyword)
+	dtoStr := c.GetString("dto")
+	dtoStr, _ = url.QueryUnescape(dtoStr)
+	var searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto
+	if dtoStr != "" {
+		json.Unmarshal([]byte(dtoStr), &searchDto)
+	}
+	data, err := c.Service.GetList(baseParamDto, reqDataListDto.PageSize, reqDataListDto.Offset, searchDto)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {

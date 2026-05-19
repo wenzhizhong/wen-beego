@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { message } from "@/utils/message";
 import { ElMessageBox, ElDialog, ElImage, ElLink } from "element-plus";
 import { listToMap, getFileSuffix, getFileIcon } from "@/utils/util.js";
+import { dateParsingInZone } from "@/utils/time";
 import { get{{.ModelName}}List, del{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
 import { getLinkById } from "@/api/upload";
 import type { PaginationProps } from "@pureadmin/table";
@@ -36,7 +37,9 @@ export function use{{.ModelName}}(formRef: any) {
   const dataList = ref([]);
   const selectedNum = ref(0);
 
-  const searchForm = reactive({ keyword: "" });
+  const searchForm = reactive({
+{{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}    {{.Name}}: {{if isMultipleCompt .FormType}}[]{{else}}""{{end}},
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}  });
 
   const pagination = reactive<PaginationProps>({
     total: 0, pageSize: 10, currentPage: 1, background: true
@@ -71,10 +74,23 @@ export function use{{.ModelName}}(formRef: any) {
   async function onSearch() {
     loading.value = true;
     try {
+      const searchDto: any = {};
+      for (const k of Object.keys(searchForm)) {
+        let val = (searchForm as any)[k];
+        if (val === '' || val === null || val === undefined) continue;
+        if (Array.isArray(val) && val.length === 2 && !isNaN(Date.parse(val[0]))) {
+          searchDto[k + 'Start'] = dateParsingInZone(val[0]);
+          searchDto[k + 'End']   = dateParsingInZone(val[1]);
+        } else if (Array.isArray(val)) {
+          searchDto[k] = val.join(',');
+        } else {
+          searchDto[k] = val;
+        }
+      }
       const res = await get{{.ModelName}}List({
         currentPage: pagination.currentPage,
         pageSize: pagination.pageSize,
-        keyword: searchForm.keyword
+        dto: encodeURIComponent(JSON.stringify(searchDto))
       });
       const { list, total } = res.data ?? { list: [], total: 0 };
       dataList.value = list ?? [];
