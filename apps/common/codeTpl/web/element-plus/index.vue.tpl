@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { use{{.ModelName}} } from "./utils/hook";
+import { use{{.ModelName}}, previewVisible, previewFileList } from "./utils/hook";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import {{.ModelName}}Form from "./form.vue";
@@ -104,6 +104,15 @@ const {
     </PureTableBar>
 
     <{{.ModelName}}Form ref="formRef" @refresh="onSearch" />
+
+    <el-dialog v-model="previewVisible" title="附件预览" width="700px">
+      <div v-for="item in previewFileList" :key="item.id" class="preview-item">
+        <el-image v-if="['jpg','jpeg','png','gif','webp','bmp'].includes(item.suffix)" :src="item.path" fit="contain" style="max-width:100%;max-height:400px" />
+        <div v-else>
+          <el-link :href="item.path" target="_blank" type="primary">{{"{{"}} item.name {{"}}"}}</el-link>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -114,4 +123,8 @@ const {
 .search-form :deep(.el-form-item) {
   margin-bottom: 12px;
 }
+.preview-item {
+  margin-bottom: 12px;
+}
 </style>
+

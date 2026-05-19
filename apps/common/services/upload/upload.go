@@ -157,6 +157,7 @@ func (s *Upload) doUpload(requestDto upload_dto.UploadFileReqDto, userId string,
 
 	if mergeRes {
 		// save info to db
+		result.FileName = requestDto.FileName
 		result.FileId, err = helper.GetUuid()
 		if err != nil {
 			return result, err

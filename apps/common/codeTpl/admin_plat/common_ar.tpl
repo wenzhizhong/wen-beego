@@ -57,7 +57,7 @@ func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, keyword string) (data 
 	}
 
 	err = query.
-		Select(tableName + ".*").
+		Select("{{.ListSelectCols}}").
 		Limit(pageSize).
 		Offset(offset).
 		Order(tableName + ".created_at desc").

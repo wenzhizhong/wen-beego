@@ -12,10 +12,10 @@
         <el-input type="textarea" v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
       {{else if eq .FormType "datetime"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-date-picker v-model="form.{{.Name}}" type="{{if eq .Type "date"}}{{.Type}}{{else}}{{.FormType}}{{end}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="{{if eq .Type "date"}}YYYY-MM-DD{{else}}YYYY-MM-DD HH:mm:ss{{end}}" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{form.{{.Name}} = dateParsingInZone(dateStr)}"/>
+        <el-date-picker v-model="form.{{.Name}}" type="{{if eq .Type "date"}}{{.Type}}{{else}}datetime{{end}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="{{if eq .Type "date"}}YYYY-MM-DD{{else}}YYYY-MM-DD HH:mm:ss{{end}}" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr: any)=>{form.{{.Name}} = dateParsingInZone(dateStr)}"/>
       </el-form-item>
       {{else if eq .FormType "time"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-time-picker v-model="form.{{.Name}}" type="{{.FormType}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr)=>{form.{{.Name}} = dateParsingInZone(dateStr)}"/>
+        <el-time-picker v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} format="HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" @change="(dateStr: any)=>{form.{{.Name}} = dateParsingInZone(dateStr)}"/>
       </el-form-item>
       {{else if eq .FormType "switch"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-switch v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
@@ -24,25 +24,33 @@
         <el-select v-model="form.{{.Name}}" placeholder="请选择{{.Comment}}" style="width: 100%" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-select>
       </el-form-item>
       {{else if eq .FormType "radio"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-radio-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
-        </el-radio-group>
+        <el-radio-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-radio-group>
       </el-form-item>
       {{else if eq .FormType "checkbox"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-checkbox-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}>
-        </el-checkbox-group>
+        <el-checkbox-group v-model="form.{{.Name}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}}></el-checkbox-group>
       </el-form-item>
       {{else if eq .FormType "imageUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" list-type="picture-card" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if hasMultipleProp .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
-          <el-icon><Plus /></el-icon>
-        </el-upload>
+        <sliceUploadV2
+          :bucketACL="'public'"
+          :uploadSuccessCallback="(uploadResult: any, file: any)=>{uploadFileSuccessCallback(uploadResult, file, '{{.Name}}')}"
+          :elementPlusUploader="{ 'list-type': 'picture-card', 'show-file-list': true, 'file-list': fileListObj['{{.Name}}'], 'on-remove': (e: any)=>{removeFile(e, '{{.Name}}')} {{if .FormParamVue}} , {{.FormParamVue}}{{end}} }">
+          <template #default>
+            <AddLargeLine style="width: 40px; height: 40px;"/>
+          </template>
+        </sliceUploadV2>
       </el-form-item>
       {{else if eq .FormType "fileUpload"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <el-upload action="#" :auto-upload="false" {{if .FormParamVue}}{{.FormParamVue}}{{end}}  @change="e=>{uploadFile(e, '{{.Name}}', {{if hasMultipleProp .FormParam}}true{{else}}false{{end}} )}"  :on-remove="(e)=>{removeFile(e, '{{.Name}}')}"  :file-list="fileListObj['{{.Name}}']">
-          <el-button type="primary">上传文件</el-button>
-        </el-upload>
+        <sliceUploadV2
+          :bucketACL="'public'"
+          :uploadSuccessCallback="(uploadResult: any, file: any)=>{uploadFileSuccessCallback(uploadResult, file, '{{.Name}}')}"
+          :elementPlusUploader="{ 'list-type': 'text', 'show-file-list': true, 'file-list': fileListObj['{{.Name}}'], 'on-remove': (e: any)=>{removeFile(e, '{{.Name}}')} {{if .FormParamVue}} , {{.FormParamVue}}{{end}} }">
+          <template #default>
+            <el-button type="primary">上传文件</el-button>
+          </template>
+        </sliceUploadV2>
       </el-form-item>
       {{else if eq .FormType "editor"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <EditorBase v-model="form.t_editor"/>
+        <EditorBase v-model="form.{{.Name}}"/>
       </el-form-item>
       {{else}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-input v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
@@ -61,16 +69,18 @@ import { ref, reactive, nextTick } from "vue";
 import type { FormInstance } from "element-plus";
 import { ElMessageBox } from "element-plus";
 import { message } from "@/utils/message";
-import  { dateParsingInZone } from "@/utils/time";
+import { dateParsingInZone } from "@/utils/time";
 import { getVarType } from "@/components/sliceUpload/common";
-import { EditorBase, EditorMulti, EditorUpload } from "@/components/Editor/components";
+import sliceUploadV2 from "@/components/sliceUploadV2/index.vue";
+import { EditorBase } from "@/components/Editor/components";
+import AddLargeLine from "~icons/ri/add-large-line";
 import { get{{.ModelName}}Detail, add{{.ModelName}}, edit{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
 import { formRules } from "./utils/rule";
-import {upload} from "@/api/upload";
-
+import { getLinkById } from "@/api/upload";
 {{range .Columns}}{{if .FormParamTs}}
-{{.FormParamTs}}
-{{end}}{{end}}
+{{if or (eq .FormType "select") (eq .FormType "radio") (eq .FormType "checkbox")}}import { {{.Name}}Options, {{.Name}}Props } from "./utils/hook";
+{{else if eq .FormType "switch"}}import { {{.Name}}Options } from "./utils/hook";
+{{end}}{{end}}{{end}}
 
 const emit = defineEmits(["refresh"]);
 const visible = ref(false);
@@ -79,34 +89,36 @@ const submitLoading = ref(false);
 const formRef = ref<FormInstance>();
 const editId = ref("");
 
-const fileListObj = ref({
-  {{range .Columns}}{{if eq .FormType "imageUpload"}} {{.Name}}: [],
-  {{else if eq .FormType "fileUpload"}} {{.Name}}: [],
-  {{end}}{{end}}
+const fileListObj = ref<Record<string, any[]>>({
+{{range .Columns}}{{if eq .FormType "imageUpload"}}  {{.Name}}: [],
+{{else if eq .FormType "fileUpload"}}  {{.Name}}: [],
+{{end}}{{end}}
 });
+
 const needStringifyFields = reactive([
-  {{range .Columns}}{{if eq .FormType "checkbox"}}  "{{.Name}}",
-  {{else if eq .FormType "select"}}  "{{.Name}}",
-  {{end}}{{end}}
-  ...(Object.keys(fileListObj.value))
+{{range .Columns}}{{if eq .FormType "checkbox"}}  "{{.Name}}",
+{{else if eq .FormType "select"}}  "{{.Name}}",
+{{end}}{{end}}  ...(Object.keys(fileListObj.value))
 ]);
 const needConvertBoolFields = reactive([
-  {{range .Columns}}{{if eq .FormType "switch"}}  "{{.Name}}",
-  {{end}}{{end}}
+{{range .Columns}}{{if eq .FormType "switch"}}  "{{.Name}}",
+{{end}}{{end}}
 ]);
 
 const form = reactive({
-  {{range .Columns}}{{if not .SkipForm}}
+{{range .Columns}}{{if not .SkipForm}}
     {{- if isMultipleCompt .FormType -}}
       {{- if and (eq .FormType "select") (not (hasMultipleProp .FormParam)) -}}
-        {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}""{{else}}{{.DefVal}}{{end}},
+        {{.Name}}: {{if .DefVal}}{{.DefVal}}{{else}}""{{end}},
       {{- else -}}
         {{.Name}}: [],
       {{- end -}}
+    {{- else if eq .FormType "switch" -}}
+      {{.Name}}: {{if .DefVal}}{{.DefVal}}{{else}}0{{end}},
     {{- else -}}
-      {{.Name}}: {{if and (eq .TsType "string") (eq .DefVal "")}}""{{else}}{{.DefVal}}{{end}},
+      {{.Name}}: {{if .DefVal}}{{.DefVal}}{{else}}""{{end}},
     {{- end}}
-  {{end}}{{end}}
+{{end}}{{end}}
 });
 
 function open(title = "新增", row?: any) {
@@ -117,12 +129,9 @@ function open(title = "新增", row?: any) {
       editId.value = row.id;
       const res = await get{{.ModelName}}Detail({ id: row.id });
       const data = res.data ?? {};
-
       for (let i = 0; i < needStringifyFields.length; i++) {
         if (data[needStringifyFields[i]] === null || data[needStringifyFields[i]] === undefined) continue;
-
-        let type = form[needStringifyFields[i]] && getVarType(form[needStringifyFields[i]]) || ''
-        if (type == 'array') {
+        if (getVarType(form[needStringifyFields[i]]) === 'array') {
           data[needStringifyFields[i]] = data[needStringifyFields[i]].split(",");
         }
       }
@@ -130,9 +139,9 @@ function open(title = "新增", row?: any) {
         if (data[needConvertBoolFields[i]] === null || data[needConvertBoolFields[i]] === undefined) continue;
         data[needConvertBoolFields[i]] = Boolean(data[needConvertBoolFields[i]]);
       }
-
       Object.assign(form, data);
-    } else {
+{{range .Columns}}{{if or (eq .FormType "imageUpload") (eq .FormType "fileUpload")}}      fileListObj.value['{{.Name}}'] = await doGetLinkById("{{.Name}}");
+{{end}}{{end}}    } else {
       editId.value = "";
       formRef.value?.resetFields();
     }
@@ -151,80 +160,65 @@ async function handleSubmit() {
   submitLoading.value = true;
   try {
     await ElMessageBox.confirm(editId.value ? "是否修改?" : "是否新增?");
-
-    let tmpForm = JSON.parse(JSON.stringify(form));
+    let tmpForm: any = JSON.parse(JSON.stringify(form));
     for (let i = 0; i < needStringifyFields.length; i++) {
       if (form[needStringifyFields[i]] === null || form[needStringifyFields[i]] === undefined) continue;
-
-      let type = form[needStringifyFields[i]] && getVarType(form[needStringifyFields[i]]) || ''
-      if (type == 'array') {
+      if (getVarType(form[needStringifyFields[i]]) === 'array') {
         tmpForm[needStringifyFields[i]] = form[needStringifyFields[i]].join(",");
       }
     }
     for (let i = 0; i < needConvertBoolFields.length; i++) {
       if (form[needConvertBoolFields[i]] === null || form[needConvertBoolFields[i]] === undefined) continue;
-      tmpForm[needConvertBoolFields[i]] = Number(!!(tmpForm[needConvertBoolFields[i]]))
+      tmpForm[needConvertBoolFields[i]] = Number(!!tmpForm[needConvertBoolFields[i]]);
     }
-    
-    let result
+    let result;
     if (editId.value) {
-      result =  await editGenerateForm({ id: editId.value, ...tmpForm })
+      result = await edit{{.ModelName}}({ id: editId.value, ...tmpForm });
     } else {
-      result =  await addGenerateForm(tmpForm)
+      result = await add{{.ModelName}}(tmpForm);
     }
-    let msg = ""
-    if  (result && result.code === 200) {
-      msg = editId.value ? "修改成功" : "新增成功"
-      message(msg, { type: "success" });
+    if (result && result.code === 200) {
+      message(editId.value ? "修改成功" : "新增成功", { type: "success" });
     } else {
-      msg = result.message || "操作失败"
-      message(msg, { type: "error" });
+      message(result?.message || "操作失败", { type: "error" });
     }
     emit("refresh");
     handleClose();
-  }catch(error) {
-    let errMsg = typeof error === "string" ? error : error.message;
-    message(errMsg || "修改失败", { type: "error" });
+  } catch (error: any) {
+    message(error?.message || "操作失败", { type: "error" });
   } finally {
     submitLoading.value = false;
   }
 }
 
-/**
-* 上传文件
-* file 文件对象
-* key 字段名
-* multiple 是否多文件上传
-*/
-async function uploadFile(file: any, key: string, multiple: boolean = false) { 
-  if (!file) return;
-  upload(file.raw, file.name, file.size).then(async (res) => { 
-    if (res.code === 200 && res?.data?.filePath) {
-      message("上传成功", { type: "success" });
+const uploadFileSuccessCallback = async (uploadResult: any, file: any, key: string) => {
+  form[key] = form[key].length ? [...form[key], uploadResult.fileId] : [uploadResult.fileId];
+  fileListObj.value[key] = await doGetLinkById(key);
+};
 
-      let fileItem = {id: res.data.fileId, name: file.name, url: res.data.filePath}
-      form[key] = multiple ? [...form[key], res.data.fileId] : [res.data.fileId];
-      multiple? fileListObj.value[key].push(fileItem) : fileListObj.value[key] = [fileItem];
-    } else {
-      message(res.message ||"上传失败", { type: "error" });
+function removeFile(e: any, key: string) {
+  const fileId = e?.raw && e.raw instanceof File ? e.raw.fileId : e.id;
+  if (!fileId) return;
+  fileListObj.value[key] = fileListObj.value[key].filter((item: any) => item.id != fileId);
+  form[key] = form[key].filter((item: any) => item != fileId);
+}
+
+const getShowUploadListItem = (fileId: string, fileName: string, filePath: string) => {
+  return { id: fileId, name: fileName, url: filePath };
+};
+
+const doGetLinkById = async (key: string) => {
+  if (!form[key] || !form[key].length) return [];
+  return await getLinkById(form[key]).then((res: any) => {
+    if (res?.code !== 200) {
+      console.error(res?.message || "getLinkById() 获取数据错误");
+      return [];
     }
+    return (res?.data?.list || []).map((item: any) =>
+      getShowUploadListItem(item.id, item.realName, item.path)
+    );
   });
-}
-function removeFile(e :any, key:string){
-  if (fileListObj.value[key]){
-    let fileId = e?.raw && e.raw instanceof File ? e.raw.fileId : e.id;
-    if (!fileId) {
-      message("请选择文件", { type: "error" });
-      return
-    }
-    
-    fileListObj.value[key] = fileListObj.value[key].filter(item=>item.id != fileId);
-    form[key] = form[key].filter(item=>item != fileId);
-  }
-}
+};
 
 defineExpose({ open });
 </script>
-
-<style scoped>
-</style>

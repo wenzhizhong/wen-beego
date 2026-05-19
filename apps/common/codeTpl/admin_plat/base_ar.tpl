@@ -28,7 +28,7 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 	}
 
 	err = query.
-		Select(tableName + ".*").
+		Select("{{.ListSelectCols}}").
 		Limit(pageSize).
 		Offset(offset).
 		{{if .HasCreateTime}}Order(tableName + ".{{.CreateTimeField}} desc").{{end}}

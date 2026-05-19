@@ -217,6 +217,7 @@ type TemplateData struct {
 	MchntModelName  string
 	PlatTableName   string
 	MchntTableName  string
+	ListSelectCols  string
 }
 
 func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDto) (map[string]string, error) {
@@ -340,6 +341,24 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 	tplDir := filepath.Join(global.AppDir, "common", "codeTpl")
 
+	listSelectCols := tableName + ".*"
+	hasEditorCol := false
+	for _, c := range columnConfigs {
+		if c.FormType == "editor" {
+			hasEditorCol = true
+			break
+		}
+	}
+	if hasEditorCol {
+		cols := make([]string, 0, len(columnConfigs))
+		for _, c := range columnConfigs {
+			if c.FormType != "editor" {
+				cols = append(cols, tableName+"."+c.Name)
+			}
+		}
+		listSelectCols = strings.Join(cols, ", ")
+	}
+
 	td := TemplateData{
 		ModelName:       modelName,
 		ModelNameLower:  modelNameLower,
@@ -362,6 +381,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		MchntModelName:  mchntModelName,
 		PlatTableName:   platTableName,
 		MchntTableName:  mchntTableName,
+		ListSelectCols:  listSelectCols,
 	}
 
 	// shared code: base_model, model, dto (always generated once)
@@ -721,8 +741,17 @@ func parseFormParam(formParam string) (vue, ts string) {
 	}
 	var data FormParamData
 	if err := json.Unmarshal([]byte(formParam), &data); err != nil {
-		// old plain string format: treat as vue attrs
 		return formParam, ""
+	}
+	// add export prefix so hook.tsx exports them for cross-file import
+	if data.Ts != "" {
+		lines := strings.Split(data.Ts, "\n")
+		for i, line := range lines {
+			if strings.HasPrefix(strings.TrimSpace(line), "const ") {
+				lines[i] = "export " + line
+			}
+		}
+		data.Ts = strings.Join(lines, "\n")
 	}
 	return data.Vue, data.Ts
 }

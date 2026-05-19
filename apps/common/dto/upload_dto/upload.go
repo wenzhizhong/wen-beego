@@ -21,6 +21,7 @@ type UploadFileReqDto struct {
 type UploadFileRespDto struct {
 	FileId        string `json:"fileId"`
 	FilePath      string `json:"filePath"`
+	FileName      string `json:"fileName"`
 	TempSlicePath string `json:"tempSlicePath"`
 	UploadFileCheckDto
 }
