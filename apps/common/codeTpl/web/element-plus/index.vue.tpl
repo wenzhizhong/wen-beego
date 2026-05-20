@@ -44,21 +44,27 @@ const {
       :model="searchForm"
       class="search-form bg-bg_color w-full pl-8 pt-[12px]"
     >
-{{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-form-item label="{{.Comment}}：" prop="{{.Name}}">
-        {{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio")}}<el-select v-model="searchForm.{{.Name}}" placeholder="{{.Comment}}" clearable class="!w-[160px]">
-          <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
-        </el-select>
-        {{else if or (eq .FormType "select") (eq .FormType "checkbox")}}<el-select v-model="searchForm.{{.Name}}" multiple placeholder="{{.Comment}}" clearable class="!w-[200px]">
-          <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
-        </el-select>
-        {{end}}{{else if eq .FormType "datetime"}}<el-date-picker v-model="searchForm.{{.Name}}" type="daterange" start-placeholder="开始" end-placeholder="结束" value-format="YYYY-MM-DD" class="!w-[240px]" />
-        {{else}}<el-input v-model="searchForm.{{.Name}}" placeholder="请输入{{.Comment}}" clearable class="!w-[180px]" />
-        {{end}}
-      </el-form-item>
-{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-form-item>
-        <el-button type="primary" :icon="useRenderIcon('ri/search-line')" :loading="loading" @click="onSearch">搜索</el-button>
-        <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(searchFormRef)">重置</el-button>
-      </el-form-item>
+    <el-row :gutter="20">
+  {{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+          <el-form-item label="{{.Comment}}：" prop="{{.Name}}">
+            {{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio")}}<el-select v-model="searchForm.{{.Name}}" placeholder="{{.Comment}}" clearable class="!w-[160px]">
+              <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
+            </el-select>
+            {{else if or (eq .FormType "select") (eq .FormType "checkbox")}}<el-select v-model="searchForm.{{.Name}}" multiple placeholder="{{.Comment}}" clearable class="!w-[200px]">
+              <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
+            </el-select>
+            {{end}}{{else if eq .FormType "datetime"}}<el-date-picker v-model="searchForm.{{.Name}}" type="daterange" start-placeholder="开始" end-placeholder="结束" value-format="YYYY-MM-DD" class="!w-[240px]" />
+            {{else}}<el-input v-model="searchForm.{{.Name}}" placeholder="请输入{{.Comment}}" clearable class="!w-[180px]" />
+            {{end}}
+          </el-form-item>
+        </el-col>
+  {{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+          <el-form-item>
+            <el-button type="primary" :icon="useRenderIcon('ri/search-line')" :loading="loading" @click="onSearch">搜索</el-button>
+            <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(searchFormRef)">重置</el-button>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <PureTableBar title="{{.MenuName}}" :columns="columns" @refresh="onSearch">
@@ -129,6 +135,13 @@ const {
 }
 .preview-item {
   margin-bottom: 12px;
+}
+.el-form--inline .el-form-item{
+  width: 100%;
+  margin-right: 0;
+  :deep(  .el-form-item__label){
+    min-width: 82px;
+  }
 }
 </style>
 
