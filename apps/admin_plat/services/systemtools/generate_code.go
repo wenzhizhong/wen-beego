@@ -218,6 +218,12 @@ type TemplateData struct {
 	PlatTableName   string
 	MchntTableName  string
 	ListSelectCols  string
+
+	AuthRead   string
+	AuthAdd    string
+	AuthEdit   string
+	AuthDel    string
+	AuthDetail string
 }
 
 func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDto) (map[string]string, error) {
@@ -474,6 +480,13 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 	// frontend code
 	if contains(codeTypes, CODE_TYPE_VIEW) && viewType == VIEW_TYPE_ELEMENT_PLUS {
+		// page curd permission
+		td.AuthRead = s.getAuthRead(td.AppModule, menuModule, modelNameLower)
+		td.AuthAdd = s.getAuthAdd(td.AppModule, menuModule, modelNameLower)
+		td.AuthEdit = s.getAuthEdit(td.AppModule, menuModule, modelNameLower)
+		td.AuthDel = s.getAuthDel(td.AppModule, menuModule, modelNameLower)
+		td.AuthDetail = s.getAuthDetail(td.AppModule, menuModule, modelNameLower)
+
 		if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/index.vue", td); err != nil {
 			return nil, err
 		}
@@ -588,7 +601,12 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix,
 	detailId, _ := helper.GetUuid()
 
 	viewPath := "/" + menuModule + "/" + bizModuleLower + "/index"
-	authPrefix := appModule + ":" + menuModule + "-" + bizModuleLower
+	// authPrefix := appModule + ":" + menuModule + "-" + bizModuleLower
+	authRead := s.getAuthRead(appModule, menuModule, bizModuleLower)
+	authAdd := s.getAuthAdd(appModule, menuModule, bizModuleLower)
+	authEdit := s.getAuthEdit(appModule, menuModule, bizModuleLower)
+	authDel := s.getAuthDel(appModule, menuModule, bizModuleLower)
+	authDetail := s.getAuthDetail(appModule, menuModule, bizModuleLower)
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("-- Menu DML for: %s (%s)\n", tableName, menuName))
@@ -596,24 +614,24 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix,
 
 	sb.WriteString(fmt.Sprintf("-- 主菜单\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/get", viewPath, authPrefix+":get"))
+	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/get", viewPath, authRead))
 	sb.WriteString(");\n\n")
 
 	sb.WriteString(fmt.Sprintf("-- 按钮权限\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '%s', 1, '%s', false, false, false\n", listId, menuId, apiUrlPrefix+"/get", authPrefix+":get"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '%s', 1, '%s', false, false, false\n", listId, menuId, apiUrlPrefix+"/get", authRead))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '%s', 2, '%s', false, false, false\n", addId, menuId, apiUrlPrefix+"/add", authPrefix+":add"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '%s', 2, '%s', false, false, false\n", addId, menuId, apiUrlPrefix+"/add", authAdd))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', 'edit', '', '%s', 3, '%s', false, false, false\n", editId, menuId, apiUrlPrefix+"/edit", authPrefix+":edit"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', 'edit', '', '%s', 3, '%s', false, false, false\n", editId, menuId, apiUrlPrefix+"/edit", authEdit))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', 'del', '', '%s', 4, '%s', false, false, false\n", delId, menuId, apiUrlPrefix+"/del", authPrefix+":del"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', 'del', '', '%s', 4, '%s', false, false, false\n", delId, menuId, apiUrlPrefix+"/del", authDel))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', 'detail', '', '%s', 5, '%s', false, false, false\n", detailId, menuId, apiUrlPrefix+"/detail", authPrefix+":detail"))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', 'detail', '', '%s', 5, '%s', false, false, false\n", detailId, menuId, apiUrlPrefix+"/detail", authDetail))
 	sb.WriteString(");\n")
 
 	return sb.String()
@@ -652,6 +670,24 @@ func (s *GenerateCodeService) createZip(srcDir, zipPath string) error {
 		return err
 	})
 	return err
+}
+func (s *GenerateCodeService) getAuthPrefix(appModule, menuModule, bizModuleLower string) string {
+	return appModule + ":" + menuModule + "-" + bizModuleLower
+}
+func (s *GenerateCodeService) getAuthRead(appModule, menuModule, bizModuleLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":get"
+}
+func (s *GenerateCodeService) getAuthAdd(appModule, menuModule, bizModuleLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":add"
+}
+func (s *GenerateCodeService) getAuthEdit(appModule, menuModule, bizModuleLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":edit"
+}
+func (s *GenerateCodeService) getAuthDel(appModule, menuModule, bizModuleLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":del"
+}
+func (s *GenerateCodeService) getAuthDetail(appModule, menuModule, bizModuleLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":detail"
 }
 
 func snakeToPascal(s string) string {

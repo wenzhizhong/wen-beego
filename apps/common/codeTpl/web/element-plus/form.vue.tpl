@@ -71,7 +71,7 @@
       {{end}}{{end}}    </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" :loading="submitLoading" @click="handleSubmit" :disabled="!hasPerms(['{{.AuthAdd}}', '{{.AuthEdit}}'])">确定</el-button>
     </template>
   </el-dialog>
 </template>
@@ -80,6 +80,7 @@
 import { ref, reactive, nextTick } from "vue";
 import type { FormInstance } from "element-plus";
 import { ElMessageBox } from "element-plus";
+import { hasPerms } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { dateParsingInZone } from "@/utils/time";
 import { getVarType } from "@/components/sliceUpload/common";

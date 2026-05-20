@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { hasPerms } from "@/utils/auth";
 import { use{{.ModelName}}, previewVisible, previewFileList{{range .Columns}}{{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio") (eq .FormType "select") (eq .FormType "checkbox")}}, {{.Name}}Options{{end}}{{end}}{{end}} } from "./utils/hook";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
@@ -69,8 +70,8 @@ const {
 
     <PureTableBar title="{{.MenuName}}" :columns="columns" @refresh="onSearch">
       <template #buttons>
-        <el-button type="primary" :icon="useRenderIcon(AddFill)" @click="openDialog()">新增</el-button>
-        <el-button type="danger" :icon="useRenderIcon(Delete)" :disabled="selectedNum === 0" @click="onBatchDel(tableRef?.getTableRef()?.getSelectionRows())">批量删除</el-button>
+        <el-button type="primary" :icon="useRenderIcon(AddFill)" @click="openDialog()" :disabled="!hasPerms(['{{.AuthAdd}}'])">新增</el-button>
+        <el-button type="danger" :icon="useRenderIcon(Delete)" :disabled="!hasPerms(['{{.AuthDel}}']) || selectedNum === 0" @click="onBatchDel(tableRef?.getTableRef()?.getSelectionRows())">批量删除</el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">
         <div
@@ -106,8 +107,8 @@ const {
           @page-current-change="handleCurrentChange"
         >
           <template #operation="{ row }">
-            <el-button class="reset-margin" link type="primary" :size="size" :icon="useRenderIcon(EditPen)" @click="openDialog('编辑', row)">编辑</el-button>
-            <el-button class="reset-margin" link type="danger" :size="size" :icon="useRenderIcon(Delete)" @click="handleDelete(row)">删除</el-button>
+            <el-button class="reset-margin" link type="primary" :size="size" :icon="useRenderIcon(EditPen)" @click="openDialog('编辑', row)" :disabled="!hasPerms(['{{.AuthEdit}}', '{{.AuthDetail}}'])">编辑</el-button>
+            <el-button class="reset-margin" link type="danger" :size="size" :icon="useRenderIcon(Delete)" @click="handleDelete(row)" :disabled="!hasPerms(['{{.AuthDel}}'])">删除</el-button>
           </template>
         </pure-table>
       </template>

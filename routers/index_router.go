@@ -27,6 +27,9 @@ func init() {
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
 		blocker.RouterBefore()(ctx)
+		if ctx.ResponseWriter.Started {
+			return
+		}
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
 	// 	(blocker.RouterAfter())(ctx) // 请求后处理存在bug

@@ -51,6 +51,9 @@ func init() {
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
 		blocker.RouterBefore()(ctx)
+		if ctx.ResponseWriter.Started {
+			return
+		}
 		blocker.AuthUser(&apiWhiteApiList, &apiAuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {

@@ -145,6 +145,9 @@ func init() {
 	// 请求前、后处理
 	ns.Filter("before", func(ctx *context.Context) {
 		blocker.RouterBefore()(ctx)
+		if ctx.ResponseWriter.Started {
+			return
+		}
 		blocker.AuthAdmin(&mchntWhiteApiList, &mchntAuthApiList)(ctx)
 	})
 	// ns.Filter("after", func(ctx *context.Context) {
