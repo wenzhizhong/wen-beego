@@ -74,7 +74,7 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 			{{end -}}
 		{{end}}
 
-		return s.{{.ModelName}}Ar.Insert(tx, &data.{{.ModelName}})
+		return s.{{.ModelName}}Ar.Insert(tx, &data.{{.ModelName}}.{{.ModelName}})
 	})
 }
 
@@ -93,7 +93,7 @@ func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.Menu
 		data.{{.GoFieldName}} = baseParamDto.UnitUserId 
 			{{end -}}
 		{{end}}
-		return s.{{.ModelName}}Ar.Update(tx, &data.{{.ModelName}})
+		return s.{{.ModelName}}Ar.Update(tx, &data.{{.ModelName}}.{{.ModelName}})
 	})
 }
 

@@ -34,7 +34,7 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 	switch RoleDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitRoleList(RoleDto, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		data, count, err = base_ar.GetUnitRoleList(RoleDto, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
@@ -103,7 +103,7 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.Unit
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
 			classifyData, err = base_ar.GetRoleClassifyByRoleId(roleDto.Id, &models.PlatRoleClassify{})
-		case "mchnt_plat":
+		case "admin_mchnt":
 			classifyData, err = base_ar.GetRoleClassifyByRoleId(roleDto.Id, &models.MchntRoleClassify{})
 		default:
 			err = errors.New("模块名称错误")
@@ -122,7 +122,7 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.Unit
 		case "admin_plat":
 			id, err = base_ar.SaveUnitRole(tx, roleDto, &models.PlatRole{})
 			base_ar.InsertUserRoleClassifies[*models.PlatRoleClassify](tx, classifyData)
-		case "mchnt_plat":
+		case "admin_mchnt":
 			id, err = base_ar.SaveUnitRole(tx, roleDto, &models.MchntRole{})
 			base_ar.InsertUserRoleClassifies[*models.MchntRoleClassify](tx, classifyData)
 		default:
@@ -155,7 +155,7 @@ func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitR
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		err = base_ar.DelUnitRole(updateData, &models.PlatRole{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		err = base_ar.DelUnitRole(updateData, &models.MchntRole{})
 	default:
 		err = errors.New("模块名称错误")
@@ -181,7 +181,7 @@ func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string
 	case "admin_plat":
 		// dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
 		dataList, err = s.PlatMenuViewAr.GetRoleMenu(selectUnitIds, models.PlatMenuView{}, models.PlatMenuMap{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntMenuMap{})
 	default:
 		err = errors.New("GetRoleMenu：模块名称错误")
@@ -220,7 +220,7 @@ func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dat
 	case "admin_plat":
 		// dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
 		dataList, err = s.PlatMenuViewAr.GetRoleMenuIds(baseParamDto, roleId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{})
 	default:
 		err = errors.New("GetRoleMenuIds：模块名称错误")
@@ -273,7 +273,7 @@ func (s *Role) RoleMenuSave(baseParamDto dto.BaseParamDto, roleMenuSaveDto role_
 				return errors.New("RoleMenuSave：系统管理员角色不能修改菜单")
 			}
 			err = s.doRoleMenuSave(tx, roleId, menuIds, &models.PlatRoleMenu{})
-		case "mchnt_plat":
+		case "admin_mchnt":
 			roleClassify, err1 := base_ar.GetRoleClassifyByRoleId(roleId, &models.MchntRoleClassify{})
 			if err1 == nil && roleClassify.Id != "" && roleClassify.Name == "admin" {
 				return errors.New("RoleMenuSave：系统管理员的角色不能修改菜单")

@@ -240,7 +240,7 @@ func (s *UnitAr) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.RespDat
 	case "admin_plat":
         // ... 平台组织数据库查询逻辑
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Plat{}, &models.PlatUser{})
-	case "mchnt_plat":
+	case "admin_mchnt":
         // ... 商户组织数据库查询逻辑
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Mchnt{}, &models.MchntUser{})
 	default:

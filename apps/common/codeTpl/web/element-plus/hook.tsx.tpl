@@ -39,7 +39,8 @@ export function use{{.ModelName}}(formRef: any) {
 
   const searchForm = reactive({
 {{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}    {{.Name}}: {{if isMultipleCompt .FormType}}[]{{else}}""{{end}},
-{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}  });
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}  
+    {{if .HasUnitId}}selectUnitIds:"",{{end}} });
 
   const pagination = reactive<PaginationProps>({
     total: 0, pageSize: 10, currentPage: 1, background: true
@@ -128,10 +129,15 @@ export function use{{.ModelName}}(formRef: any) {
       else { message(res.message || "删除失败", { type: "error" }); }
     } catch {}
   }
+  {{if .HasUnitId}}function onTreeSelect({ id, selected}){
+    searchForm.selectUnitIds = selected ? id : "";
+    onSearch();
+  }{{end}} 
 
   return {
     loading, dataList, selectedNum, searchForm, pagination, columns,
     onSearch, resetForm, handleSizeChange, handleCurrentChange,
-    handleSelectionChange, onSelectionCancel, openDialog, handleDelete, onBatchDel
+    handleSelectionChange, onSelectionCancel, openDialog, handleDelete, onBatchDel, 
+    {{if .HasUnitId}}onTreeSelect,{{end}} 
   };
 }

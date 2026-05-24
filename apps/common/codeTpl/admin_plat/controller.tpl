@@ -24,12 +24,17 @@ func (c *{{.ModelName}}Controller) Get() {
 		c.ServeJSON()
 		return
 	}
+
 	dtoStr := c.GetString("dto")
 	dtoStr, _ = url.QueryUnescape(dtoStr)
 	var searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto
 	if dtoStr != "" {
 		json.Unmarshal([]byte(dtoStr), &searchDto)
 	}
+	{{- if .HasUnitId}}
+	searchDto.SelectUnitIds = helper.Ternary(searchDto.SelectUnitIds != "", searchDto.SelectUnitIds, baseParamDto.UnitId)
+	{{- end}}
+
 	data, err := c.Service.GetList(baseParamDto, reqDataListDto.PageSize, reqDataListDto.Offset, searchDto)
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
@@ -97,7 +102,7 @@ func (c *{{.ModelName}}Controller) Detail() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	
 	id := c.Controller.GetString("id")
-	dtoData := system_dto.GenerateFormDto{}
+	dtoData := {{.MenuModule}}_dto.{{.ModelName}}Dto{}
 	dtoData.Id = id
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)

@@ -2,17 +2,21 @@
 package models_ar
 
 import (
-	_ "WenBeego/apps/common/models"
-	commonAr "WenBeego/apps/common/models_ar"
+	"WenBeego/apps/common/models"
 	{{if .HasDeleted -}}
 	_ "context"
 	{{- end}}
 )
 
 type {{.ModelName}}Ar struct {
-	commonAr.{{.ModelName}}Ar
+	{{- if and (.IsMultiTenant) (eq .AppModule "admin_plat") }}
+	models.{{.PlatModelName}}
+	{{- else if and (.IsMultiTenant) ( eq .AppModule "admin_mchnt")}}
+	models.{{.MchntModelName}}
+	{{- else}}
+	models.{{.ModelName}}
+	{{- end}}
 }
-
 {{else}}
 package models_ar
 
@@ -31,7 +35,7 @@ import (
 )
 
 type {{.ModelName}}Ar struct {
-	models.{{.ModelName}}
+	base_model.{{.ModelName}}
 }
 
 func (ar *{{.ModelName}}Ar) Insert(tx *gorm.DB, data *base_model.{{.ModelName}}) error {
@@ -92,7 +96,7 @@ func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, searchDto {{.MenuModul
 	}
 
 	err = query.
-		Select("{{.ListSelectCols}}").
+		Select({{.ListSelectCols}}).
 		Limit(pageSize).
 		Offset(offset).
 		{{if .HasCreateTime}}Order(tableName + ".{{.CreateTimeField}} desc").{{end}}

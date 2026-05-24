@@ -35,7 +35,7 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	switch reqDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUserListOfUnitById(reqDto, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatDept{}, &models.PlattUserDept{}, &models.PlatRole{}, &models.PlatUserRole{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		data, count, err = base_ar.GetUserListOfUnitById(reqDto, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntDept{}, &models.MchntUserDept{}, &models.MchntRole{}, &models.MchntUserRole{})
 	default:
 		err = errors.New("GetUserList：模块名称错误")
@@ -92,7 +92,7 @@ func (s *User) GetUnitRoleTree(baseParamDto dto.BaseParamDto, selectUnitIds []st
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		dataList, err = base_ar.GetUnitRoleTree(selectUnitIds, &models.PlatRole{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		dataList, err = base_ar.GetUnitRoleTree(selectUnitIds, &models.MchntRole{})
 	default:
 		err = errors.New("GetUnitRoleTree:模块名称错误")
@@ -146,7 +146,7 @@ func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto
 		unitRoleModel = &models.PlatRole{}
 		unitUserDeptModel = &models.PlattUserDept{}
 		unitUserRoleModel = &models.PlatUserRole{}
-	case "mchnt_plat":
+	case "admin_mchnt":
 		unitUserModel = &models.MchntUser{}
 		unitUserProfileModel = &models.MchntUserProfile{}
 		unitDeptModel = &models.MchntDept{}
@@ -590,7 +590,7 @@ func (s *User) DelUnitUser(baseParamDto dto.BaseParamDto, ids []string) error {
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		return base_ar.DelUnitUser(ids, &models.PlatUser{}, &models.PlatUserProfile{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		return base_ar.DelUnitUser(ids, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		return errors.New("DelUnitUser:模块名称错误")

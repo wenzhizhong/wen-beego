@@ -62,7 +62,7 @@
         </sliceUploadV2>
       </el-form-item>
       {{else if eq .FormType "editor"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
-        <EditorBase v-model="form.{{.Name}}"/>
+        <EditorBase v-if="editorVisible" v-model="form.{{.Name}}"/>
       </el-form-item>
       {{else}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-input v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
@@ -101,6 +101,7 @@ const dialogTitle = ref("新增");
 const submitLoading = ref(false);
 const formRef = ref<FormInstance>();
 const editId = ref("");
+const editorVisible = ref(false);
 
 const fileListObj = ref<Record<string, any[]>>({
 {{range .Columns}}{{if eq .FormType "imageUpload"}}  {{.Name}}: [],
@@ -137,6 +138,8 @@ const form = reactive({
 function open(title = "新增", row?: any) {
   dialogTitle.value = title;
   visible.value = true;
+  editorVisible.value = false;
+
   nextTick(async () => {
     if (row && row.id) {
       editId.value = row.id;
@@ -158,6 +161,10 @@ function open(title = "新增", row?: any) {
       editId.value = "";
       formRef.value?.resetFields();
     }
+
+    nextTick(() => {
+      editorVisible.value = true;
+    });
   });
 }
 

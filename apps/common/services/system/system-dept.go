@@ -27,7 +27,7 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 	switch deptDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Plat{}, &models.PlatDept{}, &models.PlatUser{}, &models.PlatUserProfile{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Mchnt{}, &models.MchntDept{}, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
@@ -65,7 +65,7 @@ func (s *Dept) GetUnitDeptTree(baseParamDto dto.BaseParamDto, selectUnitIds []st
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.PlatDept{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.MchntDept{})
 	default:
 		err = errors.New("GetUnitDeptTree:模块名称错误")
@@ -115,7 +115,7 @@ func (s *Dept) GetUnitDeptPrincipal(baseParamDto dto.BaseParamDto, deptPrincipal
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.PlatUser{}, &models.PlatUserProfile{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		err = errors.New("GetUnitDeptPrincipal:模块名称错误")
@@ -167,7 +167,7 @@ func (s *Dept) SaveUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.Unit
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		id, err = base_ar.SaveUnitDept(deptDto, &models.PlatDept{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		id, err = base_ar.SaveUnitDept(deptDto, &models.MchntDept{})
 	default:
 		err = errors.New("模块名称错误")
@@ -195,7 +195,7 @@ func (s *Dept) DelUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitD
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		err = base_ar.DelUnitDept(updateData, &models.PlatDept{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		err = base_ar.DelUnitDept(updateData, &models.MchntDept{})
 	default:
 		err = errors.New("模块名称错误")

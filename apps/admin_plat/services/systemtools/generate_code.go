@@ -57,7 +57,10 @@ var deleteUserIdFields = []string{"delete_user_id", "deleted_user_id", "deleted_
 var hasDeletedFields = []string{"deleted", "is_deleted", "is_delete", "is_del"}
 
 var funcMap = template.FuncMap{
-	"contains": strings.Contains,
+	"contains":      strings.Contains,
+	"snakeToPascal": snakeToPascal,
+	"snakeToCamel":  snakeToCamel,
+	"replaceAll":    strings.ReplaceAll,
 
 	"hasMultipleProp": func(ft string) bool { return strings.Contains(ft, "multiple") },
 	"isMultipleCompt": func(ft string) bool { return contains(multipleComptSlice, ft) },
@@ -193,10 +196,10 @@ type ColumnConfig struct {
 }
 
 type TemplateData struct {
+	AppModule       string
 	ModelName       string
 	ModelNameLower  string
 	TableName       string
-	AppModule       string
 	MenuModule      string
 	BizModule       string
 	MenuName        string
@@ -207,10 +210,12 @@ type TemplateData struct {
 	HasUpdateTime   bool
 	HasCreateTime   bool
 	HasDeleteTime   bool
+	HasUnitId       bool
 	DeletedField    string
 	CreateTimeField string
 	UpdateTimeField string
-	CeleteTimeField string
+	DeleteTimeField string
+	UnitIdField     string
 	IsMultiApp      bool
 	IsMultiTenant   bool
 	PlatModelName   string
@@ -219,11 +224,16 @@ type TemplateData struct {
 	MchntTableName  string
 	ListSelectCols  string
 
+	RenderTemplateType string
+
+	ViewPath   string
 	AuthRead   string
 	AuthAdd    string
 	AuthEdit   string
 	AuthDel    string
 	AuthDetail string
+
+	AdminPlatShowMchntUnit bool
 }
 
 func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDto) (map[string]string, error) {
@@ -257,6 +267,8 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	updateTimeField := ""
 	hasDeleteTime := false
 	deleteTimeField := ""
+	hasUnitId := false
+	unitIdField := ""
 
 	for i := range columnConfigs {
 		columnConfigs[i].GoFieldName = snakeToPascal(columnConfigs[i].Name)
@@ -275,16 +287,19 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		tmpHasCreateTime, tmpCreateTimeField := hasColumn(createTimeFields, columnConfigs[i].Name)
 		tmpHasUpdateTime, tmpUpdateTimeField := hasColumn(updateTimeFields, columnConfigs[i].Name)
 		tmpHasDeleteTime, tmpDeleteTimeField := hasColumn(deletedTimeFields, columnConfigs[i].Name)
+		tmpHasUnitId, tmpUnitIdField := hasColumn([]string{"unit_id"}, columnConfigs[i].Name)
 
 		hasDeleted = helper.Ternary(hasDeleted, hasDeleted, tmpHasDeleted)
 		hasCreateTime = helper.Ternary(hasCreateTime, hasCreateTime, tmpHasCreateTime)
 		hasUpdateTime = helper.Ternary(hasUpdateTime, hasUpdateTime, tmpHasUpdateTime)
 		hasDeleteTime = helper.Ternary(hasDeleteTime, hasDeleteTime, tmpHasDeleteTime)
+		hasUnitId = helper.Ternary(hasUnitId, hasUnitId, tmpHasUnitId)
 
 		deletedField = helper.Ternary(tmpDeletedField != "", tmpDeletedField, deletedField)
 		createTimeField = helper.Ternary(tmpCreateTimeField != "", tmpCreateTimeField, createTimeField)
 		updateTimeField = helper.Ternary(tmpUpdateTimeField != "", tmpUpdateTimeField, updateTimeField)
 		deleteTimeField = helper.Ternary(tmpDeleteTimeField != "", tmpDeleteTimeField, deleteTimeField)
+		unitIdField = helper.Ternary(tmpUnitIdField != "", tmpUnitIdField, unitIdField)
 
 	}
 
@@ -308,25 +323,37 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	}
 
 	bizModule := reqDto.BizModule
-	if bizModule == "" {
-		bizModule = snakeToPascal(genCodeDetail.TableName)
-	}
 	tableName := genCodeDetail.TableName
 	menuModule := reqDto.MenuModule
 
 	isMultiApp := len(appModules) > 1
 	isMultiTenant := strings.HasPrefix(tableName, "plat_") || strings.HasPrefix(tableName, "mchnt_")
 
+	// strip plat_/mchnt_ prefix for base naming
+	strippedTableName := tableName
+	if strings.HasPrefix(tableName, "plat_") {
+		strippedTableName = strings.TrimPrefix(tableName, "plat_")
+	} else if strings.HasPrefix(tableName, "mchnt_") {
+		strippedTableName = strings.TrimPrefix(tableName, "mchnt_")
+	}
+	baseBizName := snakeToPascal(strippedTableName)
+
+	// if bizModule == "" {
+	// 	bizModule = baseBizName
+	// }
+	bizModule = baseBizName
+
 	modelName := bizModule
 	modelNameLower := snakeToCamel(modelName)
+	// plat/mchnt entity model names: add prefix to base (already stripped)
 	platModelName := "Plat" + modelName
 	mchntModelName := "Mchnt" + modelName
 	platTableName := tableName
 	mchntTableName := tableName
 	if isMultiTenant && strings.HasPrefix(tableName, "plat_") {
-		mchntTableName = "mchnt_" + strings.TrimPrefix(tableName, "plat_")
+		mchntTableName = "mchnt_" + strippedTableName
 	} else if isMultiTenant && strings.HasPrefix(tableName, "mchnt_") {
-		platTableName = "plat_" + strings.TrimPrefix(tableName, "mchnt_")
+		platTableName = "plat_" + strippedTableName
 	}
 
 	timestamp := time.Now().Format("20060102150405")
@@ -347,28 +374,14 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 	tplDir := filepath.Join(global.AppDir, "common", "codeTpl")
 
-	listSelectCols := tableName + ".*"
-	hasEditorCol := false
-	for _, c := range columnConfigs {
-		if c.FormType == "editor" {
-			hasEditorCol = true
-			break
-		}
-	}
-	if hasEditorCol {
-		cols := make([]string, 0, len(columnConfigs))
-		for _, c := range columnConfigs {
-			if c.FormType != "editor" {
-				cols = append(cols, tableName+"."+c.Name)
-			}
-		}
-		listSelectCols = strings.Join(cols, ", ")
-	}
-
 	td := TemplateData{
 		ModelName:       modelName,
 		ModelNameLower:  modelNameLower,
+		PlatModelName:   platModelName,
+		MchntModelName:  mchntModelName,
 		TableName:       tableName,
+		PlatTableName:   platTableName,
+		MchntTableName:  mchntTableName,
 		MenuModule:      menuModule,
 		BizModule:       bizModule,
 		MenuName:        reqDto.MenuName,
@@ -377,36 +390,37 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		HasUpdateTime:   hasUpdateTime,
 		HasCreateTime:   hasCreateTime,
 		HasDeleteTime:   hasDeleteTime,
+		HasUnitId:       hasUnitId,
 		DeletedField:    deletedField,
 		CreateTimeField: createTimeField,
 		UpdateTimeField: updateTimeField,
-		CeleteTimeField: deleteTimeField,
+		DeleteTimeField: deleteTimeField,
+		UnitIdField:     unitIdField,
 		IsMultiApp:      isMultiApp,
 		IsMultiTenant:   isMultiTenant,
-		PlatModelName:   platModelName,
-		MchntModelName:  mchntModelName,
-		PlatTableName:   platTableName,
-		MchntTableName:  mchntTableName,
-		ListSelectCols:  listSelectCols,
 	}
 
 	// shared code: base_model, model, dto (always generated once)
 	if contains(codeTypes, CODE_TYPE_MODEL) {
-		if err := s.renderTemplate(tplDir, "admin_plat", "base_model.tpl", tempDir, "apps/common/models/base_model/"+modelNameLower+".go", td); err != nil {
+		td.RenderTemplateType = "common:model"
+		if err := s.renderTemplate(tplDir, "admin_plat", "model.tpl", tempDir, "wen-beego/apps/common/models/"+strippedTableName+".go", td); err != nil {
 			return nil, err
 		}
-		if err := s.renderTemplate(tplDir, "admin_plat", "model.tpl", tempDir, "apps/common/models/"+modelNameLower+".go", td); err != nil {
+		td.RenderTemplateType = "common:base_model"
+		if err := s.renderTemplate(tplDir, "admin_plat", "base_model.tpl", tempDir, "wen-beego/apps/common/models/base_model/unit_"+strippedTableName+".go", td); err != nil {
 			return nil, err
 		}
-		if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "apps/common/dto/"+menuModule+"_dto/"+modelNameLower+".go", td); err != nil {
+		td.RenderTemplateType = "common:dto"
+		if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "wen-beego/apps/common/dto/"+menuModule+"_dto/"+strippedTableName+".go", td); err != nil {
 			return nil, err
 		}
-		// multi-tenant: additionally generate Plat/Mchnt entity models
 		if isMultiTenant {
-			if err := s.renderTemplate(tplDir, "admin_plat", "plat_model.tpl", tempDir, "apps/common/models/plat_"+modelNameLower+".go", td); err != nil {
+			td.RenderTemplateType = "common:MultiTenant_plat_model"
+			if err := s.renderTemplate(tplDir, "admin_plat", "plat_model.tpl", tempDir, "wen-beego/apps/common/models/plat_"+strippedTableName+".go", td); err != nil {
 				return nil, err
 			}
-			if err := s.renderTemplate(tplDir, "admin_plat", "mchnt_model.tpl", tempDir, "apps/common/models/mchnt_"+modelNameLower+".go", td); err != nil {
+			td.RenderTemplateType = "common:MultiTenant_mchnt_model"
+			if err := s.renderTemplate(tplDir, "admin_plat", "mchnt_model.tpl", tempDir, "wen-beego/apps/common/models/mchnt_"+strippedTableName+".go", td); err != nil {
 				return nil, err
 			}
 		}
@@ -416,39 +430,49 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		// multi-app: generate common shared service + AR, then per-app wrappers
 		if contains(codeTypes, CODE_TYPE_AR) {
 			// always generate common AR struct
-			if err := s.renderTemplate(tplDir, "admin_plat", "common_ar.tpl", tempDir, "apps/common/models_ar/"+modelNameLower+".go", td); err != nil {
+			td.RenderTemplateType = "common:MultiApp_ar"
+			td.ListSelectCols = s.buildListSelectCols("", columnConfigs, true)
+			if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "wen-beego/apps/common/models_ar/"+strippedTableName+".go", td); err != nil {
 				return nil, err
 			}
 			// multi-tenant: additionally generate generic functions in base_ar
 			if isMultiTenant {
-				if err := s.renderTemplate(tplDir, "admin_plat", "base_ar.tpl", tempDir, "apps/common/models_ar/base_ar/common_"+modelNameLower+".go", td); err != nil {
+				td.RenderTemplateType = "common:MultiApp_MultiTenant_ar"
+				if err := s.renderTemplate(tplDir, "admin_plat", "base_ar.tpl", tempDir, "wen-beego/apps/common/models_ar/base_ar/common_"+strippedTableName+".go", td); err != nil {
 					return nil, err
 				}
 			}
 		}
 		if contains(codeTypes, CODE_TYPE_SERVICE) {
-			if err := s.renderTemplate(tplDir, "admin_plat", "common_service.tpl", tempDir, "apps/common/services/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+			td.RenderTemplateType = "common:MultiApp_MultiTenant_service"
+			if err := s.renderTemplate(tplDir, "admin_plat", "common_service.tpl", tempDir, "wen-beego/apps/common/services/"+menuModule+"/"+strippedTableName+".go", td); err != nil {
 				return nil, err
 			}
 		}
 
 		for _, appModule := range appModules {
 			td.AppModule = appModule
-			td.ApiUrlPrefix = "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
-			td.ApiNamePrefix = strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+			appTableName := s.getTableForApp(isMultiTenant, appModule, tableName, platTableName, mchntTableName)
+			td.TableName = appTableName
+			td.ListSelectCols = s.buildListSelectCols(appTableName, columnConfigs, false)
+			td.ApiUrlPrefix = s.getApiUrlPrefix(appModule, menuModule, strippedTableName)
+			td.ApiNamePrefix = s.getApiNamePrefix(menuModule, strippedTableName)
 
 			if contains(codeTypes, CODE_TYPE_AR) {
-				if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "apps/"+appModule+"/models_ar/"+modelNameLower+"_ar.go", td); err != nil {
+				td.RenderTemplateType = appModule + ":models_ar"
+				if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "wen-beego/apps/"+appModule+"/models_ar/"+strippedTableName+"_ar.go", td); err != nil {
 					return nil, err
 				}
 			}
 			if contains(codeTypes, CODE_TYPE_SERVICE) {
-				if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "apps/"+appModule+"/services/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+				td.RenderTemplateType = appModule + ":services"
+				if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "wen-beego/apps/"+appModule+"/services/"+menuModule+"/"+strippedTableName+".go", td); err != nil {
 					return nil, err
 				}
 			}
 			if contains(codeTypes, CODE_TYPE_CONTROLLER) {
-				if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "apps/"+appModule+"/controllers/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+				td.RenderTemplateType = appModule + ":controllers"
+				if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "wen-beego/apps/"+appModule+"/controllers/"+menuModule+"/"+strippedTableName+".go", td); err != nil {
 					return nil, err
 				}
 			}
@@ -457,29 +481,42 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		// single-app: generate everything for one app
 		appModule := appModules[0]
 		td.AppModule = appModule
-		td.ApiUrlPrefix = "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
-		td.ApiNamePrefix = strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+		appTableName := s.getTableForApp(isMultiTenant, appModule, tableName, platTableName, mchntTableName)
+		td.TableName = appTableName
+		td.ListSelectCols = s.buildListSelectCols(appTableName, columnConfigs, false)
+		td.ApiUrlPrefix = s.getApiUrlPrefix(appModule, menuModule, strippedTableName)
+		td.ApiNamePrefix = s.getApiNamePrefix(menuModule, strippedTableName)
 
 		for _, codeType := range codeTypes {
 			switch codeType {
 			case CODE_TYPE_AR:
-				if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "apps/"+appModule+"/models_ar/"+modelNameLower+"_ar.go", td); err != nil {
+				td.RenderTemplateType = appModule + ":models_ar"
+				if err := s.renderTemplate(tplDir, "admin_plat", "ar.tpl", tempDir, "wen-beego/apps/"+appModule+"/models_ar/"+strippedTableName+"_ar.go", td); err != nil {
 					return nil, err
 				}
 			case CODE_TYPE_SERVICE:
-				if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "apps/"+appModule+"/services/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+				td.RenderTemplateType = appModule + ":services"
+				if err := s.renderTemplate(tplDir, "admin_plat", "service.tpl", tempDir, "wen-beego/apps/"+appModule+"/services/"+menuModule+"/"+strippedTableName+".go", td); err != nil {
 					return nil, err
 				}
 			case CODE_TYPE_CONTROLLER:
-				if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "apps/"+appModule+"/controllers/"+menuModule+"/"+modelNameLower+".go", td); err != nil {
+				td.RenderTemplateType = appModule + ":controllers"
+				if err := s.renderTemplate(tplDir, "admin_plat", "controller.tpl", tempDir, "wen-beego/apps/"+appModule+"/controllers/"+menuModule+"/"+strippedTableName+".go", td); err != nil {
 					return nil, err
 				}
 			}
 		}
 	}
 
-	// frontend code
-	if contains(codeTypes, CODE_TYPE_VIEW) && viewType == VIEW_TYPE_ELEMENT_PLUS {
+	// frontend code + DDL/DML (per-app in multi-tenant)
+	for _, appModule := range appModules {
+		td.AppModule = appModule
+		appTableName := s.getTableForApp(isMultiTenant, appModule, tableName, platTableName, mchntTableName)
+		td.TableName = appTableName
+		td.ListSelectCols = s.buildListSelectCols(appTableName, columnConfigs, false)
+		td.ApiUrlPrefix = s.getApiUrlPrefix(appModule, menuModule, strippedTableName)
+		td.ApiNamePrefix = s.getApiNamePrefix(menuModule, strippedTableName)
+
 		// page curd permission
 		td.AuthRead = s.getAuthRead(td.AppModule, menuModule, modelNameLower)
 		td.AuthAdd = s.getAuthAdd(td.AppModule, menuModule, modelNameLower)
@@ -487,39 +524,57 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		td.AuthDel = s.getAuthDel(td.AppModule, menuModule, modelNameLower)
 		td.AuthDetail = s.getAuthDetail(td.AppModule, menuModule, modelNameLower)
 
-		if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/index.vue", td); err != nil {
-			return nil, err
-		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "form.vue.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/form.vue", td); err != nil {
-			return nil, err
-		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "hook.tsx.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/utils/hook.tsx", td); err != nil {
-			return nil, err
-		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "types.ts.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/utils/types.ts", td); err != nil {
-			return nil, err
-		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "rule.ts.tpl", tempDir, "src/views/"+menuModule+"/"+modelNameLower+"/utils/rule.ts", td); err != nil {
-			return nil, err
-		}
-		if err := s.renderTemplate(tplDir, "web/element-plus", "api.ts.tpl", tempDir, "src/api/"+modelNameLower+".ts", td); err != nil {
-			return nil, err
-		}
-	}
+		baseViewPath := menuModule + "/" + modelNameLower
+		td.ViewPath = "/" + baseViewPath + "/index"
 
-	ddlContent := s.generateDDL(genCodeDetail.TableName, columnConfigs)
-	ddlPath := filepath.Join(tempDir, "sql", tableName+".sql")
-	if err := os.MkdirAll(filepath.Dir(ddlPath), os.ModePerm); err != nil {
-		return nil, err
-	}
-	if err := os.WriteFile(ddlPath, []byte(ddlContent), 0644); err != nil {
-		return nil, err
-	}
+		if contains(codeTypes, CODE_TYPE_VIEW) && viewType == VIEW_TYPE_ELEMENT_PLUS {
+			if !(appModule == "admin_plat" || appModule == "admin_mchnt") {
+				continue
+			}
+			// frontend code project-name
+			frontendProjectName := "wen-beego-mchnt-ui"
+			if appModule == "admin_plat" {
+				frontendProjectName = "wen-beego-plat-ui"
+			}
 
-	dmlContent := s.generateMenuDML(tableName, reqDto.MenuName, td.ApiUrlPrefix, menuModule, modelNameLower, td.AppModule)
-	dmlPath := filepath.Join(tempDir, "sql", tableName+"_menu.sql")
-	if err := os.WriteFile(dmlPath, []byte(dmlContent), 0644); err != nil {
-		return nil, err
+			if err := s.renderTemplate(tplDir, "web/element-plus", "index.vue.tpl", tempDir, frontendProjectName+"/src/views/"+baseViewPath+"/index.vue", td); err != nil {
+				return nil, err
+			}
+			if err := s.renderTemplate(tplDir, "web/element-plus", "form.vue.tpl", tempDir, frontendProjectName+"/src/views/"+baseViewPath+"/form.vue", td); err != nil {
+				return nil, err
+			}
+			if err := s.renderTemplate(tplDir, "web/element-plus", "hook.tsx.tpl", tempDir, frontendProjectName+"/src/views/"+baseViewPath+"/utils/hook.tsx", td); err != nil {
+				return nil, err
+			}
+			if err := s.renderTemplate(tplDir, "web/element-plus", "types.ts.tpl", tempDir, frontendProjectName+"/src/views/"+baseViewPath+"/utils/types.ts", td); err != nil {
+				return nil, err
+			}
+			if err := s.renderTemplate(tplDir, "web/element-plus", "rule.ts.tpl", tempDir, frontendProjectName+"/src/views/"+baseViewPath+"/utils/rule.ts", td); err != nil {
+				return nil, err
+			}
+			if err := s.renderTemplate(tplDir, "web/element-plus", "api.ts.tpl", tempDir, frontendProjectName+"/src/api/"+modelNameLower+".ts", td); err != nil {
+				return nil, err
+			}
+		}
+		if err := s.renderTemplate(tplDir, "admin_plat", "admin_router.tpl", tempDir, "wen-beego/routers/"+appModule+"_router.go-"+modelNameLower, td); err != nil {
+			return nil, err
+		}
+
+		ddlContent := s.generateDDL(appTableName, columnConfigs)
+		ddlPath := filepath.Join(tempDir, "sql", appTableName+".sql")
+		if err := os.MkdirAll(filepath.Dir(ddlPath), os.ModePerm); err != nil {
+			return nil, err
+		}
+		if err := os.WriteFile(ddlPath, []byte(ddlContent), 0644); err != nil {
+			return nil, err
+		}
+
+		// dmlContent := s.generateMenuDML(appTableName, reqDto.MenuName, td.ApiUrlPrefix, menuModule, modelNameLower, td.AppModule)
+		dmlContent := s.generateMenuDML(appTableName, reqDto.MenuName, modelNameLower, &td)
+		dmlPath := filepath.Join(tempDir, "sql", appTableName+"_menu.sql")
+		if err := os.WriteFile(dmlPath, []byte(dmlContent), 0644); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := s.createZip(tempDir, zipPath); err != nil {
@@ -587,7 +642,8 @@ func (s *GenerateCodeService) generateDDL(tableName string, columns []ColumnConf
 	return sb.String()
 }
 
-func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix, menuModule, bizModuleLower, appModule string) string {
+// func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix, menuModule, bizModuleLower, appModule string) string {
+func (s *GenerateCodeService) generateMenuDML(tableName, menuName, bizModuleLower string, td *TemplateData) string {
 	menuTable := "plat_menu"
 	if strings.HasPrefix(tableName, "mchnt_") {
 		menuTable = "mchnt_menu"
@@ -600,38 +656,30 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix,
 	delId, _ := helper.GetUuid()
 	detailId, _ := helper.GetUuid()
 
-	viewPath := "/" + menuModule + "/" + bizModuleLower + "/index"
-	// authPrefix := appModule + ":" + menuModule + "-" + bizModuleLower
-	authRead := s.getAuthRead(appModule, menuModule, bizModuleLower)
-	authAdd := s.getAuthAdd(appModule, menuModule, bizModuleLower)
-	authEdit := s.getAuthEdit(appModule, menuModule, bizModuleLower)
-	authDel := s.getAuthDel(appModule, menuModule, bizModuleLower)
-	authDetail := s.getAuthDetail(appModule, menuModule, bizModuleLower)
-
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("-- Menu DML for: %s (%s)\n", tableName, menuName))
 	sb.WriteString("-- Generated by wen-beego code generator\n\n")
 
 	sb.WriteString(fmt.Sprintf("-- 主菜单\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, apiUrlPrefix+"/get", viewPath, authRead))
+	sb.WriteString(fmt.Sprintf("  '%s', '0', 0, '%s', '%s', '%s', '%s', 99, '%s', true, true, false\n", menuId, menuName, bizModuleLower, td.ApiUrlPrefix+"/get", td.ViewPath, td.AuthRead))
 	sb.WriteString(");\n\n")
 
 	sb.WriteString(fmt.Sprintf("-- 按钮权限\n"))
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', 'list', '', '%s', 1, '%s', false, false, false\n", listId, menuId, apiUrlPrefix+"/get", authRead))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '列表', '%sList', '%s', '', 1, '%s', false, false, false\n", listId, menuId, bizModuleLower, td.ApiUrlPrefix+"/get", td.AuthRead))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', 'add', '', '%s', 2, '%s', false, false, false\n", addId, menuId, apiUrlPrefix+"/add", authAdd))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '新增', '%sAdd', '%s', '', 2, '%s', false, false, false\n", addId, menuId, bizModuleLower, td.ApiUrlPrefix+"/add", td.AuthAdd))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', 'edit', '', '%s', 3, '%s', false, false, false\n", editId, menuId, apiUrlPrefix+"/edit", authEdit))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '编辑', '%sEdit', '%s', '', 3, '%s', false, false, false\n", editId, menuId, bizModuleLower, td.ApiUrlPrefix+"/edit", td.AuthEdit))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', 'del', '', '%s', 4, '%s', false, false, false\n", delId, menuId, apiUrlPrefix+"/del", authDel))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '删除', '%sDel', '%s', '', 4, '%s', false, false, false\n", delId, menuId, bizModuleLower, td.ApiUrlPrefix+"/del", td.AuthDel))
 	sb.WriteString(");\n")
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
-	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', 'detail', '', '%s', 5, '%s', false, false, false\n", detailId, menuId, apiUrlPrefix+"/detail", authDetail))
+	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', '%sDetail', '%s', '', 5, '%s', false, false, false\n", detailId, menuId, bizModuleLower, td.ApiUrlPrefix+"/detail", td.AuthDetail))
 	sb.WriteString(");\n")
 
 	return sb.String()
@@ -671,23 +719,57 @@ func (s *GenerateCodeService) createZip(srcDir, zipPath string) error {
 	})
 	return err
 }
-func (s *GenerateCodeService) getAuthPrefix(appModule, menuModule, bizModuleLower string) string {
-	return appModule + ":" + menuModule + "-" + bizModuleLower
+func (s *GenerateCodeService) getAuthPrefix(appModule, menuModule, modelNameLower string) string {
+	return appModule + ":" + menuModule + "-" + modelNameLower
 }
-func (s *GenerateCodeService) getAuthRead(appModule, menuModule, bizModuleLower string) string {
-	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":get"
+func (s *GenerateCodeService) getAuthRead(appModule, menuModule, modelNameLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, modelNameLower) + ":get"
 }
-func (s *GenerateCodeService) getAuthAdd(appModule, menuModule, bizModuleLower string) string {
-	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":add"
+func (s *GenerateCodeService) getAuthAdd(appModule, menuModule, modelNameLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, modelNameLower) + ":add"
 }
-func (s *GenerateCodeService) getAuthEdit(appModule, menuModule, bizModuleLower string) string {
-	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":edit"
+func (s *GenerateCodeService) getAuthEdit(appModule, menuModule, modelNameLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, modelNameLower) + ":edit"
 }
-func (s *GenerateCodeService) getAuthDel(appModule, menuModule, bizModuleLower string) string {
-	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":del"
+func (s *GenerateCodeService) getAuthDel(appModule, menuModule, modelNameLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, modelNameLower) + ":del"
 }
-func (s *GenerateCodeService) getAuthDetail(appModule, menuModule, bizModuleLower string) string {
-	return s.getAuthPrefix(appModule, menuModule, bizModuleLower) + ":detail"
+func (s *GenerateCodeService) getAuthDetail(appModule, menuModule, modelNameLower string) string {
+	return s.getAuthPrefix(appModule, menuModule, modelNameLower) + ":detail"
+}
+
+func (s *GenerateCodeService) getApiUrlPrefix(appModule, menuModule, tableName string) string {
+	return "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
+}
+func (s *GenerateCodeService) getApiNamePrefix(menuModule, tableName string) string {
+	return strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+}
+func (s *GenerateCodeService) getTableForApp(isMultiTenant bool, appModule, tableName, platTableName, mchntTableName string) string {
+	if !isMultiTenant {
+		return tableName
+	}
+	switch appModule {
+	case "admin_plat":
+		return platTableName
+	case "admin_mchnt":
+		return mchntTableName
+	default:
+		return tableName
+	}
+}
+
+func (s *GenerateCodeService) buildListSelectCols(tableName string, columns []ColumnConfig, tableNameIsVar bool) string {
+	cols := make([]string, 0, len(columns))
+	for _, c := range columns {
+		if c.FormType != "editor" {
+			col := fmt.Sprintf("\"%s\".\"%s\"", tableName, c.Name)
+			if tableNameIsVar {
+				col = fmt.Sprintf("tableName + \".%s\"", c.Name)
+			}
+			cols = append(cols, col)
+		}
+	}
+	return strings.Join(cols, ", ")
 }
 
 func snakeToPascal(s string) string {

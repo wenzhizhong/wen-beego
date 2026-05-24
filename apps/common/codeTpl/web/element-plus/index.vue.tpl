@@ -6,6 +6,8 @@ import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import {{.ModelName}}Form from "./form.vue";
 
+import SelectUserUnitTree from "@/components/unit/SelectUserUnitTree.vue";
+
 import Delete from "~icons/ep/delete";
 import EditPen from "~icons/ep/edit-pen";
 import Refresh from "~icons/ep/refresh";
@@ -33,11 +35,18 @@ const {
   onSelectionCancel,
   openDialog,
   handleDelete,
-  onBatchDel
+  onBatchDel,
+  {{if .HasUnitId}}onTreeSelect,{{end}}
 } = use{{.ModelName}}(formRef);
 </script>
 
 <template>
+{{if .HasUnitId}}<div :class="['flex']">
+  <SelectUserUnitTree
+    ref="treeRef"
+    {{if .AdminPlatShowMchntUnit}}:apiType="'for-mchnt-unit-tree'"{{end}}
+    @tree-select="onTreeSelect"
+  />{{end}}
   <div class="main">
     <el-form
       ref="searchFormRef"
@@ -46,7 +55,7 @@ const {
       class="search-form bg-bg_color w-full pl-8 pt-[12px]"
     >
     <el-row :gutter="20">
-  {{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+  {{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-col :xs="24" :sm="12" :md="10" :lg="6" :xl="6">
           <el-form-item label="{{.Comment}}：" prop="{{.Name}}">
             {{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio")}}<el-select v-model="searchForm.{{.Name}}" placeholder="{{.Comment}}" clearable class="!w-[160px]">
               <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
@@ -59,7 +68,7 @@ const {
             {{end}}
           </el-form-item>
         </el-col>
-  {{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+  {{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-col :xs="24" :sm="12" :md="10" :lg="6" :xl="6">
           <el-form-item>
             <el-button type="primary" :icon="useRenderIcon('ri/search-line')" :loading="loading" @click="onSearch">搜索</el-button>
             <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(searchFormRef)">重置</el-button>
@@ -125,6 +134,7 @@ const {
       </div>
     </el-dialog>
   </div>
+{{if .HasUnitId}}</div>{{end}}
 </template>
 
 <style scoped>

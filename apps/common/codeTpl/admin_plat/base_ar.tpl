@@ -2,9 +2,10 @@ package base_ar
 
 import (
 	"WenBeego/apps/common/global"
-	"WenBeego/apps/common/models"
+	_ "WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
+	{{if .HasUnitId}}"strings"{{end}}
 	"fmt"
 	"time"
 
@@ -12,8 +13,8 @@ import (
 )
 
 // Get{{.ModelName}}List 多用户体系通用列表查询
-func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M) (data []models.{{.ModelName}}, count int64, err error) {
-	data = make([]models.{{.ModelName}}, 0)
+func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M) (data []base_model.{{.ModelName}}, count int64, err error) {
+	data = make([]base_model.{{.ModelName}}, 0)
 	tableName := model.TableName()
 
 	query := global.GetReadDb().
@@ -32,6 +33,12 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 	{{else}}	if searchDto.{{.GoFieldName}} != "" { query = query.Where(tableName+".{{.Name}} = ?", searchDto.{{.GoFieldName}}) }
 	{{end}}
 {{end}}{{end}}{{end}}{{end}}
+	{{- if .HasUnitId}}
+	if searchDto.SelectUnitIds != "" {
+		selectUnitIds := strings.Split(searchDto.SelectUnitIds, ",")
+		query = query.Where(tableName+".unit_id in (?)", selectUnitIds)
+	}
+	{{- end}}
 
 	err = query.Count(&count).Error
 	if err != nil || count == 0 {
@@ -39,7 +46,7 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 	}
 
 	err = query.
-		Select("{{.ListSelectCols}}").
+		Select({{.ListSelectCols}}).
 		Limit(pageSize).
 		Offset(offset).
 		{{if .HasCreateTime}}Order(tableName + ".{{.CreateTimeField}} desc").{{end}}

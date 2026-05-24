@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 	"fmt"
@@ -41,7 +42,7 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
 			return base_ar.Insert{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.PlatModelName}}{})
-		case "mchnt_plat":
+		case "admin_mchnt":
 			return base_ar.Insert{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.MchntModelName}}{})
 		default:
 			return errors.New("模块名称错误")
@@ -67,7 +68,7 @@ func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.Menu
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
 			return base_ar.Update{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.PlatModelName}}{})
-		case "mchnt_plat":
+		case "admin_mchnt":
 			return base_ar.Update{{.ModelName}}(tx, &data.{{.ModelName}}, &models.{{.MchntModelName}}{})
 		default:
 			return errors.New("模块名称错误")
@@ -80,7 +81,7 @@ func (s *{{.ModelName}}Service) Del(baseParamDto dto.BaseParamDto, id string) er
 		switch baseParamDto.ModuleName {
 		case "admin_plat":
 			return base_ar.Delete{{.ModelName}}(tx, id, &models.{{.PlatModelName}}{})
-		case "mchnt_plat":
+		case "admin_mchnt":
 			return base_ar.Delete{{.ModelName}}(tx, id, &models.{{.MchntModelName}}{})
 		default:
 			return errors.New("模块名称错误")
@@ -88,34 +89,35 @@ func (s *{{.ModelName}}Service) Del(baseParamDto dto.BaseParamDto, id string) er
 	})
 }
 
-func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id string) (models.{{.ModelName}}, error) {
+func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id string) (base_model.{{.ModelName}}, error) {
+	var data base_model.{{.ModelName}}
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		data, err := base_ar.Get{{.ModelName}}ById(id, &models.{{.PlatModelName}}{})
 		if err != nil {
-			return models.{{.ModelName}}{}, err
+			return data, err
 		}
-		return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
-	case "mchnt_plat":
+		return data, nil
+	case "admin_mchnt":
 		data, err := base_ar.Get{{.ModelName}}ById(id, &models.{{.MchntModelName}}{})
 		if err != nil {
-			return models.{{.ModelName}}{}, err
+			return data, err
 		}
-		return models.{{.ModelName}}{ {{.ModelName}}: data}, nil
+		return data, nil
 	default:
-		return models.{{.ModelName}}{}, errors.New("模块名称错误")
+		return data, errors.New("模块名称错误")
 	}
 }
 
 func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (*dto.RespDataListDto, error) {
-	var data []models.{{.ModelName}}
+	var data []base_model.{{.ModelName}}
 	var count int64
 	var err error
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.PlatModelName}}{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.MchntModelName}}{})
 	default:
 		return nil, errors.New("模块名称错误")

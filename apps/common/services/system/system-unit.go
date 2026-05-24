@@ -27,7 +27,7 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto
 	switch unitDto.ModuleName {
 	case "admin_plat":
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Plat{}, &models.PlatUser{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Mchnt{}, &models.MchntUser{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
@@ -85,7 +85,7 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Plat{}, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatRole{}, &models.PlatUserRole{}, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleClassify{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Mchnt{}, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntRole{}, &models.MchntUserRole{}, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleClassify{})
 	default:
 		err = errors.New("unit Save：模块名称错误")
@@ -112,7 +112,7 @@ func (s *Unit) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
 		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Plat{})
-	case "mchnt_plat":
+	case "admin_mchnt":
 		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Mchnt{})
 	default:
 		err = errors.New("Unit Del:模块名称错误")
