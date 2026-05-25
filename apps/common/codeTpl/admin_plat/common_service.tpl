@@ -4,6 +4,7 @@ package {{.MenuModule}}
 import (
 	dto "WenBeego/apps/common/dto_vo"
 	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -110,7 +111,7 @@ func (s *{{.ModelName}}Service) GetDetail(baseParamDto dto.BaseParamDto, id stri
 }
 
 func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (*dto.RespDataListDto, error) {
-	var data []base_model.{{.ModelName}}
+	var data []{{.MenuModule}}_vo.{{.ModelName}}Vo
 	var count int64
 	var err error
 

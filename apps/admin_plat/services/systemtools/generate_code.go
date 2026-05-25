@@ -429,6 +429,10 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "wen-beego/apps/common/dto_vo/"+menuModule+"_dto/"+strippedTableName+".go", td); err != nil {
 			return nil, err
 		}
+		td.RenderTemplateType = "common:vo"
+		if err := s.renderTemplate(tplDir, "admin_plat", "vo.tpl", tempDir, "wen-beego/apps/common/dto_vo/"+menuModule+"_vo/"+strippedTableName+".go", td); err != nil {
+			return nil, err
+		}
 		if isMultiTenant {
 			td.RenderTemplateType = "common:MultiTenant_plat_model"
 			if err := s.renderTemplate(tplDir, "admin_plat", "plat_model.tpl", tempDir, "wen-beego/apps/common/models/plat_"+strippedTableName+".go", td); err != nil {

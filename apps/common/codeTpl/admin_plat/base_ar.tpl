@@ -5,6 +5,7 @@ import (
 	_ "WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_vo"
 	{{if .HasUnitId}}"strings"{{end}}
 	"fmt"
 	"time"
@@ -13,8 +14,8 @@ import (
 )
 
 // Get{{.ModelName}}List 多用户体系通用列表查询
-func Get{{.ModelName}}List[M, UserM{{if .HasUnitId}}, UnitM{{end}} interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M, userModel UserM{{if .HasUnitId}}, unitModel UnitM{{end}}) (data []base_model.{{.ModelName}}, count int64, err error) {
-	data = make([]base_model.{{.ModelName}}, 0)
+func Get{{.ModelName}}List[M, UserM{{if .HasUnitId}}, UnitM{{end}} interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M, userModel UserM{{if .HasUnitId}}, unitModel UnitM{{end}}) (data []{{.MenuModule}}_vo.{{.ModelName}}Vo, count int64, err error) {
+	data = make([]{{.MenuModule}}_vo.{{.ModelName}}Vo, 0)
 	tableName := model.TableName()
 	userTableName := userModel.TableName()
 

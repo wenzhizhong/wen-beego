@@ -25,6 +25,8 @@ import (
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_vo"
+	{{if .HasUnitId}}"strings"{{end}}
 	"fmt"
 	"time"
 
@@ -68,8 +70,8 @@ func (ar *{{.ModelName}}Ar) Delete(tx *gorm.DB, id string) error {
 	{{end}}
 }
 
-func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (data []models.{{.ModelName}}, count int64, err error) {
-	data = make([]models.{{.ModelName}}, 0)
+func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto) (data []{{.MenuModule}}_vo.{{.ModelName}}Vo, count int64, err error) {
+	data = make([]{{.MenuModule}}_vo.{{.ModelName}}Vo, 0)
 	model := &models.{{.ModelName}}{}
 	tableName := model.TableName()
 
@@ -89,6 +91,12 @@ func (ar *{{.ModelName}}Ar) GetList(pageSize, offset int, searchDto {{.MenuModul
 	{{else}}	if searchDto.{{.GoFieldName}} != "" { query = query.Where(tableName+".{{.Name}} = ?", searchDto.{{.GoFieldName}}) }
 	{{end}}
 {{end}}{{end}}{{end}}{{end}}
+	{{- if .HasUnitId}}
+	if searchDto.SelectUnitIds != "" {
+		selectUnitIds := strings.Split(searchDto.SelectUnitIds, ",")
+		query = query.Where(tableName+".unit_id in (?)", selectUnitIds)
+	}
+	{{- end}}
 
 	err = query.Count(&count).Error
 	if err != nil || count == 0 {
