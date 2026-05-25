@@ -8,9 +8,6 @@ type DeptItf interface {
 	GetUnitId() string
 	GetName() string
 	GetPrincipalId() string
-	GetPrincipal() string
-	GetPhone() string
-	GetEmail() string
 	GetSort() int
 	GetStatus() int
 	GetDeleted() int

@@ -2,6 +2,7 @@ package models_ar
 
 import (
 	"WenBeego/apps/common/dto_vo/generate_code_dto"
+	"WenBeego/apps/common/dto_vo/generate_code_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
@@ -38,8 +39,8 @@ func (ar *GenerateCodeAr) Delete(tx *gorm.DB, ids []string) error {
 	return tx.Model(&models.GenerateCode{}).Where("id IN ?", ids).Update("deleted", 1).Error
 }
 
-func (ar *GenerateCodeAr) GetList(req page_dto.GenerateCodeListReqDto) (data []models.GenerateCode, count int64, err error) {
-	data = make([]models.GenerateCode, 0)
+func (ar *GenerateCodeAr) GetList(req page_dto.GenerateCodeListReqDto) (data []generate_code_vo.GenerateCodeListVo, count int64, err error) {
+	data = make([]generate_code_vo.GenerateCodeListVo, 0)
 	model := &models.GenerateCode{}
 	tableName := model.TableName()
 

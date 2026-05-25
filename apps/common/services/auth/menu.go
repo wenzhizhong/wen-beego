@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"WenBeego/apps/common/dto_vo/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -27,7 +27,7 @@ type CommonMenu struct {
  * @param roleModel 角色模型
  * @return
  */
-func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId string) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId string) (menuAuthList []auth_vo.RoleMenuVo, err error) {
 
 	var permissions []base_model.UnitMenu
 	var roleClassifies []base_model.UnitRoleClassify

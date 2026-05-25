@@ -25,15 +25,6 @@ func (m *PlatDept) GetName() string {
 func (m *PlatDept) GetPrincipalId() string {
 	return m.PrincipalId
 }
-func (m *PlatDept) GetPrincipal() string {
-	return m.Principal
-}
-func (m *PlatDept) GetPhone() string {
-	return m.Phone
-}
-func (m *PlatDept) GetEmail() string {
-	return m.Email
-}
 func (m *PlatDept) GetSort() int {
 	return m.Sort
 }

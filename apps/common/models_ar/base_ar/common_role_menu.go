@@ -1,7 +1,7 @@
 package base_ar
 
 import (
-	"WenBeego/apps/common/dto_vo/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
@@ -14,7 +14,7 @@ import (
 
 var OperateMenuTypeArr = []int{base_model.UNIT_MENU_TYPE_BUTTON, base_model.UNIT_MENU_TYPE_OTHER_API}
 
-func GetUserMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuMapModel MenuMapModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+func GetUserMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, RoleMenuModel itf.RoleMenuItf, UserRoleModel itf.UserRoleItf, RoleModel itf.RoleItf](moduleName string, unitId string, unitUserId string, menuModel MenuModel, menuMapModel MenuMapModel, roleMenuModel RoleMenuModel, userRoleModel UserRoleModel, roleModel RoleModel) (menuAuthList []auth_vo.RoleMenuVo, err error) {
 	if unitId == "" || unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, unitUserId:%s", unitId, unitUserId)
 		global.Log.Error(str)

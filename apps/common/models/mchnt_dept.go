@@ -30,15 +30,6 @@ func (m *MchntDept) GetName() string {
 func (m *MchntDept) GetPrincipalId() string {
 	return m.PrincipalId
 }
-func (m *MchntDept) GetPrincipal() string {
-	return m.Principal
-}
-func (m *MchntDept) GetPhone() string {
-	return m.Phone
-}
-func (m *MchntDept) GetEmail() string {
-	return m.Email
-}
 func (m *MchntDept) GetSort() int {
 	return m.Sort
 }

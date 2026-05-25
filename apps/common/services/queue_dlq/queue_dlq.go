@@ -3,6 +3,7 @@ package queue_dlq
 import (
 	dto "WenBeego/apps/common/dto_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/queue_dlq_vo"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar"
@@ -14,7 +15,7 @@ import (
 type QueueDlq struct{}
 
 func (s *QueueDlq) GetList(reqDto page_dto.QueueDlqListReqDto) (dto.RespDataListDto, error) {
-	var data []models.QueueDlqFailedLog
+	var data []queue_dlq_vo.QueueDlqListVo
 	var count int64
 	var err error
 

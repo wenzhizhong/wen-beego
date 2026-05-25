@@ -1,6 +1,7 @@
 package models_ar
 
 import (
+	"WenBeego/apps/common/dto_vo/cron_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
@@ -10,8 +11,8 @@ import (
 type PlatCronLogAr struct {
 }
 
-func (ar *PlatCronLogAr) GetList(pageReq page_dto.MonitorCronLogListReqDto) (data []models.PlatCronLog, total int64, err error) {
-	data = make([]models.PlatCronLog, 0)
+func (ar *PlatCronLogAr) GetList(pageReq page_dto.MonitorCronLogListReqDto) (data []cron_vo.UnitCronLogListVo, total int64, err error) {
+	data = make([]cron_vo.UnitCronLogListVo, 0)
 
 	query := global.GetReadDb().Model(&models.PlatCronLog{})
 	if pageReq.NameEn != "" {

@@ -3,6 +3,8 @@ package base_ar
 import (
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/unit_dto"
+	"WenBeego/apps/common/dto_vo/unit_vo"
+	"WenBeego/apps/common/dto_vo/user_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -105,7 +107,7 @@ func GetUserListOfUnitById[
 	unitUserDeptModel UnitUserDeptModel,
 	unitRoleModel UnitRoleModel,
 	unitUserRoleModel UnitUserRoleModel,
-) (userData []page_dto.SystemUserListDto, count int64, err error) {
+) (userData []user_vo.SystemUserListVo, count int64, err error) {
 	tableUnitUserName := unitUserModel.TableName()
 	tableUnitUserProfileName := userProfileModel.TableName()
 	tableUnitDeptName := unitDeptModel.TableName()
@@ -129,7 +131,7 @@ func GetUserListOfUnitById[
 		TableUserRole:    tableUnitUserRoleName,
 	}
 
-	userData = make([]page_dto.SystemUserListDto, 0)
+	userData = make([]user_vo.SystemUserListVo, 0)
 	if len(reqDto.SelectUnitIds) <= 0 {
 		return userData, count, errors.New("GetUserListOfUnitById(): UnitId 不能为空")
 	}
@@ -203,12 +205,12 @@ func GetUserListOfUnitById[
  * @return
  * @throws
  */
-func GetUserDefaultUnit[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userId string) (base_model.Unit, error) {
+func GetUserDefaultUnit[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userId string) (unit_vo.UnitListVo, error) {
 	var unitModel UnitModel
 	var unitUserModel UnitUserModel
 	tableUnitName := unitModel.TableName()
 	tableUnitUserName := unitUserModel.TableName()
-	var userData base_model.Unit
+	userData := unit_vo.UnitListVo{}
 	if userId == "" {
 		return userData, errors.New("userId 不能为空")
 	}

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"WenBeego/apps/common/dto_vo/auth_dto"
+	"WenBeego/apps/common/dto_vo/unit_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
@@ -341,7 +342,7 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*auth_dt
 }
 
 // 获取用户默认组织
-func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData base_model.Unit, err error) {
+func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData unit_vo.UnitListVo, err error) {
 	switch moduleName {
 	case "admin_plat":
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Plat, *models.PlatUser](userId)

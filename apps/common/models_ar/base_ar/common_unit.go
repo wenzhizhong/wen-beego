@@ -3,6 +3,7 @@ package base_ar
 import (
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/unit_dto"
+	"WenBeego/apps/common/dto_vo/unit_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
@@ -106,12 +107,13 @@ func GetUserUnitById[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](userI
 }
 
 // 获取内部组织列表
-func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []base_model.Unit, count int64, err error) {
+func GetUnitListByUserId[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserItf](unitDto page_dto.SystemUnitListReqDto, unitModel UnitModel, unitUserModel UnitUserModel) (listData []unit_vo.UnitListVo, count int64, err error) {
 	tableUnitName := unitModel.TableName()
 	tableUnitUserName := unitUserModel.TableName()
 
 	unitDto.Name = strings.TrimSpace(unitDto.Name)
 	unitDto.Code = strings.TrimSpace(unitDto.Code)
+	listData = make([]unit_vo.UnitListVo, 0)
 
 	tableStruct := struct {
 		TableUnit     string

@@ -1,8 +1,8 @@
 package auth_dto
 
 import (
+	"WenBeego/apps/common/dto_vo/unit_vo"
 	"WenBeego/apps/common/models"
-	"WenBeego/apps/common/models/base_model"
 )
 
 var AuthCodeTypeDigit = "captcha-digit"     // "数字验证码"
@@ -46,7 +46,7 @@ type UserLoginInfoDto struct {
 		Roles             []string `json:"roles"`
 		Permissions       []string `json:"permissions"`
 	} `json:"userInfo"`
-	UnitInfo base_model.Unit `json:"unitInfo"`
+	UnitInfo unit_vo.UnitListVo `json:"unitInfo"`
 }
 
 // 刷新token

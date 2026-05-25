@@ -2,7 +2,7 @@ package models_ar
 
 import (
 	dto "WenBeego/apps/common/dto_vo"
-	"WenBeego/apps/common/dto_vo/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
@@ -26,7 +26,7 @@ func (a *PlatMenuViewAr) GetById(id string) (models.PlatMenu, error) {
 	return data, result.Error
 }
 
-func (a *PlatMenuViewAr) GetUserMenu(moduleName string, unitId string, unitUserId string, menuViewModel *models.PlatMenuView, menuMapModel *models.PlatMenuMapView, roleMenuModel *models.PlatRoleMenu, userRoleModel *models.PlatUserRole, roleModel *models.PlatRole) (menuAuthList []auth_dto.RoleMenuDto, err error) {
+func (a *PlatMenuViewAr) GetUserMenu(moduleName string, unitId string, unitUserId string, menuViewModel *models.PlatMenuView, menuMapModel *models.PlatMenuMapView, roleMenuModel *models.PlatRoleMenu, userRoleModel *models.PlatUserRole, roleModel *models.PlatRole) (menuAuthList []auth_vo.RoleMenuVo, err error) {
 	if unitId == "" || unitUserId == "" {
 		str := fmt.Sprintf("GetUserMenu():获取菜单权限必填参数, unit_id:%s, unitUserId:%s", unitId, unitUserId)
 		global.Log.Error(str)

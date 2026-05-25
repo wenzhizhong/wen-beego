@@ -3,6 +3,7 @@ package system
 import (
 	dto "WenBeego/apps/common/dto_vo"
 	"WenBeego/apps/common/dto_vo/dept_dto"
+	"WenBeego/apps/common/dto_vo/dept_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -16,7 +17,7 @@ type Dept struct {
 
 // 获取组织架构列表
 func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]base_model.UnitDept, 0)
+	data := make([]dept_vo.UnitDeptListVo, 0)
 	var count int64 = 0
 
 	if res, err1 := helper.CheckUserHasUnit(deptDto.ModuleName, deptDto.UserId, deptDto.SelectUnitIds); !res {
@@ -39,7 +40,7 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 	return
 }
 func (s *Dept) GetUnitDeptListForAdminPlat(deptDto page_dto.SystemDeptListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]base_model.UnitDept, 0)
+	data := make([]dept_vo.UnitDeptListVo, 0)
 	var count int64 = 0
 
 	// if res, err1 := helper.CheckUserHasUnit(deptDto.ModuleName, deptDto.UserId, deptDto.SelectUnitIds); !res {

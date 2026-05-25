@@ -16,9 +16,6 @@ type UnitCron struct {
 	UpdatedAt *time.Time `gorm:"column:updated_at;type:date;comment:更新时间" json:"updated_at"`
 	Deleted   int        `gorm:"column:deleted;type:int;comment:是否删除：0否1是" json:"deleted"`
 	Remark    string     `gorm:"column:remark;type:varchar(100);comment:备注" json:"remark"`
-
-	CreatedByName string `gorm:"->" json:"created_by_name"`
-	UpdatedByName string `gorm:"->" json:"updated_by_name"`
 }
 
 var UNIt_CRONTAB_STATUS_ENABLED = 1

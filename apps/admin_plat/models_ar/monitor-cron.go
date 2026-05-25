@@ -2,6 +2,7 @@ package models_ar
 
 import (
 	"WenBeego/apps/common/dto_vo/cron_dto"
+	"WenBeego/apps/common/dto_vo/cron_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
@@ -63,8 +64,8 @@ func (ar *PlatCronAr) Delete(tx *gorm.DB, unit_id, id string) (err error) {
 }
 
 // 获取计划任务列表
-func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []models.PlatCron, count int64, err error) {
-	data = make([]models.PlatCron, 0)
+func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []cron_vo.UnitCronListVo, count int64, err error) {
+	data = make([]cron_vo.UnitCronListVo, 0)
 
 	platCronMdoel := &models.PlatCron{}
 	platUserModel := &models.PlatUser{}

@@ -1,10 +1,10 @@
-package auth_dto
+package auth_vo
 
 import (
 	"WenBeego/apps/common/models/base_model"
 )
 
-type RoleMenuDto struct {
+type RoleMenuVo struct {
 	//table: menu
 	base_model.UnitMenu
 

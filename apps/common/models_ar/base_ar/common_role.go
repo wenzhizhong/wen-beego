@@ -3,6 +3,7 @@ package base_ar
 import (
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/role_dto"
+	"WenBeego/apps/common/dto_vo/role_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
@@ -56,10 +57,12 @@ func InsertUnitRole[RoleModel itf.RoleItf](tx *gorm.DB, roleModel base_model.Uni
 }
 
 // 页面-获取组织架构部门列表
-func GetUnitRoleList[UnitModel itf.UnitItf, UnitRoleModel itf.RoleItf, UnitRoleClassifyModel itf.RoleClassifyItf](RoleDto page_dto.SystemRoleListReqDto, unitModel UnitModel, unitRoleModel UnitRoleModel, unitRoleClassifyModel UnitRoleClassifyModel) (dataList []base_model.UnitRole, count int64, err error) {
+func GetUnitRoleList[UnitModel itf.UnitItf, UnitRoleModel itf.RoleItf, UnitRoleClassifyModel itf.RoleClassifyItf](RoleDto page_dto.SystemRoleListReqDto, unitModel UnitModel, unitRoleModel UnitRoleModel, unitRoleClassifyModel UnitRoleClassifyModel) (dataList []role_vo.UnitRoleListVo, count int64, err error) {
 	tableUnitName := unitModel.TableName()
 	tableRoleName := unitRoleModel.TableName()
 	tableRoleClassifyName := unitRoleClassifyModel.TableName()
+
+	dataList = make([]role_vo.UnitRoleListVo, 0)
 
 	query := global.GetReadDb().
 		Model(unitRoleModel).
@@ -83,10 +86,10 @@ func GetUnitRoleList[UnitModel itf.UnitItf, UnitRoleModel itf.RoleItf, UnitRoleC
 
 	err = query.Select(tableRoleName + ".id").Count(&count).Error
 	if err != nil {
-		return make([]base_model.UnitRole, 0), 0, nil
+		return dataList, 0, nil
 	}
 	if count == 0 {
-		return make([]base_model.UnitRole, 0), 0, nil
+		return dataList, 0, nil
 	}
 	err = query.Select(tableRoleName + ".*," + tableUnitName + ".name as unit_name," + tableRoleClassifyName + ".name as role_classify_name").
 		Order(tableRoleName + ".role_sort").

@@ -1,7 +1,7 @@
 package models_ar
 
 import (
-	"WenBeego/apps/common/dto_vo/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
 	"errors"
@@ -27,7 +27,7 @@ func (a *PlatRoleMenu) GetById(id string) (PlatRoleMenu, error) {
 /**
  * 获取用户权限菜单
  */
-func (a *PlatRoleMenu) GetUserMenu(unitId string, userId string) (roleMenu []auth_dto.RoleMenuDto, err error) {
+func (a *PlatRoleMenu) GetUserMenu(unitId string, userId string) (roleMenu []auth_vo.RoleMenuVo, err error) {
 
 	return
 }

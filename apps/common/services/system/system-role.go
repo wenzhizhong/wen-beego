@@ -4,6 +4,7 @@ import (
 	dto "WenBeego/apps/common/dto_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/role_dto"
+	"WenBeego/apps/common/dto_vo/role_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
@@ -23,7 +24,7 @@ type Role struct {
 
 // 获取角色列表
 func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]base_model.UnitRole, 0)
+	data := make([]role_vo.UnitRoleListVo, 0)
 	var count int64 = 0
 
 	if res, err1 := helper.CheckUserHasUnit(RoleDto.ModuleName, RoleDto.UserId, RoleDto.SelectUnitIds); !res {
@@ -46,7 +47,7 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 	return
 }
 func (s *Role) GetUnitRoleListForAdminPlat(RoleDto page_dto.SystemRoleListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]base_model.UnitRole, 0)
+	data := make([]role_vo.UnitRoleListVo, 0)
 	var count int64 = 0
 
 	// if res, err1 := helper.CheckUserHasUnit(RoleDto.ModuleName, RoleDto.UserId, RoleDto.SelectUnitIds); !res {

@@ -2,6 +2,7 @@ package models_ar
 
 import (
 	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/queue_dlq_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -17,8 +18,8 @@ func (ar *QueueDlqFailedLogAR) Insert(insertData *models.QueueDlqFailedLog) erro
 	return global.GetWriteDb().Create(insertData).Error
 }
 
-func (ar *QueueDlqFailedLogAR) GetList(reqDto page_dto.QueueDlqListReqDto) (data []models.QueueDlqFailedLog, total int64, err error) {
-	data = make([]models.QueueDlqFailedLog, 0)
+func (ar *QueueDlqFailedLogAR) GetList(reqDto page_dto.QueueDlqListReqDto) (data []queue_dlq_vo.QueueDlqListVo, total int64, err error) {
+	data = make([]queue_dlq_vo.QueueDlqListVo, 0)
 
 	query := global.GetReadDb().Model(&models.QueueDlqFailedLog{}).Where("deleted = ?", "0")
 

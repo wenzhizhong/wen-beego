@@ -4,6 +4,7 @@ import (
 	dto "WenBeego/apps/common/dto_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/unit_dto"
+	"WenBeego/apps/common/dto_vo/unit_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
@@ -21,7 +22,8 @@ type Unit struct {
 
 // 系统管理-获取内部组织列表
 func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]base_model.Unit, 0)
+	data := make([]unit_vo.UnitListVo, 0)
+
 	var count int64 = 0
 
 	switch unitDto.ModuleName {

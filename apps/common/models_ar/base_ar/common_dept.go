@@ -2,6 +2,7 @@ package base_ar
 
 import (
 	"WenBeego/apps/common/dto_vo/dept_dto"
+	"WenBeego/apps/common/dto_vo/dept_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
@@ -12,11 +13,13 @@ import (
 )
 
 // 获取组织架构部门列表
-func GetUnitDeptList[UnitModel itf.UnitItf, UnitDeptModel itf.DeptItf, UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](deptDto page_dto.SystemDeptListReqDto, unitModel UnitModel, unitDeptModel UnitDeptModel, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (dataList []base_model.UnitDept, count int64, err error) {
+func GetUnitDeptList[UnitModel itf.UnitItf, UnitDeptModel itf.DeptItf, UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.UserProfileItf](deptDto page_dto.SystemDeptListReqDto, unitModel UnitModel, unitDeptModel UnitDeptModel, unitUserModel UnitUserModel, unitUserProfileModel UnitUserProfileModel) (dataList []dept_vo.UnitDeptListVo, count int64, err error) {
 	tableUnitName := unitModel.TableName()
 	tableDeptName := unitDeptModel.TableName()
 	tableUnitUserName := unitUserModel.TableName()
 	tableUserProfileName := unitUserProfileModel.TableName()
+
+	dataList = make([]dept_vo.UnitDeptListVo, 0)
 
 	subQuery := global.GetReadDb().
 		Model(unitUserModel).
@@ -43,10 +46,10 @@ func GetUnitDeptList[UnitModel itf.UnitItf, UnitDeptModel itf.DeptItf, UnitUserM
 
 	err = query.Select(tableDeptName + ".id").Count(&count).Error
 	if err != nil {
-		return make([]base_model.UnitDept, 0), 0, nil
+		return dataList, 0, nil
 	}
 	if count == 0 {
-		return make([]base_model.UnitDept, 0), 0, nil
+		return dataList, 0, nil
 	}
 	err = query.Select(tableDeptName+".*,"+tableUnitName+".name as unit_name, t.principal, t.phone, t.email").
 		Joins("LEFT JOIN (?) AS t ON t.principal_id = "+tableDeptName+".principal_id", subQuery).

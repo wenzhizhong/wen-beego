@@ -5,6 +5,7 @@ import (
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/unit_dto"
 	"WenBeego/apps/common/dto_vo/user_dto"
+	"WenBeego/apps/common/dto_vo/user_vo"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
@@ -24,7 +25,7 @@ type User struct {
 
 // 系统管理-获取用户列表
 func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]page_dto.SystemUserListDto, 0)
+	data := make([]user_vo.SystemUserListVo, 0)
 	var count int64 = 0
 
 	if res, err1 := helper.CheckUserHasUnit(reqDto.ModuleName, reqDto.UserId, reqDto.SelectUnitIds); !res {
@@ -56,7 +57,7 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 }
 
 func (s *User) GetUserListForAdminPlat(reqDto page_dto.SystemUserListReqDto) (resultDto dto.RespDataListDto, err error) {
-	data := make([]page_dto.SystemUserListDto, 0)
+	data := make([]user_vo.SystemUserListVo, 0)
 	var count int64 = 0
 
 	// if res, err1 := helper.CheckUserHasUnit(reqDto.ModuleName, reqDto.UserId, reqDto.SelectUnitIds); !res {
