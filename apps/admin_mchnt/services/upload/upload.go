@@ -1,7 +1,7 @@
 package upload
 
 import (
-	"WenBeego/apps/common/dto/upload_dto"
+	"WenBeego/apps/common/dto_vo/upload_dto"
 	commonUpload "WenBeego/apps/common/services/upload"
 	"mime/multipart"
 	"net/url"

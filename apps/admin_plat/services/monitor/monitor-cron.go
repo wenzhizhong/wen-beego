@@ -2,9 +2,9 @@ package monitor
 
 import (
 	"WenBeego/apps/admin_plat/models_ar"
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/cron_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/cron_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/crontab"

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/queue_dlq_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/queue_dlq_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"

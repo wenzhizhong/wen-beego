@@ -1,9 +1,9 @@
 package system
 
 import (
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/dept_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/dept_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"

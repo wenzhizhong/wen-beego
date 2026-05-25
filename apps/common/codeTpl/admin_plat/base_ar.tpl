@@ -4,7 +4,7 @@ import (
 	"WenBeego/apps/common/global"
 	_ "WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
-	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
 	{{if .HasUnitId}}"strings"{{end}}
 	"fmt"
 	"time"

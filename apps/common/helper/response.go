@@ -1,6 +1,6 @@
 package helper
 
-import "WenBeego/apps/common/dto"
+import dto "WenBeego/apps/common/dto_vo"
 
 func Response(code int, message string, data interface{}) dto.Response {
 	if data == nil {

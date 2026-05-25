@@ -3,8 +3,8 @@ package monitor
 import (
 	monitorService "WenBeego/apps/admin_plat/services/monitor"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/queue_dlq_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/queue_dlq_dto"
 	"WenBeego/apps/common/helper"
 	"strconv"
 )

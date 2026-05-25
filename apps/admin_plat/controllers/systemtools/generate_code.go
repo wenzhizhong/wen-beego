@@ -1,12 +1,12 @@
 package systemtools
 
 import (
+	genService "WenBeego/apps/admin_plat/services/systemtools"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/generate_code_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto_vo/generate_code_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
-	genService "WenBeego/apps/admin_plat/services/systemtools"
 	"path/filepath"
 )
 

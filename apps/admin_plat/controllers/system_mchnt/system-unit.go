@@ -4,8 +4,8 @@ package system_mchnt
 import (
 	systemService "WenBeego/apps/admin_plat/services/system_mchnt"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/unit_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/unit_dto"
 	"WenBeego/apps/common/helper"
 	"errors"
 )

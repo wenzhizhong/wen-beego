@@ -1,8 +1,8 @@
 package models_ar
 
 import (
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/auth_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/auth_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"

@@ -1,6 +1,6 @@
-package dto
+package dto_vo
 
-import "WenBeego/apps/common/dto/mq_dto"
+import "WenBeego/apps/common/dto_vo/mq_dto"
 
 type ApiLogDataDto struct {
 	ModuleMap map[string]*ApiLogDataUnitDto

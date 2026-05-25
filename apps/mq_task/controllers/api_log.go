@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"WenBeego/apps/common/dto/mq_dto"
+	"WenBeego/apps/common/dto_vo/mq_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/mq_task/services"
 	"encoding/base64"

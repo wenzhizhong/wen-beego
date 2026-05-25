@@ -152,7 +152,7 @@ func platSystemSlices() []beego.LinkNamespace {
 - **结构体定义**：嵌入 `commonControllers.AdminBaseController`
 - **Swagger 注解**：包含 `@Summary`, `@Description`, `@Tags`, `@Param`, `@Success`, `@Router`
 - **方法实现**：解析参数，调用 Service，返回 JSON
-接受参数如果需要自定义dto传参，则在`apps/common/dto/<dtoType>/<Name>.go`
+接受参数如果需要自定义dto传参，则在`apps/common/dto_vo/<dtoType>/<Name>.go`
 
 ```go
 package system
@@ -160,7 +160,7 @@ package system
 import (
     "WenBeego/apps/admin_plat/services/system"
     commonControllers "WenBeego/apps/common/controller"
-    "WenBeego/apps/common/dto/page_dto"
+    "WenBeego/apps/common/dto_vo/page"
     "WenBeego/apps/common/helper"
 )
 
@@ -206,8 +206,8 @@ func (c *UnitController) Get() {
 package system
 
 import (
-    "WenBeego/apps/common/dto"
-    "WenBeego/apps/common/dto/page_dto"
+    "WenBeego/apps/common/dto_vo"
+    "WenBeego/apps/common/dto_vo/page"
     CommonSystem "WenBeego/apps/common/services/system"
 )
 
@@ -224,8 +224,8 @@ func (s *UnitService) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (dto.Re
 package system
 
 import (
-    "WenBeego/apps/common/dto"
-    "WenBeego/apps/common/dto/page_dto"
+    "WenBeego/apps/common/dto_vo"
+    "WenBeego/apps/common/dto_vo/page"
     "WenBeego/apps/common/helper"
     "WenBeego/apps/common/models/base_model"
 )

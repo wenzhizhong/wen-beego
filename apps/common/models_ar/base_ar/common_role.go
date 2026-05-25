@@ -1,8 +1,8 @@
 package base_ar
 
 import (
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/role_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/role_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"

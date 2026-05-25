@@ -3,8 +3,8 @@ package {{.MenuModule}}
 
 import (
 	commonService "WenBeego/apps/common/services/{{.MenuModule}}"
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
 )
 
 type {{.ModelName}}Service struct {
@@ -36,8 +36,8 @@ package {{.MenuModule}}
 
 import (
 	"WenBeego/apps/{{.AppModule}}/models_ar"
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/{{.MenuModule}}_dto"
+	"WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"

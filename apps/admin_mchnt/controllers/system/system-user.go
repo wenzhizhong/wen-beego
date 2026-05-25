@@ -2,8 +2,8 @@ package system
 
 // 系统管理-内部用户管理
 import (
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/user_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/user_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"strings"

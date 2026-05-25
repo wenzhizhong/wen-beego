@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"WenBeego/apps/common/dto/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_dto"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar/base_ar"

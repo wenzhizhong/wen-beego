@@ -1,12 +1,12 @@
 package page_dto
 
 import (
-	"WenBeego/apps/common/dto"
+	"WenBeego/apps/common/dto_vo"
 	"time"
 )
 
 type MonitorCronLogListReqDto struct {
-	dto.ReqDataListDto
+	dto_vo.ReqDataListDto
 
 	NameEn    string
 	CreatedAt *time.Time

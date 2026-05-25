@@ -1,7 +1,7 @@
 package captcha
 
 import (
-	"WenBeego/apps/common/dto/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_dto"
 	"errors"
 	"time"
 

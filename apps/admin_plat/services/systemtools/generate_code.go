@@ -2,9 +2,9 @@ package systemtools
 
 import (
 	"WenBeego/apps/admin_plat/models_ar"
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/generate_code_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/generate_code_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -195,45 +195,45 @@ type ColumnConfig struct {
 	SkipForm     bool        `json:"-"`
 }
 
-	type TemplateData struct {
-	AppModule        string
-	ModelName        string
-	ModelNameLower   string
-	TableName        string
-	MenuModule       string
-	BizModule        string
-	MenuName         string
-	ApiUrlPrefix     string
-	ApiNamePrefix    string
-	Columns          []ColumnConfig
-	HasDeleted       bool
-	HasUpdateTime    bool
-	HasCreateTime    bool
-	HasDeleteTime    bool
-	HasUnitId        bool
-	HasCreateUserId  bool
-	HasUpdateUserId  bool
-	DeletedField     string
-	CreateTimeField  string
-	UpdateTimeField  string
-	DeleteTimeField  string
-	UnitIdField      string
-	CreateUserIdField string
-	UpdateUserIdField string
-	IsMultiApp       bool
-	IsMultiTenant    bool
-	PlatModelName    string
-	MchntModelName   string
-	PlatTableName    string
-	MchntTableName   string
-	ListSelectCols      string
-	RenderTemplateType  string
-	ViewPath            string
-	AuthRead         string
-	AuthAdd          string
-	AuthEdit         string
-	AuthDel          string
-	AuthDetail       string
+type TemplateData struct {
+	AppModule              string
+	ModelName              string
+	ModelNameLower         string
+	TableName              string
+	MenuModule             string
+	BizModule              string
+	MenuName               string
+	ApiUrlPrefix           string
+	ApiNamePrefix          string
+	Columns                []ColumnConfig
+	HasDeleted             bool
+	HasUpdateTime          bool
+	HasCreateTime          bool
+	HasDeleteTime          bool
+	HasUnitId              bool
+	HasCreateUserId        bool
+	HasUpdateUserId        bool
+	DeletedField           string
+	CreateTimeField        string
+	UpdateTimeField        string
+	DeleteTimeField        string
+	UnitIdField            string
+	CreateUserIdField      string
+	UpdateUserIdField      string
+	IsMultiApp             bool
+	IsMultiTenant          bool
+	PlatModelName          string
+	MchntModelName         string
+	PlatTableName          string
+	MchntTableName         string
+	ListSelectCols         string
+	RenderTemplateType     string
+	ViewPath               string
+	AuthRead               string
+	AuthAdd                string
+	AuthEdit               string
+	AuthDel                string
+	AuthDetail             string
 	AdminPlatShowMchntUnit bool
 }
 
@@ -386,33 +386,33 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	tplDir := filepath.Join(global.AppDir, "common", "codeTpl")
 
 	td := TemplateData{
-		ModelName:       modelName,
-		ModelNameLower:  modelNameLower,
-		PlatModelName:   platModelName,
-		MchntModelName:  mchntModelName,
-		TableName:       tableName,
-		PlatTableName:   platTableName,
-		MchntTableName:  mchntTableName,
-		MenuModule:      menuModule,
-		BizModule:       bizModule,
-		MenuName:        reqDto.MenuName,
-		Columns:         columnConfigs,
-		HasDeleted:      hasDeleted,
-		HasUpdateTime:   hasUpdateTime,
-		HasCreateTime:   hasCreateTime,
-		HasDeleteTime:   hasDeleteTime,
-		HasUnitId:        hasUnitId,
-		HasCreateUserId:  hasCreateUserId,
-		HasUpdateUserId:  hasUpdateUserId,
-		DeletedField:     deletedField,
-		CreateTimeField: createTimeField,
-		UpdateTimeField: updateTimeField,
-		DeleteTimeField: deleteTimeField,
+		ModelName:         modelName,
+		ModelNameLower:    modelNameLower,
+		PlatModelName:     platModelName,
+		MchntModelName:    mchntModelName,
+		TableName:         tableName,
+		PlatTableName:     platTableName,
+		MchntTableName:    mchntTableName,
+		MenuModule:        menuModule,
+		BizModule:         bizModule,
+		MenuName:          reqDto.MenuName,
+		Columns:           columnConfigs,
+		HasDeleted:        hasDeleted,
+		HasUpdateTime:     hasUpdateTime,
+		HasCreateTime:     hasCreateTime,
+		HasDeleteTime:     hasDeleteTime,
+		HasUnitId:         hasUnitId,
+		HasCreateUserId:   hasCreateUserId,
+		HasUpdateUserId:   hasUpdateUserId,
+		DeletedField:      deletedField,
+		CreateTimeField:   createTimeField,
+		UpdateTimeField:   updateTimeField,
+		DeleteTimeField:   deleteTimeField,
 		UnitIdField:       unitIdField,
 		CreateUserIdField: createUserIdField,
 		UpdateUserIdField: updateUserIdField,
-		IsMultiApp:      isMultiApp,
-		IsMultiTenant:   isMultiTenant,
+		IsMultiApp:        isMultiApp,
+		IsMultiTenant:     isMultiTenant,
 	}
 
 	// shared code: base_model, model, dto (always generated once)
@@ -426,7 +426,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 			return nil, err
 		}
 		td.RenderTemplateType = "common:dto"
-		if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "wen-beego/apps/common/dto/"+menuModule+"_dto/"+strippedTableName+".go", td); err != nil {
+		if err := s.renderTemplate(tplDir, "admin_plat", "dto.tpl", tempDir, "wen-beego/apps/common/dto_vo/"+menuModule+"_dto/"+strippedTableName+".go", td); err != nil {
 			return nil, err
 		}
 		if isMultiTenant {

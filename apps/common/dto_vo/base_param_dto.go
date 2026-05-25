@@ -1,4 +1,4 @@
-package dto
+package dto_vo
 
 // 基础参数
 type BaseParamDto struct {

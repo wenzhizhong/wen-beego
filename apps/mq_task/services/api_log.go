@@ -1,14 +1,14 @@
 package services
 
 import (
-	"WenBeego/apps/common/dto/mq_dto"
+	"WenBeego/apps/common/dto_vo/mq_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"WenBeego/apps/common/models_ar/base_ar"
-	mqTaskDto "WenBeego/apps/mq_task/dto"
+	mqTaskDto "WenBeego/apps/mq_task/dto_vo"
 )
 
 type ApiLog struct {

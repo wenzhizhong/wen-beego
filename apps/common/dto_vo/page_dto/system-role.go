@@ -1,10 +1,10 @@
 package page_dto
 
-import "WenBeego/apps/common/dto"
+import "WenBeego/apps/common/dto_vo"
 
 type SystemRoleListReqDto struct {
-	dto.BaseParamDto
-	dto.ReqDataListDto
+	dto_vo.BaseParamDto
+	dto_vo.ReqDataListDto
 	SelectUnitIds    []string
 	RoleName         string
 	Status           int

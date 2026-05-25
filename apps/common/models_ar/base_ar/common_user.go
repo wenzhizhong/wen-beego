@@ -1,7 +1,7 @@
 package base_ar
 
 import (
-	"WenBeego/apps/common/dto/user_dto"
+	"WenBeego/apps/common/dto_vo/user_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
 	"errors"

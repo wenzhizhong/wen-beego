@@ -6,7 +6,7 @@ import (
 
 	authServiceV1 "WenBeego/apps/api/services/auth/v1"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_dto"
 	"WenBeego/apps/common/helper"
 )
 

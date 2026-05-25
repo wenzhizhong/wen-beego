@@ -1,7 +1,7 @@
 package itf
 
 import (
-	"WenBeego/apps/common/dto/upload_dto"
+	"WenBeego/apps/common/dto_vo/upload_dto"
 )
 
 type UploadItf interface {

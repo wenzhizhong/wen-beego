@@ -1,8 +1,8 @@
 package models_ar
 
 import (
-	"WenBeego/apps/common/dto/generate_code_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto_vo/generate_code_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -45,7 +45,7 @@ func (ar *GenerateCodeAr) GetList(req page_dto.GenerateCodeListReqDto) (data []m
 
 	query := global.GetReadDb().
 		Model(model).
-		Where(tableName + ".deleted = ?", 0)
+		Where(tableName+".deleted = ?", 0)
 
 	if req.Keyword != "" {
 		query = query.Where(tableName+".table_name LIKE ?", "%"+req.Keyword+"%")

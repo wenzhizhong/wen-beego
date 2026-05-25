@@ -4,8 +4,8 @@ package system
 import (
 	systemService "WenBeego/apps/admin_plat/services/system"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/menu_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto_vo/menu_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/helper"
 	"errors"
 )

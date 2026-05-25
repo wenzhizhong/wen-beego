@@ -1,9 +1,9 @@
 package system_mchnt
 
 import (
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/unit_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/unit_dto"
 	CommonSystem "WenBeego/apps/common/services/system"
 )
 

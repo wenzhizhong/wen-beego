@@ -4,7 +4,7 @@ package auth
 import (
 	mchntService "WenBeego/apps/admin_mchnt/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/auth_dto"
+	"WenBeego/apps/common/dto_vo/auth_dto"
 	"WenBeego/apps/common/helper"
 	"fmt"
 )

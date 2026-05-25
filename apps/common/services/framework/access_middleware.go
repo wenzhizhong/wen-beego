@@ -1,8 +1,8 @@
 package framework
 
 import (
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/db_param"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/db_param"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"

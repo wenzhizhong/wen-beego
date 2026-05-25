@@ -3,8 +3,8 @@ package monitor
 import (
 	paltMonitorService "WenBeego/apps/admin_plat/services/monitor"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/dto/cron_dto"
-	"WenBeego/apps/common/dto/page_dto"
+	"WenBeego/apps/common/dto_vo/cron_dto"
+	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/helper"
 )
 

@@ -1,9 +1,9 @@
 package system
 
 import (
-	"WenBeego/apps/common/dto"
-	"WenBeego/apps/common/dto/page_dto"
-	"WenBeego/apps/common/dto/role_dto"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/dto_vo/role_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"

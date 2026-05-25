@@ -1,6 +1,6 @@
 package page_dto
 
-import "WenBeego/apps/common/dto"
+import "WenBeego/apps/common/dto_vo"
 
 var QUEUE_DLQ_STATUS_PENDING = 0
 var QUEUE_DLQ_STATUS_REQUEUED = 1
@@ -10,8 +10,8 @@ var QUEUE_DLQ_STATUS_MAP = map[int]string{
 }
 
 type QueueDlqListReqDto struct {
-	dto.BaseParamDto
-	dto.ReqDataListDto
+	dto_vo.BaseParamDto
+	dto_vo.ReqDataListDto
 	TaskName        string
 	Status          int
 	CreateTimeBegin string
