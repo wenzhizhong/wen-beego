@@ -116,9 +116,9 @@ func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize,
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.PlatModelName}}{})
+		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.PlatModelName}}{}, &models.PlatUser{}{{if .HasUnitId}}, &models.Plat{}{{end}})
 	case "admin_mchnt":
-		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.MchntModelName}}{})
+		data, count, err = base_ar.Get{{.ModelName}}List(pageSize, offset, searchDto, &models.{{.MchntModelName}}{}, &models.MchntUser{}{{if .HasUnitId}}, &models.Mchnt{}{{end}})
 	default:
 		return nil, errors.New("模块名称错误")
 	}

@@ -55,7 +55,7 @@ const {
       class="search-form bg-bg_color w-full pl-8 pt-[12px]"
     >
     <el-row :gutter="20">
-  {{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-col :xs="24" :sm="12" :md="10" :lg="6" :xl="6">
+  {{range .Columns}}{{if not (eq .Name "id")}}{{if not (eq .Name "unit_id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}      <el-col :xs="24" :sm="12" :md="10" :lg="6" :xl="6">
           <el-form-item label="{{.Comment}}：" prop="{{.Name}}">
             {{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio")}}<el-select v-model="searchForm.{{.Name}}" placeholder="{{.Comment}}" clearable class="!w-[160px]">
               <el-option v-for="o in {{.Name}}Options" :key="o.id" :label="o.name" :value="o.id" />
@@ -68,7 +68,7 @@ const {
             {{end}}
           </el-form-item>
         </el-col>
-  {{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-col :xs="24" :sm="12" :md="10" :lg="6" :xl="6">
+  {{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}      <el-col :xs="24" :sm="12" :md="10" :lg="6" :xl="6">
           <el-form-item>
             <el-button type="primary" :icon="useRenderIcon('ri/search-line')" :loading="loading" @click="onSearch">搜索</el-button>
             <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(searchFormRef)">重置</el-button>

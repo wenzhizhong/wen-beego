@@ -7,7 +7,13 @@
     @close="handleClose"
   >
     <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
-      {{range .Columns}}{{if not .SkipForm}}
+      {{- if .HasUnitId -}}
+      <el-form-item label="组织单位"  prop="unit_id">
+        <SelectUserUnitCascader :changed="handelSelectUserUnit" :modelValue="form.unit_id" />
+      </el-form-item>
+      {{- end}}
+
+      {{range .Columns}}{{if and (not .SkipForm) (not (eq .Name "unit_id"))}}
       {{if eq .FormType "textarea"}}<el-form-item label="{{.Comment}}" prop="{{.Name}}">
         <el-input type="textarea" v-model="form.{{.Name}}" placeholder="请输入{{.Comment}}" {{if .FormParamVue}}{{.FormParamVue}}{{end}} />
       </el-form-item>
@@ -90,6 +96,9 @@ import AddLargeLine from "~icons/ri/add-large-line";
 import { get{{.ModelName}}Detail, add{{.ModelName}}, edit{{.ModelName}} } from "@/api/{{.ModelNameLower}}";
 import { formRules } from "./utils/rule";
 import { getLinkById } from "@/api/upload";
+{{- if .HasUnitId}}
+import SelectUserUnitCascader from "@/components/unit/SelectUserUnitCascader.vue";
+{{end -}}
 {{range .Columns}}{{if .FormParamTs}}
 {{if or (eq .FormType "select") (eq .FormType "radio") (eq .FormType "checkbox")}}import { {{.Name}}Options, {{.Name}}Props } from "./utils/hook";
 {{else if eq .FormType "switch"}}import { {{.Name}}Options } from "./utils/hook";
@@ -239,6 +248,13 @@ const doGetLinkById = async (key: string) => {
     );
   });
 };
+{{if .HasUnitId -}}
+function handelSelectUserUnit(e){
+  if (e && e[0]){
+    console.log( e[e.length-1])
+  }
+}
+{{end -}}
 
 defineExpose({ open });
 </script>

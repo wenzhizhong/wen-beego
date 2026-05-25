@@ -13,13 +13,20 @@ import (
 )
 
 // Get{{.ModelName}}List 多用户体系通用列表查询
-func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M) (data []base_model.{{.ModelName}}, count int64, err error) {
+func Get{{.ModelName}}List[M, UserM{{if .HasUnitId}}, UnitM{{end}} interface{ TableName() string }](pageSize, offset int, searchDto {{.MenuModule}}_dto.{{.ModelName}}Dto, model M, userModel UserM{{if .HasUnitId}}, unitModel UnitM{{end}}) (data []base_model.{{.ModelName}}, count int64, err error) {
 	data = make([]base_model.{{.ModelName}}, 0)
 	tableName := model.TableName()
+	userTableName := userModel.TableName()
 
 	query := global.GetReadDb().
-		Model(model){{if .HasDeleted}}.
+		Model(model).
+		Table(tableName){{if .HasDeleted}}.
 		Where(tableName + ".{{.DeletedField}} = 0"){{end}}
+{{if .HasCreateUserId}}	query = query.Joins("LEFT JOIN " + userTableName + " AS creator ON creator.id = " + tableName + ".{{.CreateUserIdField}} AND creator.deleted = 0")
+{{end}}{{if .HasUpdateUserId}}	query = query.Joins("LEFT JOIN " + userTableName + " AS updater ON updater.id = " + tableName + ".{{.UpdateUserIdField}} AND updater.deleted = 0")
+{{end}}{{if .HasUnitId}}	unitTableName := unitModel.TableName()
+	query = query.Joins("LEFT JOIN " + unitTableName + " ON " + unitTableName + ".id = " + tableName + ".{{.UnitIdField}} AND " + unitTableName + ".deleted = 0")
+{{end}}
 {{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}	{{if or (eq .GoType "time.Time") (eq .GoType "*time.Time")}}	if !searchDto.{{.GoFieldName}}Start.IsZero() {
 			query = query.Where(tableName+".{{.Name}} >= ?", searchDto.{{.GoFieldName}}Start)
 		}
@@ -46,7 +53,7 @@ func Get{{.ModelName}}List[M interface{ TableName() string }](pageSize, offset i
 	}
 
 	err = query.
-		Select({{.ListSelectCols}}).
+		Select({{.ListSelectCols}}{{if .HasCreateUserId}}, "creator.name AS created_by_name"{{end}}{{if .HasUpdateUserId}}, "updater.name AS updated_by_name"{{end}}{{if .HasUnitId}}, unitTableName + ".name AS unit_name"{{end}}).
 		Limit(pageSize).
 		Offset(offset).
 		{{if .HasCreateTime}}Order(tableName + ".{{.CreateTimeField}} desc").{{end}}

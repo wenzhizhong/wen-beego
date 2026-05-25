@@ -195,44 +195,45 @@ type ColumnConfig struct {
 	SkipForm     bool        `json:"-"`
 }
 
-type TemplateData struct {
-	AppModule       string
-	ModelName       string
-	ModelNameLower  string
-	TableName       string
-	MenuModule      string
-	BizModule       string
-	MenuName        string
-	ApiUrlPrefix    string
-	ApiNamePrefix   string
-	Columns         []ColumnConfig
-	HasDeleted      bool
-	HasUpdateTime   bool
-	HasCreateTime   bool
-	HasDeleteTime   bool
-	HasUnitId       bool
-	DeletedField    string
-	CreateTimeField string
-	UpdateTimeField string
-	DeleteTimeField string
-	UnitIdField     string
-	IsMultiApp      bool
-	IsMultiTenant   bool
-	PlatModelName   string
-	MchntModelName  string
-	PlatTableName   string
-	MchntTableName  string
-	ListSelectCols  string
-
-	RenderTemplateType string
-
-	ViewPath   string
-	AuthRead   string
-	AuthAdd    string
-	AuthEdit   string
-	AuthDel    string
-	AuthDetail string
-
+	type TemplateData struct {
+	AppModule        string
+	ModelName        string
+	ModelNameLower   string
+	TableName        string
+	MenuModule       string
+	BizModule        string
+	MenuName         string
+	ApiUrlPrefix     string
+	ApiNamePrefix    string
+	Columns          []ColumnConfig
+	HasDeleted       bool
+	HasUpdateTime    bool
+	HasCreateTime    bool
+	HasDeleteTime    bool
+	HasUnitId        bool
+	HasCreateUserId  bool
+	HasUpdateUserId  bool
+	DeletedField     string
+	CreateTimeField  string
+	UpdateTimeField  string
+	DeleteTimeField  string
+	UnitIdField      string
+	CreateUserIdField string
+	UpdateUserIdField string
+	IsMultiApp       bool
+	IsMultiTenant    bool
+	PlatModelName    string
+	MchntModelName   string
+	PlatTableName    string
+	MchntTableName   string
+	ListSelectCols      string
+	RenderTemplateType  string
+	ViewPath            string
+	AuthRead         string
+	AuthAdd          string
+	AuthEdit         string
+	AuthDel          string
+	AuthDetail       string
 	AdminPlatShowMchntUnit bool
 }
 
@@ -269,6 +270,10 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 	deleteTimeField := ""
 	hasUnitId := false
 	unitIdField := ""
+	hasCreateUserId := false
+	createUserIdField := ""
+	hasUpdateUserId := false
+	updateUserIdField := ""
 
 	for i := range columnConfigs {
 		columnConfigs[i].GoFieldName = snakeToPascal(columnConfigs[i].Name)
@@ -288,18 +293,24 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		tmpHasUpdateTime, tmpUpdateTimeField := hasColumn(updateTimeFields, columnConfigs[i].Name)
 		tmpHasDeleteTime, tmpDeleteTimeField := hasColumn(deletedTimeFields, columnConfigs[i].Name)
 		tmpHasUnitId, tmpUnitIdField := hasColumn([]string{"unit_id"}, columnConfigs[i].Name)
+		tmpHasCreateUserId, tmpCreateUserIdField := hasColumn(createUserIdFields, columnConfigs[i].Name)
+		tmpHasUpdateUserId, tmpUpdateUserIdField := hasColumn(updateUserIdFields, columnConfigs[i].Name)
 
 		hasDeleted = helper.Ternary(hasDeleted, hasDeleted, tmpHasDeleted)
 		hasCreateTime = helper.Ternary(hasCreateTime, hasCreateTime, tmpHasCreateTime)
 		hasUpdateTime = helper.Ternary(hasUpdateTime, hasUpdateTime, tmpHasUpdateTime)
 		hasDeleteTime = helper.Ternary(hasDeleteTime, hasDeleteTime, tmpHasDeleteTime)
 		hasUnitId = helper.Ternary(hasUnitId, hasUnitId, tmpHasUnitId)
+		hasCreateUserId = helper.Ternary(hasCreateUserId, hasCreateUserId, tmpHasCreateUserId)
+		hasUpdateUserId = helper.Ternary(hasUpdateUserId, hasUpdateUserId, tmpHasUpdateUserId)
 
 		deletedField = helper.Ternary(tmpDeletedField != "", tmpDeletedField, deletedField)
 		createTimeField = helper.Ternary(tmpCreateTimeField != "", tmpCreateTimeField, createTimeField)
 		updateTimeField = helper.Ternary(tmpUpdateTimeField != "", tmpUpdateTimeField, updateTimeField)
 		deleteTimeField = helper.Ternary(tmpDeleteTimeField != "", tmpDeleteTimeField, deleteTimeField)
 		unitIdField = helper.Ternary(tmpUnitIdField != "", tmpUnitIdField, unitIdField)
+		createUserIdField = helper.Ternary(tmpCreateUserIdField != "", tmpCreateUserIdField, createUserIdField)
+		updateUserIdField = helper.Ternary(tmpUpdateUserIdField != "", tmpUpdateUserIdField, updateUserIdField)
 
 	}
 
@@ -390,12 +401,16 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		HasUpdateTime:   hasUpdateTime,
 		HasCreateTime:   hasCreateTime,
 		HasDeleteTime:   hasDeleteTime,
-		HasUnitId:       hasUnitId,
-		DeletedField:    deletedField,
+		HasUnitId:        hasUnitId,
+		HasCreateUserId:  hasCreateUserId,
+		HasUpdateUserId:  hasUpdateUserId,
+		DeletedField:     deletedField,
 		CreateTimeField: createTimeField,
 		UpdateTimeField: updateTimeField,
 		DeleteTimeField: deleteTimeField,
-		UnitIdField:     unitIdField,
+		UnitIdField:       unitIdField,
+		CreateUserIdField: createUserIdField,
+		UpdateUserIdField: updateUserIdField,
 		IsMultiApp:      isMultiApp,
 		IsMultiTenant:   isMultiTenant,
 	}

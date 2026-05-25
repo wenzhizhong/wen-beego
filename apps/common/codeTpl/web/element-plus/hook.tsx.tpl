@@ -48,7 +48,7 @@ export function use{{.ModelName}}(formRef: any) {
 
   const columns: TableColumnList = [
     { label: "勾选列", type: "selection", fixed: "left", reserveSelection: true },
-{{range .Columns}}{{if not (eq .Name "id") }}{{if not (isHasDeletedFields .Name)}}{{if not (isDeleteUserIdFields .Name)}}{{if not (isDeletedTimeFields .Name)}}{{if not (eq .FormType "editor")}}    {
+{{range .Columns}}{{if not (eq .Name "id") }}{{if not (eq .Name "unit_id") }}{{if not (isHasDeletedFields .Name)}}{{if not (isDeleteUserIdFields .Name)}}{{if not (isCreateUserIdFields .Name)}}{{if not (isUpdateUserIdFields .Name)}}{{if not (isDeletedTimeFields .Name)}}{{if not (eq .FormType "editor")}}    {
       label: "{{.Comment}}",
       prop: "{{.Name}}",
 {{if .FormParamTs}}{{if or (eq .FormType "switch") (eq .FormType "radio")}}      cellRenderer: ({ row, props }: any) => <span>{ {{.Name}}OptionsMap[row.{{.Name}}] ?? row.{{.Name}} }</span>,
@@ -67,7 +67,11 @@ export function use{{.ModelName}}(formRef: any) {
 {{else if eq .FormType "time"}}      formatter: ({ {{.Name}} }: any) => {{.Name}} ? dayjs({{.Name}}).format("HH:mm:ss") : "",
 {{end}}      minWidth: 120
     },
-{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}    { label: "操作", fixed: "right", width: 180, slot: "operation" }
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
+{{if .HasCreateUserId}}    { label: "创建人", prop: "created_by_name", minWidth: 100 },
+{{end}}{{if .HasUpdateUserId}}    { label: "更新人", prop: "updated_by_name", minWidth: 100 },
+{{end}}{{if .HasUnitId}}    { label: "组织单位", prop: "unit_name", minWidth: 120 },
+{{end}}    { label: "操作", fixed: "right", width: 180, slot: "operation" }
   ];
 
   onMounted(() => { onSearch(); });
