@@ -25,13 +25,13 @@ func {{$routerFuncName}} []beego.LinkNamespace {
         {{$pathDel = replaceAll $pathDel $old $new  -}}
         {{$pathDetail = replaceAll $pathDetail $old $new  -}}
 
-        // {{$menuModule}} begin
+        // {{.ModelName}} begin
         beego.NSCtrlGet("{{$pathRead}}", (*admin{{$menuModule}}.{{.ModelName}}Controller).Get),
         beego.NSCtrlPost("{{$pathAdd}}", (*admin{{$menuModule}}.{{.ModelName}}Controller).Add),
         beego.NSCtrlPost("{{$pathEdit}}", (*admin{{$menuModule}}.{{.ModelName}}Controller).Edit),
         beego.NSCtrlPost("{{$pathDel}}", (*admin{{$menuModule}}.{{.ModelName}}Controller).Del),
         beego.NSCtrlGet("{{$pathDetail}}", (*admin{{$menuModule}}.{{.ModelName}}Controller).Detail),
-        // {{$menuModule}} end
+        // {{.ModelName}} end
     }
 }
 // 3

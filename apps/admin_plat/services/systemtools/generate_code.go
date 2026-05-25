@@ -777,7 +777,8 @@ func (s *GenerateCodeService) buildListSelectCols(tableName string, columns []Co
 	cols := make([]string, 0, len(columns))
 	for _, c := range columns {
 		if c.FormType != "editor" {
-			col := fmt.Sprintf("\"%s\".\"%s\"", tableName, c.Name)
+			// col := fmt.Sprintf("\"%s\".\"%s\"", tableName, c.Name)
+			col := fmt.Sprintf("\"\\\"%s\\\".\\\"%s\\\"\"", tableName, c.Name)
 			if tableNameIsVar {
 				col = fmt.Sprintf("tableName + \".%s\"", c.Name)
 			}

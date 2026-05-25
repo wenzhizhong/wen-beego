@@ -11,3 +11,4 @@ cmd/*/*.exe
 *.exe*
 uploads/*
 upload/*
+routers/*.go-*
