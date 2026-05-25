@@ -3,7 +3,7 @@ package {{.MenuModule}}
 import (
 	commonControllers "WenBeego/apps/common/controller"
 	_ "WenBeego/apps/common/dto_vo"
-	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
 	"WenBeego/apps/common/helper"
 	{{.MenuModule}}Service "WenBeego/apps/{{.AppModule}}/services/{{.MenuModule}}"
 	"encoding/json"

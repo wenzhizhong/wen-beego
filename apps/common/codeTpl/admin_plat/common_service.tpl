@@ -2,8 +2,8 @@
 package {{.MenuModule}}
 
 import (
-	"WenBeego/apps/common/dto_vo"
-	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
@@ -137,8 +137,8 @@ func (s *{{.ModelName}}Service) GetList(baseParamDto dto.BaseParamDto, pageSize,
 package {{.MenuModule}}
 
 import (
-	"WenBeego/apps/common/dto_vo"
-	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
+	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"

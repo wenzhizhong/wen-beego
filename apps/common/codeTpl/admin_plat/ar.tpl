@@ -24,7 +24,7 @@ import (
 	"WenBeego/apps/common/global"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
-	"WenBeego/apps/common/dto_vo/{{.MenuModule}}"
+	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_dto"
 	"fmt"
 	"time"
 
