@@ -33,6 +33,9 @@ func setResponse(ctx *beecontext.Context, code int, msg string, data interface{}
 	if len(headerCode) > 0 {
 		tmpHeaderCode = headerCode[0]
 	}
+	if code == http.StatusUnauthorized {
+		tmpHeaderCode = http.StatusUnauthorized
+	}
 
 	jsonString := responseStr(code, msg, data)
 	ctx.ResponseWriter.ResponseWriter.WriteHeader(tmpHeaderCode)
