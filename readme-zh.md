@@ -11,7 +11,7 @@
   7. 配置管理
   8. 定时任务管理
   9. 代码生成
-  如果经营模式是B2C (纯自营:企业->消费者)，使用admin_org模块即可，
+  如果经营模式是B2C (纯自营:企业->消费者)，使用admin_mchnt模块即可，
   如果经营模式是B2B2C (平台模式:平台->(商户->消费者))，使用admin_plat模块即可
 
   #### 目录结构
@@ -44,8 +44,8 @@
   set BEEGO_RUNMODE=test
   ```
 
-  #### 运行
-  启动postgresql, redis。
+  #### 启动服务
+  启动postgresql, redis, rabbitmq服务。
 
   我这里是使用dockers，直接在终端启动，即可自动构建`postgresql``redis`容器服务：
   ```
@@ -53,8 +53,12 @@
   docker-compose up -d
   ```
 
+  #### 安装
+  执行脚本`./scripts/install.sh`或者`.\scripts\install.ps1`
+
+  #### 运行
+
   1. 开发环境，可以直接运行。
-  如果使用vender 模式，`bee run`命令可以再添加参数 `-vendor=true`。
   ```
   go mod tidy
   bee run 
@@ -79,6 +83,14 @@
   ```
   命令运行成功后，会在apps/swagger目录下生成swagger.json和swagger.yaml文件，
   文档访问地址：http://127.0.0.1:8013/swagger/index.html
+
+  #### 2. migrate 迁移
+  ```
+  // 迁移
+  bee migrate -driver=postgres -conn="host=localhost port=5432 user=postgres password=postgres dbname=test sslmode=disable"
+  // 回滚
+  bee migrate rollback -driver=postgres -conn="host=localhost port=5432 user=postgres password=postgres dbname=test sslmode=disable"
+  ```
 
 # 系统手册 
   [系统手册](doc/系统手册.md)

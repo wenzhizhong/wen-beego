@@ -1124,12 +1124,20 @@ COMMENT ON COLUMN public.queue_dlq_failed_log.deleted IS '是否删除：0否1�
 
 -- DROP TABLE public.queue_dlq_failed_retry;
 
+-- public.queue_dlq_failed_retry definition
+
+-- Drop table
+
+-- DROP TABLE public.queue_dlq_failed_retry;
+
 CREATE TABLE public.queue_dlq_failed_retry (
 	id varchar(64) NOT NULL, -- 原任务UUID
-	new_id varchar(64) NOT NULL -- 新任务UUID
+	new_id varchar(64) NOT NULL, -- 新任务UUID
 	CONSTRAINT queue_dlq_failed_retry_pkey PRIMARY KEY (id)
 );
 COMMENT ON TABLE public.queue_dlq_failed_retry IS '队列：死信队列重新入队记录';
+
+-- Column comments
 
 COMMENT ON COLUMN public.queue_dlq_failed_retry.id IS '原任务UUID';
 COMMENT ON COLUMN public.queue_dlq_failed_retry.new_id IS '新任务UUID';
@@ -1191,7 +1199,7 @@ CREATE TABLE public.user_profile (
 	degree_number varchar(100) NULL, -- 学位编号
 	remark varchar(255) NULL, -- 备注
 	professional varchar(100) NULL, -- 专业
-	status int4 NOT NULL DEFAULT 1, -- 用户行为状态：1正常，2已注销
+	status int4 NOT NULL DEFAULT 1, -- 用户行为状态：1正常，2已注销，平台状态：3禁用
 	created_at int8 NULL, -- 记录创建时间
 	updated_at int8 NULL, -- 记录修改时间
 	deleted_at int8 NULL, -- 删除时间

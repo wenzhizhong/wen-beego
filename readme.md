@@ -11,7 +11,7 @@
   7. Configuration management
   8. Scheduled task management
   9. Code generation
-  If the business model is B2C (pure self support: enterprise ->consumer), use the admin_org module,
+  If the business model is B2C (pure self support: enterprise ->consumer), use the admin_mchnt module,
   If the business model is B2B2C (platform mode: platform ->(merchant ->consumer)), use the admin_plat module
 
   #### Directory structure
@@ -45,17 +45,19 @@
   set BEEGO_RUNMODE=test
   ```
 
-  #### run
-  Run postgresql, redis.
+  #### Start service
+  Start the PostgreSQL, Redis, and RabbitMQ services.
 
   I'm using dockers here, starting directly in the terminal, and you can automatically build the container `service:postgresql``redis`
   ```
   cd beego-docker
   docker-compose up -d
   ```
-
+  #### Install
+  Execute the script `./scripts/install.sh` or `.\scripts\install.ps1`
+  
+  #### Run
   1. development environment, which can be run directly.
-  If you use vender mode, you can add more parameters to the command. `bee run-vendor=true`
   ```
   go mod tidy
   bee run 
@@ -81,6 +83,14 @@
   ```
   After the command is successfully executed, the swagger.json and swagger.yaml files are generated in the apps/swagger directory, and
   the document access address is http://127.0.0.1:8013/swagger/index.html
+  #### 2. migration
+  ```
+  // migration
+  bee migrate -driver=postgres -conn="host=localhost port=5432 user=postgres password=postgres dbname=test sslmode=disable"
+  // rollback
+  bee migrate rollback -driver=postgres -conn="host=localhost port=5432 user=postgres password=postgres dbname=test sslmode=disable"
+  ```
+
 
 # System manual 
   [System manual](doc/系统手册.md)
