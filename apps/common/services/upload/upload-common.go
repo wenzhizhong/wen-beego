@@ -51,8 +51,8 @@ func SaveInfoToDB(requestDto upload_dto.UploadFileReqDto, uploadResult *upload_d
 		UnitId:     unitId,
 		UnitType:   moduleName,
 		CreateBy:   userId,
-		Createtime: helper.GetTime(),
-		Updatetime: helper.GetTime(),
+		CreateTime: helper.GetTime(),
+		UpdateTime: helper.GetTime(),
 	})
 }
 
@@ -77,8 +77,8 @@ func SaveSliceToDB(requestDto upload_dto.UploadFileReqDto, uploadResult upload_d
 		FileMd5:    requestDto.FileMd5,
 		FilePath:   uploadResult.TempSlicePath,
 		CreateBy:   userId,
-		Createtime: helper.GetTime(),
-		Updatetime: helper.GetTime(),
+		CreateTime: helper.GetTime(),
+		UpdateTime: helper.GetTime(),
 		SliceIndex: requestDto.SliceIndex,
 		SliceTotal: requestDto.SliceTotal,
 		SliceSize:  requestDto.FileSize,

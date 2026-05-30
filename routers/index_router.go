@@ -2,7 +2,7 @@ package routers
 
 import (
 	"WenBeego/apps/common/middleware/blocker"
-	indeHome "WenBeego/apps/index/controllers/home"
+	indexHome "WenBeego/apps/index/controllers/home"
 
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
@@ -11,17 +11,17 @@ import (
 var indexWhiteApiList, indexAuthApiList []string
 
 func init() {
-	// beego.Router("/", &indeHome.IndexController{})
-	// beego.Router("/index", &indeHome.IndexController{})
-	// beego.Router("/index/index", &indeHome.IndexController{})
+	// beego.Router("/", &indexHome.IndexController{})
+	// beego.Router("/index", &indexHome.IndexController{})
+	// beego.Router("/index/index", &indexHome.IndexController{})
 
 	beego.Get("/", func(ctx *context.Context) {
 		ctx.Redirect(302, "/index")
 	})
 	ns := beego.NewNamespace("/index",
-		beego.NSCtrlGet("/", (*indeHome.IndexController).Get),
-		beego.NSCtrlGet("/index", (*indeHome.IndexController).Get),
-		beego.NSCtrlPost("/index", (*indeHome.IndexController).Post),
+		beego.NSCtrlGet("/", (*indexHome.IndexController).Get),
+		beego.NSCtrlGet("/index", (*indexHome.IndexController).Get),
+		beego.NSCtrlPost("/index", (*indexHome.IndexController).Post),
 	)
 
 	// 请求前、后处理

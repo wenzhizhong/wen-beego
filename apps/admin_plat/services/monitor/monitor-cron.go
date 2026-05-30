@@ -141,7 +141,7 @@ func (s *CronService) UpdateTaskStatus(baseParamDto dto.BaseParamDto, data cron_
 	return err
 }
 
-func (s *CronService) GetAvaibleCronList() (interface{}, error) {
+func (s *CronService) GetAvailableCronList() (interface{}, error) {
 	data := struct {
 		List interface{} `json:"list"`
 	}{

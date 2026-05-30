@@ -39,9 +39,9 @@ func TestVeriryCapture(t *testing.T) {
 }
 
 func TestIsPhone(t *testing.T) {
-	phomeNo := "15912345678"
-	fmt.Printf("is phone No. %s:\n", phomeNo)
-	fmt.Println(helper.IsCellPhone(phomeNo))
+	phoneNo := "15912345678"
+	fmt.Printf("is phone No. %s:\n", phoneNo)
+	fmt.Println(helper.IsCellPhone(phoneNo))
 }
 
 func TestGetMapKeys(t *testing.T) {

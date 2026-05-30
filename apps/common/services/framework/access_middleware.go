@@ -43,8 +43,8 @@ func (s *AccessMiddleware) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	}
 
 	// 代码配置文件是否开启api安全配置
-	encryptEnagle, err1 := s.checkApiSecurityConfig("apiSecurity.encrypt")
-	signatureEnagle, err2 := s.checkApiSecurityConfig("apiSecurity.signature")
+	encryptEnable, err1 := s.checkApiSecurityConfig("apiSecurity.encrypt")
+	signatureEnable, err2 := s.checkApiSecurityConfig("apiSecurity.signature")
 	if err1 != nil || err2 != nil {
 		err := helper.Ternary(err1 != nil, err1, err2)
 		return err
@@ -65,7 +65,7 @@ func (s *AccessMiddleware) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	signatureStr, err := s.getHeaderSignature(ctx)
 	if err != nil {
 		return err
-	} else if signatureEnagle && signatureStr == "" {
+	} else if signatureEnable && signatureStr == "" {
 		global.Log.Error("未知签名")
 		return errors.New("未知签名")
 	}
@@ -89,7 +89,7 @@ func (s *AccessMiddleware) DealSignAndEncrypt(ctx *beecontext.Context) error {
 
 	// 从数据库获取rsa密钥
 	configModelMap := make(map[string][]models.Config)
-	if encryptEnagle || signatureEnagle {
+	if encryptEnable || signatureEnable {
 		configModelMap, err1 = s.getDatabaseRsaData(ctx)
 	}
 	if err1 != nil {
@@ -97,7 +97,7 @@ func (s *AccessMiddleware) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	}
 
 	// 解密body, 并重新覆盖请求body
-	if encryptEnagle {
+	if encryptEnable {
 		configModel := configModelMap[configEncryptName][0]
 		bodyEncryptStr := bodyEncryptDto.EncryptedData
 		err = s.decryptBodyAndReset(ctx, configModel, bodyEncryptStr)
@@ -107,7 +107,7 @@ func (s *AccessMiddleware) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	}
 
 	// 验证签名
-	if signatureEnagle {
+	if signatureEnable {
 		configModel := configModelMap[configSignName][0]
 		err = s.verifyBodySign(ctx, configModel, signatureStr)
 	}

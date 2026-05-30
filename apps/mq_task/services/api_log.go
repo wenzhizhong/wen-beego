@@ -14,7 +14,7 @@ import (
 type ApiLog struct {
 }
 
-func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (redslt interface{}, err error) {
+func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (result interface{}, err error) {
 	if len(data) <= 0 {
 		return nil, nil
 	}
@@ -133,7 +133,7 @@ func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDt
 				PV:         pv,
 				UV:         uv,
 				Date:       helper.GetDateStamp(),
-				Modulename: modulename,
+				ModuleName: modulename,
 			}
 			apiLogData = append(apiLogData, item)
 		}

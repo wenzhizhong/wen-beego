@@ -5,26 +5,26 @@ import (
 	commonServices "WenBeego/apps/common/services/auth"
 )
 
-var cpatchaType = auth_dto.AuthCodeTypeDigit
+var captchaType = auth_dto.AuthCodeTypeDigit
 
 type Auth struct {
 	commonAuth commonServices.CommonAuth
 }
 
 // 获取验证码
-func (s *Auth) GetCatpcha() (interface{}, error) {
-	return s.commonAuth.GetCatpcha(cpatchaType)
+func (s *Auth) GetCaptcha() (interface{}, error) {
+	return s.commonAuth.GetCaptcha(captchaType)
 }
 
 // 登录
 func (s *Auth) Login(data auth_dto.LoginDto, moduleName, host string) (interface{}, error) {
-	data.AuthCodeType = cpatchaType
+	data.AuthCodeType = captchaType
 	return s.commonAuth.Login(data, moduleName, host)
 }
 
 // 注册
 func (s *Auth) Register(data auth_dto.RegisterDto, moduleName string) (interface{}, error) {
-	data.AuthCodeType = cpatchaType
+	data.AuthCodeType = captchaType
 	return s.commonAuth.Register(data, moduleName)
 }
 

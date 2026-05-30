@@ -9,22 +9,22 @@ import (
 )
 
 // 获取验证码
-func GetCaptcha(cpatchaType string) (id string, b64s string, answer string, err error) {
-	driver, err := getCaptchaDriver(cpatchaType)
+func GetCaptcha(captchaType string) (id string, b64s string, answer string, err error) {
+	driver, err := getCaptchaDriver(captchaType)
 	if err != nil {
 		return
 	}
 
 	store := Base64CaptchaRedisStore{}
 	store.Expiration = 300 * time.Second
-	catpcha := base64Captcha.NewCaptcha(driver, &store)
-	id, b64s, answer, err = catpcha.Generate()
+	captcha := base64Captcha.NewCaptcha(driver, &store)
+	id, b64s, answer, err = captcha.Generate()
 	return
 }
 
 // 获取验证码驱动
-func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err error) {
-	switch cpatchaType {
+func getCaptchaDriver(captchaType string) (driver base64Captcha.Driver, err error) {
+	switch captchaType {
 	case auth_dto.AuthCodeTypeDigit:
 		driver = &base64Captcha.DriverDigit{
 			Height:   80,
@@ -87,7 +87,7 @@ func getCaptchaDriver(cpatchaType string) (driver base64Captcha.Driver, err erro
 }
 
 // 校验验证码
-func VerifyCaptcha(cpatchaType string, id string, answer string) bool {
+func VerifyCaptcha(captchaType string, id string, answer string) bool {
 	store := Base64CaptchaRedisStore{}
 	return store.Verify(id, answer, true)
 }

@@ -14,7 +14,7 @@ const AUMID_US = "AUMID_US"
 const AUMID_URS = "AUMID_URS"
 const AUMID_URP = "AUMID_URP"
 
-var ALL_AUMID_PRIFIXS = []string{
+var ALL_AUMID_PREFIX_SLICE = []string{
 	AUMID_UPS,
 	AUMID_US,
 	AUMID_URS,
@@ -101,7 +101,7 @@ func SetAumidUrp(moduleName, unitUserId, unitId, value string) error {
 // 清空认证缓存
 func ClearAumid() error {
 	// if redisCache, ok := global.Redis.(*redis.Cache); ok {
-	// 	for _, prefix := range ALL_AUMID_PRIFIXS {
+	// 	for _, prefix := range ALL_AUMID_PREFIX_SLICE {
 	// 		key, _ := helper.GetCustomRedisKey(prefix)
 	// 		keys, err := redisCache.Scan(redis.DefaultKey + ":" + key + ":*")
 	// 		if err != nil {
@@ -121,7 +121,7 @@ func ClearAumid() error {
 	// return nil
 
 	var allKeys []string
-	for _, prefix := range ALL_AUMID_PRIFIXS {
+	for _, prefix := range ALL_AUMID_PREFIX_SLICE {
 		key, _ := helper.GetCustomRedisKey(prefix)
 		var cursor uint64
 		for {

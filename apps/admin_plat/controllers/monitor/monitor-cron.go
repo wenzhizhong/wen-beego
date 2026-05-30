@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	paltMonitorService "WenBeego/apps/admin_plat/services/monitor"
+	platMonitorService "WenBeego/apps/admin_plat/services/monitor"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/cron_dto"
 	"WenBeego/apps/common/dto_vo/page_dto"
@@ -10,7 +10,7 @@ import (
 
 type CronController struct {
 	commonControllers.AdminBaseController
-	cronService paltMonitorService.CronService
+	cronService platMonitorService.CronService
 }
 
 // 定时任务列表
@@ -40,8 +40,8 @@ func (c *CronController) Get() {
 }
 
 // 获取可用定时任务列表
-func (c *CronController) GetAvaibleCronList() {
-	data, err := c.cronService.GetAvaibleCronList()
+func (c *CronController) GetAvailableCronList() {
+	data, err := c.cronService.GetAvailableCronList()
 	if err != nil {
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()

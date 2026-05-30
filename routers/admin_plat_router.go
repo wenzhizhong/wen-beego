@@ -39,7 +39,7 @@ func platAuthSlices() []beego.LinkNamespace {
 	return []beego.LinkNamespace{
 		// auth begin
 		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
-		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
+		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCaptcha),
 		beego.NSCtrlPost("/auth/refresh-token", (*adminAuth.AuthController).RefreshToken),
 		beego.NSCtrlGet("/auth-params/model-params", (*adminAuth.ParamsController).GetModelParams),
 		beego.NSCtrlPost("/auth-plat/change-unit", (*adminAuth.PlatController).ChangeUnit),
@@ -98,7 +98,7 @@ func platSystemSlices() []beego.LinkNamespace {
 		beego.NSCtrlPost("/monitor-cron/edit", (*adminMonitor.CronController).Edit),
 		beego.NSCtrlPost("/monitor-cron/del", (*adminMonitor.CronController).Del),
 		beego.NSCtrlPost("/monitor-cron/change-status", (*adminMonitor.CronController).ChangeStatus),
-		beego.NSCtrlGet("/monitor-cron/get-avaible", (*adminMonitor.CronController).GetAvaibleCronList),
+		beego.NSCtrlGet("/monitor-cron/get-available", (*adminMonitor.CronController).GetAvailableCronList),
 		beego.NSCtrlGet("/monitor-cron-log/get", (*adminMonitor.CronLogController).Get),
 
 		beego.NSCtrlGet("/monitor-queue-dlq/get", (*adminMonitor.QueueDlqController).Get),

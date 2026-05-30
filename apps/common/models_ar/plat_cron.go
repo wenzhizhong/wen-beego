@@ -12,10 +12,10 @@ type PlatCronAr struct {
 func (ar *PlatCronAr) RunProjectGetCronList() (data []models.PlatCron, err error) {
 	data = make([]models.PlatCron, 0)
 
-	platCronMdoel := &models.PlatCron{}
-	tablePlatCronName := platCronMdoel.TableName()
+	platCronModel := &models.PlatCron{}
+	tablePlatCronName := platCronModel.TableName()
 	query := global.GetReadDb().
-		Model(platCronMdoel).
+		Model(platCronModel).
 		Where("status = 1 AND deleted = 0")
 
 	err = query.Select(tablePlatCronName + ".*, '' AS created_by_name, '' AS updated_by_name").

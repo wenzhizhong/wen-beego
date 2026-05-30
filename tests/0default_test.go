@@ -17,13 +17,13 @@ import (
 func init() {
 	fmt.Println("init ....。 ")
 	_, file, _, _ := runtime.Caller(0)
-	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
-	beego.TestBeegoInit(apppath)
+	appPath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
+	beego.TestBeegoInit(appPath)
 
 	_ = beego.LoadAppConfig("yaml", "conf/app.yaml")
-	// beego.TestBeegoInit(apppath)
-	path := filepath.Join(apppath, "conf", "app.yaml")
-	os.Chdir(apppath)
+	// beego.TestBeegoInit(appPath)
+	path := filepath.Join(appPath, "conf", "app.yaml")
+	os.Chdir(appPath)
 	// 注册自己资源服务
 	cmdCommon.InitCommonSource("pathUnitTest")
 	cmdCommon.InitMqClient()

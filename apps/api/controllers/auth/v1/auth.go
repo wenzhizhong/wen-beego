@@ -83,8 +83,8 @@ func (c *AuthController) UpdateUserInfo() {
 // @Failure      0  {object}  dto.Response
 // @Router       /api/v1/auth/get-captcha [get]
 // @Security     ApiKeyAuth
-func (c *AuthController) GetCatpcha() {
-	data, err := c.AuthServiceV1.GetCatpcha()
+func (c *AuthController) GetCaptcha() {
+	data, err := c.AuthServiceV1.GetCaptcha()
 	if err != nil {
 		c.Data["json"] = helper.Response(0, err.Error(), nil)
 		c.ServeJSON()

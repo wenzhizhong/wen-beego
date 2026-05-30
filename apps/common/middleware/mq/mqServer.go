@@ -105,21 +105,21 @@ func (mq *MqServer) getConfig() (cnf *config.Config, err error) {
 		if err != nil {
 			return cnf, err
 		}
-		tmpRabitMqConfig, err := helper.Interface2MapInterface(tmpRabbitMQ)
+		tmpRabbitMqConfig, err := helper.Interface2MapInterface(tmpRabbitMQ)
 		if err != nil {
 			return cnf, err
 		}
-		if tmpRabitMqConfig["user"] == nil || tmpRabitMqConfig["password"] == nil || tmpRabitMqConfig["host"] == nil || tmpRabitMqConfig["port"] == nil {
+		if tmpRabbitMqConfig["user"] == nil || tmpRabbitMqConfig["password"] == nil || tmpRabbitMqConfig["host"] == nil || tmpRabbitMqConfig["port"] == nil {
 			return cnf, errors.New("queue.rabbitmq config error")
 		}
-		user := tmpRabitMqConfig["user"].(string)
-		password := tmpRabitMqConfig["password"].(string)
-		host := tmpRabitMqConfig["host"].(string)
-		port := tmpRabitMqConfig["port"].(int)
-		exchange := tmpRabitMqConfig["exchange"].(string)
-		exchangeDlx := tmpRabitMqConfig["exchangeDlx"].(string)
-		exchangeType := tmpRabitMqConfig["exchangeType"].(string)
-		bindingKey := defaultQueue // tmpRabitMqConfig["bindingKey"].(string)
+		user := tmpRabbitMqConfig["user"].(string)
+		password := tmpRabbitMqConfig["password"].(string)
+		host := tmpRabbitMqConfig["host"].(string)
+		port := tmpRabbitMqConfig["port"].(int)
+		exchange := tmpRabbitMqConfig["exchange"].(string)
+		exchangeDlx := tmpRabbitMqConfig["exchangeDlx"].(string)
+		exchangeType := tmpRabbitMqConfig["exchangeType"].(string)
+		bindingKey := defaultQueue // tmpRabbitMqConfig["bindingKey"].(string)
 		bindingKeyDlx := bindingKey + ".dlq"
 
 		brokerURL = fmt.Sprintf("amqp://%s:%s@%s:%d/",

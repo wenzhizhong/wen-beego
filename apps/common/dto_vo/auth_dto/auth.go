@@ -42,7 +42,7 @@ type UserLoginInfoDto struct {
 		AccessToken       string   `json:"accessToken"`
 		RefreshToken      string   `json:"refreshToken"`
 		DefaultUnitId     string   `json:"default_unit_id"`
-		DefaultUnitUserId string   `json:"default_unit_user_id" comment:"plat_user表/mchut_user表 id"`
+		DefaultUnitUserId string   `json:"default_unit_user_id" comment:"plat_user表/mchnt_user表 id"`
 		Roles             []string `json:"roles"`
 		Permissions       []string `json:"permissions"`
 	} `json:"userInfo"`

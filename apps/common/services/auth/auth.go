@@ -62,8 +62,8 @@ func (s *CommonAuth) Register(data auth_dto.RegisterDto, moduleName string) (log
 }
 
 // 获取验证码
-func (s *CommonAuth) GetCatpcha(cpatchaType string) (data interface{}, err error) {
-	id, b64s, _, err := captcha.GetCaptcha(cpatchaType)
+func (s *CommonAuth) GetCaptcha(captchaType string) (data interface{}, err error) {
+	id, b64s, _, err := captcha.GetCaptcha(captchaType)
 	data = map[string]interface{}{
 		"id":   id,
 		"b64s": b64s,
@@ -137,7 +137,7 @@ func (s *CommonAuth) checkRegisterDto(data auth_dto.RegisterDto) error {
 
 // 校验验证码
 func (s *CommonAuth) checkAuthCode(authCode string, authCodeId string, authCodeType string) error {
-	if helper.IsDevRunMode() && authCode == constant.CAPTCHAT_DEF_CODE {
+	if helper.IsDevRunMode() && authCode == constant.CAPTCHA_DEF_CODE {
 		// 测试环境,验证码默认使用：1234
 		return nil
 	}
@@ -227,16 +227,16 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_
 	if err != nil {
 		return nil, err
 	}
-	defualtUnit, err := s.GetUserDefaultUnitId(moduleName, userId)
+	defaultUnit, err := s.GetUserDefaultUnitId(moduleName, userId)
 	if err != nil && !helper.DbNotFound(err) {
 		return nil, err
 	}
-	if defualtUnit.Id != "" {
-		rolesClassifies, _, err = s.getUserRolesClassifies(moduleName, defualtUnit.Id, defualtUnit.DefaultUnitUserId)
+	if defaultUnit.Id != "" {
+		rolesClassifies, _, err = s.getUserRolesClassifies(moduleName, defaultUnit.Id, defaultUnit.DefaultUnitUserId)
 		if err != nil {
 			return nil, err
 		}
-		perms, err = s.GetUserPermissions(moduleName, defualtUnit.Id, defualtUnit.DefaultUnitUserId)
+		perms, err = s.GetUserPermissions(moduleName, defaultUnit.Id, defaultUnit.DefaultUnitUserId)
 		if err != nil {
 			return nil, err
 		}
@@ -250,8 +250,8 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_
 	brancaData.Aud = aud.(string)
 	brancaData.Iss = iss.(string)
 	brancaData.Sub = user.Id
-	brancaData.SubUnit = defualtUnit.DefaultUnitId
-	brancaData.SubUnitUser = defualtUnit.DefaultUnitUserId
+	brancaData.SubUnit = defaultUnit.DefaultUnitId
+	brancaData.SubUnitUser = defaultUnit.DefaultUnitUserId
 	brancaData.Role = helper.Md5(strings.Join(rolesClassifies, ";"))
 	brancaData.Scope = helper.Md5(strings.Join(perms, ";"))
 	brancaData.Exp = cutTime + int64(exp.(int))
@@ -277,11 +277,11 @@ func (s *CommonAuth) GetAdminLoginInfo(moduleName string, userId string) (*auth_
 	loginInfo.UserInfo.Expires = brancaData.Exp * 1000
 	loginInfo.UserInfo.AccessToken = token
 	loginInfo.UserInfo.RefreshToken = refreshToken
-	loginInfo.UserInfo.DefaultUnitId = defualtUnit.DefaultUnitId
-	loginInfo.UserInfo.DefaultUnitUserId = defualtUnit.DefaultUnitUserId
+	loginInfo.UserInfo.DefaultUnitId = defaultUnit.DefaultUnitId
+	loginInfo.UserInfo.DefaultUnitUserId = defaultUnit.DefaultUnitUserId
 	loginInfo.UserInfo.Permissions = perms
 	loginInfo.UserInfo.Roles = rolesClassifies
-	loginInfo.UnitInfo = defualtUnit
+	loginInfo.UnitInfo = defaultUnit
 
 	return &loginInfo, nil
 }

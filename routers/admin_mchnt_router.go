@@ -120,7 +120,7 @@ func mchntAuthSlices() []beego.LinkNamespace {
 		// auth begin
 
 		beego.NSCtrlPost("/auth/login", (*adminAuth.AuthController).Login),
-		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCatpcha),
+		beego.NSCtrlGet("/auth/get-captcha", (*adminAuth.AuthController).GetCaptcha),
 		beego.NSCtrlPost("/auth/refresh-token", (*adminAuth.AuthController).RefreshToken),
 		beego.NSCtrlGet("/auth-params/model-params", (*adminAuth.ParamsController).GetModelParams),
 		beego.NSCtrlPost("/auth-mchnt/change-unit", (*adminAuth.MchntController).ChangeUnit),

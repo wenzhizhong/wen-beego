@@ -34,7 +34,7 @@ func GetUnitUserByIdOrPhone[UnitUserModel itf.UnitUserItf, UnitUserProfileModel 
 		Joins("INNER JOIN "+tableUnitUserProfileName+" on "+tableUnitUserProfileName+".id = "+tableUnitUserName+".id").
 		Where(tableUnitUserName+".unit_id = ?", unitId).
 		Where(tableUnitUserName + ".deleted = 0")
-		// Where("status <>", base_model.UNIT_USER_PROFILE_CANCLED).
+		// Where("status <>", base_model.UNIT_USER_PROFILE_CANCELED).
 	if id != "" {
 		query = query.Where(tableUnitUserName+".id = ?", id)
 	} else {
@@ -60,7 +60,7 @@ func GetUnitUserById[UnitUserModel itf.UnitUserItf, UnitUserProfileModel itf.Use
 		Joins("INNER JOIN "+tableUnitUserProfileName+" on "+tableUnitUserProfileName+".id = "+tableUnitUserName+".id").
 		Where(tableUnitUserName+".id = ?", id).
 		Where(tableUnitUserName + ".deleted = 0").
-		// Where("status <>", base_model.UNIT_USER_PROFILE_CANCLED).
+		// Where("status <>", base_model.UNIT_USER_PROFILE_CANCELED).
 		Find(&data).Error
 	return
 }
@@ -368,8 +368,8 @@ func CheckOrgStructure[UnitUserModel itf.UnitUserItf, UnitDeptModel itf.DeptItf,
 		return err
 	}
 
-	tmpsql := global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Statement.SQL.String()
-	fmt.Println(tmpsql)
+	tmpSql := global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Statement.SQL.String()
+	fmt.Println(tmpSql)
 	return global.GetReadDb().Raw(sql, unitUserId, unitId, deptId, unitId, roleId, unitId).Scan(&result).Error
 }
 

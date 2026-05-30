@@ -31,7 +31,7 @@ func apiAuthSlices() []beego.LinkNamespace {
 	return []beego.LinkNamespace{
 		// auth begin
 		beego.NSCtrlPost("/v1/auth/login", (*apiAuthV1.AuthController).Login),
-		beego.NSCtrlGet("/v1/auth/get-captcha", (*apiAuthV1.AuthController).GetCatpcha),
+		beego.NSCtrlGet("/v1/auth/get-captcha", (*apiAuthV1.AuthController).GetCaptcha),
 		beego.NSCtrlPost("/v1/auth/refresh-token", (*apiAuthV1.AuthController).RefreshToken),
 
 		beego.NSCtrlPost("/v1/upload/upload", (*apiUploadV1.UploadController).Upload),

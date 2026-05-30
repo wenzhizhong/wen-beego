@@ -39,6 +39,6 @@ func (m *PlatApiStatistics) GetUnitId() string {
 	return m.UnitId
 }
 
-func (m *PlatApiStatistics) GetModulename() string {
-	return m.Modulename
+func (m *PlatApiStatistics) GetModuleName() string {
+	return m.ModuleName
 }

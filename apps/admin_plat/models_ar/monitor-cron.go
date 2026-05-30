@@ -67,13 +67,13 @@ func (ar *PlatCronAr) Delete(tx *gorm.DB, unit_id, id string) (err error) {
 func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []cron_vo.UnitCronListVo, count int64, err error) {
 	data = make([]cron_vo.UnitCronListVo, 0)
 
-	platCronMdoel := &models.PlatCron{}
+	platCronModel := &models.PlatCron{}
 	platUserModel := &models.PlatUser{}
-	tablePlatCronName := platCronMdoel.TableName()
+	tablePlatCronName := platCronModel.TableName()
 	tablePlatUserName := platUserModel.TableName()
 
 	query := global.GetReadDb().
-		Model(platCronMdoel).
+		Model(platCronModel).
 		Where(tablePlatCronName+".deleted = ?", 0)
 
 	err = query.Count(&count).Error
@@ -84,8 +84,8 @@ func (ar *PlatCronAr) GetCronList(req page_dto.MonitorCronListReqDto) (data []cr
 		return
 	}
 
-	err = query.Select(tablePlatCronName + ".*, STRING_AGG(distinct creater.name,'') AS created_by_name, STRING_AGG(distinct updater.name,'') AS updated_by_name").
-		Joins("LEFT JOIN " + tablePlatUserName + " AS creater ON creater.id=" + tablePlatCronName + ".created_by").
+	err = query.Select(tablePlatCronName + ".*, STRING_AGG(distinct creator.name,'') AS created_by_name, STRING_AGG(distinct updater.name,'') AS updated_by_name").
+		Joins("LEFT JOIN " + tablePlatUserName + " AS creator ON creator.id=" + tablePlatCronName + ".created_by").
 		Joins("LEFT JOIN " + tablePlatUserName + " AS updater ON updater.id=" + tablePlatCronName + ".updated_by").
 		Limit(req.PageSize).
 		Offset(req.Offset).

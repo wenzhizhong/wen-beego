@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	paltMonitorService "WenBeego/apps/admin_plat/services/monitor"
+	platMonitorService "WenBeego/apps/admin_plat/services/monitor"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/helper"
@@ -10,7 +10,7 @@ import (
 
 type CronLogController struct {
 	commonControllers.AdminBaseController
-	cronLogService paltMonitorService.CronLogService
+	cronLogService platMonitorService.CronLogService
 }
 
 // 获取定时任务日志列表

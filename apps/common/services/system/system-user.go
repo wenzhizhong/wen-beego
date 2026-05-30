@@ -456,7 +456,7 @@ func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, un
 		}
 	}
 	// 已存在主体用户
-	if userData.User.Id != "" && userData.Status == base_model.UNIT_USER_PROFILE_CANCLED {
+	if userData.User.Id != "" && userData.Status == base_model.UNIT_USER_PROFILE_CANCELED {
 		// 主体用户已注销-编辑同一个手机号
 		if !isAddUnitUser {
 			err = errors.New("主体用户已注销，请勿编辑")
@@ -464,7 +464,7 @@ func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, un
 		}
 		// 主体用户已注销-新增同一个手机号
 		// pass
-	} else if userData.User.Id != "" && userData.Status != base_model.UNIT_USER_PROFILE_CANCLED {
+	} else if userData.User.Id != "" && userData.Status != base_model.UNIT_USER_PROFILE_CANCELED {
 		// 主体用户未注销-新增同一个手机号
 		if isAddUnitUser {
 			err = fmt.Errorf("用户（%s）已存在，请勿重复新增", unitUserSaveDto.UnitUserDto.Phone)
@@ -487,7 +487,7 @@ func (s *User) checkAndSetUserData(unitUserSaveDto *user_dto.UnitUserSaveDto, un
 			return
 		}
 
-		if userData.User.Id == "" || userData.Status == base_model.UNIT_USER_PROFILE_CANCLED {
+		if userData.User.Id == "" || userData.Status == base_model.UNIT_USER_PROFILE_CANCELED {
 			err = s.setNewUserId(unitUserSaveDto)
 			if err != nil {
 				return

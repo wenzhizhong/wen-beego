@@ -81,7 +81,7 @@ func (cm *CronManager) RemoveTask(taskID string) {
 
 // 启动调度器
 func (cm *CronManager) Start() {
-	cm.LoadCrontabsFromDB()
+	cm.LoadCrontabFromDB()
 	cm.cron.Start()
 }
 
@@ -101,7 +101,7 @@ func (cm *CronManager) ListTasks() []cron.Entry {
 }
 
 // 加载数据库中的启用任务
-func (cm *CronManager) LoadCrontabsFromDB() error {
+func (cm *CronManager) LoadCrontabFromDB() error {
 	crontabDbList, err := (&models_ar.PlatCronAr{}).RunProjectGetCronList()
 	if err != nil || len(crontabDbList) == 0 {
 		return err

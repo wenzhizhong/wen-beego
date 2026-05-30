@@ -37,6 +37,6 @@ func (m *MchntApiStatistics) GetDate() int64 {
 func (m *MchntApiStatistics) GetUnitId() string {
 	return m.UnitId
 }
-func (m *MchntApiStatistics) GetModulename() string {
-	return m.Modulename
+func (m *MchntApiStatistics) GetModuleName() string {
+	return m.ModuleName
 }

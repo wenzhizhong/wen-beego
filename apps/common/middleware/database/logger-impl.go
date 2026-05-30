@@ -117,9 +117,9 @@ func New(writer Writer, config Config) logger.Interface {
 
 // LogMode log mode
 func (l *loggerImpl) LogMode(level logger.LogLevel) logger.Interface {
-	newlogger := *l
-	newlogger.LogLevel = level
-	return &newlogger
+	newLogger := *l
+	newLogger.LogLevel = level
+	return &newLogger
 }
 
 // Info print info
@@ -145,8 +145,6 @@ func (l *loggerImpl) Error(ctx context.Context, msg string, data ...interface{})
 }
 
 // Trace print sql message
-//
-//nolint:cyclop
 func (l *loggerImpl) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	if l.LogLevel <= logger.Silent {
 		return

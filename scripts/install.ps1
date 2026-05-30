@@ -25,8 +25,8 @@ Write-Info "Go 版本: $goVer"
 Write-Info "安装 bee 工具..."
 if (-not (Get-Command bee -ErrorAction SilentlyContinue)) {
     & go install github.com/beego/bee/v2@latest
-    $gopath = & go env GOPATH
-    $env:Path += ";$gopath\bin"
+    $goPath = & go env GOPATH
+    $env:Path += ";$goPath\bin"
 }
 Write-Info "bee 已就绪"
 

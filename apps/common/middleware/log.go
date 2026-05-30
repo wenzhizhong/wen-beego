@@ -16,7 +16,7 @@ import (
 type logConfig struct {
 	Filename string   `json:"filename"`
 	MaxLines int64    `json:"maxLines"`
-	Maxsize  int64    `json:"maxsize"`
+	Maxsize  int64    `json:"maxSize"`
 	MaxDays  int64    `json:"maxDays"`
 	Daily    bool     `json:"daily"`
 	Rotate   bool     `json:"rotate"`
@@ -79,14 +79,14 @@ func getFileLogConfig(logType string) (string, error) {
 	}
 	var logConfigObj logConfig
 	logConfigObj.Filename = logPath + "/app.log"
-	if config["maxlines"] != "" {
-		logConfigObj.MaxLines, _ = strconv.ParseInt(config["maxlines"], 10, 64)
+	if config["maxLines"] != "" {
+		logConfigObj.MaxLines, _ = strconv.ParseInt(config["maxLines"], 10, 64)
 	}
-	if config["maxsize"] != "" {
-		logConfigObj.Maxsize, _ = strconv.ParseInt(config["maxsize"], 10, 64)
+	if config["maxSize"] != "" {
+		logConfigObj.Maxsize, _ = strconv.ParseInt(config["maxSize"], 10, 64)
 	}
-	if config["maxdays"] != "" {
-		logConfigObj.MaxDays, _ = strconv.ParseInt(config["maxdays"], 10, 64)
+	if config["maxDays"] != "" {
+		logConfigObj.MaxDays, _ = strconv.ParseInt(config["maxDays"], 10, 64)
 	}
 	if config["daily"] != "" {
 		logConfigObj.Daily, _ = strconv.ParseBool(config["daily"])

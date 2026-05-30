@@ -17,8 +17,8 @@ type File struct {
 	UnitType   string    `json:"unitType" gorm:"column:unit_type;type:varchar(255)"`
 	CreateBy   string    `json:"createBy" gorm:"column:create_by;type:varchar(255)"`
 	UpdateBy   string    `json:"updateBy" gorm:"column:update_by;type:varchar(255)"`
-	Createtime time.Time `json:"createtime" gorm:"column:createtime;type:timestamp"`
-	Updatetime time.Time `json:"updatetime" gorm:"column:updatetime;type:timestamp"`
+	CreateTime time.Time `json:"createtime" gorm:"column:createtime;type:timestamp"`
+	UpdateTime time.Time `json:"updatetime" gorm:"column:updatetime;type:timestamp"`
 }
 
 func (File) TableName() string {

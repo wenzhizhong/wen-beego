@@ -10,5 +10,5 @@ type ApiStatisticsItf interface {
 	GetUV() int
 	GetDate() int64
 	GetUnitId() string
-	GetModulename() string
+	GetModuleName() string
 }

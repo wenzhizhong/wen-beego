@@ -34,7 +34,7 @@ func customBeego() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = global.AppDir + "/swagger"
 	}
-	beego.BConfig.RecoverFunc = beeegoRecoverFuncfunc // 自定义替换掉默认defaultRecoverPanic方法
+	beego.BConfig.RecoverFunc = beegoRecoverFunc // 自定义替换掉默认defaultRecoverPanic方法
 
 	fmt.Println("beego.BConfig.RunMode:", beego.BConfig.RunMode)
 }
@@ -67,7 +67,7 @@ func createDir(path string) {
 	}
 }
 
-func beeegoRecoverFuncfunc(ctx *context.Context, config *beego.Config) {
+func beegoRecoverFunc(ctx *context.Context, config *beego.Config) {
 	if err := recover(); err != nil {
 		// 记录 panic 到日志
 		runMode, _ := helper.AppRunmode()

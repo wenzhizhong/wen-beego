@@ -20,7 +20,7 @@ var _ itf.UploadItf = (*UploadToLocal)(nil)
 
 func (s *UploadToLocal) Upload(requestDto upload_dto.UploadFileReqDto, userId string, unitId string) (result upload_dto.UploadFileRespDto, err error) {
 	var uploadPathStr string
-	uploadPathStr, err = s.GetUploadpath(requestDto.BucketACL, userId, requestDto.FilePath)
+	uploadPathStr, err = s.GetUploadPath(requestDto.BucketACL, userId, requestDto.FilePath)
 	if err != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func (s *UploadToLocal) MergeSliceFile(requestDto upload_dto.UploadFileReqDto, u
 	}
 
 	var uploadPathStr string
-	uploadPathStr, err = s.GetUploadpath(requestDto.BucketACL, userId, requestDto.FilePath)
+	uploadPathStr, err = s.GetUploadPath(requestDto.BucketACL, userId, requestDto.FilePath)
 	if err != nil {
 		return false, err
 	}
@@ -126,7 +126,7 @@ func (s *UploadToLocal) MergeSliceFile(requestDto upload_dto.UploadFileReqDto, u
 	return true, nil
 }
 
-func (s *UploadToLocal) GetUploadpath(bucketACL string, userId string, originFilepath string) (string, error) {
+func (s *UploadToLocal) GetUploadPath(bucketACL string, userId string, originFilepath string) (string, error) {
 	time := helper.GetTimeString("2006/01/02")
 
 	originFileDir := filepath.Dir(originFilepath)
