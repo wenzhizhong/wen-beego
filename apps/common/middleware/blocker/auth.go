@@ -178,21 +178,21 @@ func checkBaseAuthApi(ctx *beecontext.Context, authApiListMap map[string]bool) b
 
 // 检测用户是否有api权限
 func checkAuthAdminPermis(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
-	service := &framework.AuthMiddlewate{}
+	service := &framework.AuthMiddleware{}
 	status, err := service.CheckAuthAdminRouters(moduleName, brancaData, path)
 	return status, err
 }
 
 // 检测组织单位用户状态
 func checkAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
-	service := &framework.AuthMiddlewate{}
+	service := &framework.AuthMiddleware{}
 	status, err := service.CheckAuthAdminStatus(moduleName, brancaData)
 	return status, err
 }
 
 // 检测api端用户状态
 func checkAuthUserStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
-	service := &framework.AuthMiddlewate{}
+	service := &framework.AuthMiddleware{}
 	status, err := service.CheckAuthUserStatus(moduleName, brancaData)
 	return status, err
 }

@@ -13,14 +13,14 @@ import (
 )
 
 // 认证中间件服务层
-type AuthMiddlewate struct {
+type AuthMiddleware struct {
 	PlatMenuViewAr models_ar.PlatMenuViewAr
 }
 
 /**
  * 验证组织单位用户各种状态
  */
-func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
+func (s *AuthMiddleware) CheckAuthAdminStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
 	userId := brancaData.Sub
 	unitId := brancaData.SubUnit
 	unitUserId := brancaData.SubUnitUser
@@ -81,7 +81,7 @@ func (s *AuthMiddlewate) CheckAuthAdminStatus(moduleName string, brancaData help
 /**
  * 验证api用户各种状态
  */
-func (s *AuthMiddlewate) CheckAuthUserStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
+func (s *AuthMiddleware) CheckAuthUserStatus(moduleName string, brancaData helper.BrancaData) (bool, error) {
 	userId := brancaData.Sub
 	if userId == "" {
 		return false, errors.New("CheckAuthUserStatus(): 用户id，不能为空")
@@ -89,7 +89,7 @@ func (s *AuthMiddlewate) CheckAuthUserStatus(moduleName string, brancaData helpe
 	return s.checkUserProfileStatus(moduleName, userId)
 }
 
-func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
+func (s *AuthMiddleware) CheckAuthAdminRouters(moduleName string, brancaData helper.BrancaData, path string) (bool, error) {
 	unitId := brancaData.SubUnit
 	unitUserId := brancaData.SubUnitUser
 	if unitUserId == "" || unitId == "" {
@@ -101,7 +101,7 @@ func (s *AuthMiddlewate) CheckAuthAdminRouters(moduleName string, brancaData hel
 }
 
 // 验证组织单位用户资料状态
-func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId string, unitId string) (status bool, err error) {
+func (s *AuthMiddleware) checkUnitUserProfileStatus(moduleName string, userId string, unitId string) (status bool, err error) {
 	index := 0
 	index, err = business_store.GetAumidUps(userId, unitId, 0)
 	if err == nil && index > 0 {
@@ -144,7 +144,7 @@ func (s *AuthMiddlewate) checkUnitUserProfileStatus(moduleName string, userId st
 }
 
 // 验证api用户资料状态
-func (s *AuthMiddlewate) checkUserProfileStatus(moduleName string, userId string) (status bool, err error) {
+func (s *AuthMiddleware) checkUserProfileStatus(moduleName string, userId string) (status bool, err error) {
 	index := 0
 	index, err = business_store.GetAumidUps(userId, "", 0)
 	if err == nil && index > 0 {
@@ -180,7 +180,7 @@ func (s *AuthMiddlewate) checkUserProfileStatus(moduleName string, userId string
 }
 
 // 验证组织单位状态
-func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitId string) (status bool, err error) {
+func (s *AuthMiddleware) checkUnitStatus(moduleName string, userId string, unitId string) (status bool, err error) {
 	index := -1
 	index, err = business_store.GetAumidUs(userId, unitId, -1)
 	if err == nil && index > -1 {
@@ -244,7 +244,7 @@ func (s *AuthMiddlewate) checkUnitStatus(moduleName string, userId string, unitI
 }
 
 // 验证用户角色状态
-func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, unitUserId string) (status bool, err error) {
+func (s *AuthMiddleware) checkUserRoleStatus(moduleName string, unitUserId string) (status bool, err error) {
 
 	index := -1
 	index, err = business_store.GetAumidUrs(unitUserId, -1)
@@ -290,7 +290,7 @@ func (s *AuthMiddlewate) checkUserRoleStatus(moduleName string, unitUserId strin
 	return
 }
 
-func (s *AuthMiddlewate) checkUserRolePermissions(moduleName string, unitUserId string, unitId string, path string) (status bool, err error) {
+func (s *AuthMiddleware) checkUserRolePermissions(moduleName string, unitUserId string, unitId string, path string) (status bool, err error) {
 	tmpMap := map[string]bool{}
 	exits, err := business_store.GetAumidUrp(moduleName, unitUserId, unitId)
 	if err == nil && exits != "" {

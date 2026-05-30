@@ -146,7 +146,7 @@ func mqSendTask(data interface{}) {
 
 // 处理body签名和body加密，【解密后覆盖body】
 func dealSignAndEncrypt(ctx *beecontext.Context) error {
-	err := (&framework.AccessMiddlewate{}).DealSignAndEncrypt(ctx)
+	err := (&framework.AccessMiddleware{}).DealSignAndEncrypt(ctx)
 	if err != nil {
 		setResponse(ctx, http.StatusBadRequest, err.Error(), nil)
 	}

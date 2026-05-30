@@ -26,10 +26,10 @@ var methodOfEncryptBody = map[string]bool{
 }
 
 // 访问控制中间件服务层
-type AccessMiddlewate struct {
+type AccessMiddleware struct {
 }
 
-func (s *AccessMiddlewate) DealSignAndEncrypt(ctx *beecontext.Context) error {
+func (s *AccessMiddleware) DealSignAndEncrypt(ctx *beecontext.Context) error {
 	var err error
 	moduleName := ctx.Input.GetData(constant.MODULE_NAME)
 	contentType := ctx.Request.Header.Get("Content-Type")
@@ -115,7 +115,7 @@ func (s *AccessMiddlewate) DealSignAndEncrypt(ctx *beecontext.Context) error {
 }
 
 // 解密请求体并覆盖
-func (s *AccessMiddlewate) decryptBodyAndReset(ctx *beecontext.Context, configModel models.Config, bodyEncryptStr string) error {
+func (s *AccessMiddleware) decryptBodyAndReset(ctx *beecontext.Context, configModel models.Config, bodyEncryptStr string) error {
 	rsaConfigData, err := s.parseSignatureRsaKey(configModel)
 	if err != nil {
 		return err
@@ -133,12 +133,12 @@ func (s *AccessMiddlewate) decryptBodyAndReset(ctx *beecontext.Context, configMo
 
 	return nil
 }
-func (s *AccessMiddlewate) doResetBody(ctx *beecontext.Context, newBody []byte) {
+func (s *AccessMiddleware) doResetBody(ctx *beecontext.Context, newBody []byte) {
 	ctx.Input.RequestBody = newBody
 }
 
 // 验证请求体签名
-func (s *AccessMiddlewate) verifyBodySign(ctx *beecontext.Context, configModel models.Config, signatureStr string) error {
+func (s *AccessMiddleware) verifyBodySign(ctx *beecontext.Context, configModel models.Config, signatureStr string) error {
 	rsaConfigData, err := s.parseSignatureRsaKey(configModel)
 	if err != nil {
 		return err
@@ -164,7 +164,7 @@ func (s *AccessMiddlewate) verifyBodySign(ctx *beecontext.Context, configModel m
 }
 
 // 是否开启接口安全配置
-func (s *AccessMiddlewate) checkApiSecurityConfig(configKey string) (bool, error) {
+func (s *AccessMiddleware) checkApiSecurityConfig(configKey string) (bool, error) {
 	configItf, err := global.GetConfigDiy(configKey)
 	if err != nil || configItf == nil {
 		msg := "配置apiSecurity.signature错误："
@@ -175,14 +175,14 @@ func (s *AccessMiddlewate) checkApiSecurityConfig(configKey string) (bool, error
 }
 
 // 获取请求头签名
-func (s *AccessMiddlewate) getHeaderSignature(ctx *beecontext.Context) (string, error) {
+func (s *AccessMiddleware) getHeaderSignature(ctx *beecontext.Context) (string, error) {
 	signatureStr := helper.GetReqSignature(ctx)
 	signatureStr = strings.TrimSpace(signatureStr)
 	return signatureStr, nil
 }
 
 // 获取数据库签名密钥
-func (s *AccessMiddlewate) getDatabaseRsaData(ctx *beecontext.Context) (configModelMap map[string][]models.Config, err error) {
+func (s *AccessMiddleware) getDatabaseRsaData(ctx *beecontext.Context) (configModelMap map[string][]models.Config, err error) {
 	moduleName := ctx.Input.GetData(constant.MODULE_NAME)
 	configModelMap = make(map[string][]models.Config, 0)
 	configName := make([]string, 0)
@@ -217,7 +217,7 @@ func (s *AccessMiddlewate) getDatabaseRsaData(ctx *beecontext.Context) (configMo
 }
 
 // 获取数据库签名密钥 - 读取签名密钥
-func (s *AccessMiddlewate) parseSignatureRsaKey(configModel models.Config) (rsaConfigData *db_param.Db_config_rsa, err error) {
+func (s *AccessMiddleware) parseSignatureRsaKey(configModel models.Config) (rsaConfigData *db_param.Db_config_rsa, err error) {
 	tmpValue := configModel.Value
 	tmpValue = strings.ReplaceAll(tmpValue, "\r", "")
 	tmpValue = strings.ReplaceAll(tmpValue, "\n", "\\n")
