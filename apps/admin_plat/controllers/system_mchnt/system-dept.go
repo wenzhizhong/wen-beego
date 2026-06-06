@@ -5,6 +5,7 @@ import (
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/dept_dto"
 	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"errors"
 	"strings"
@@ -29,11 +30,13 @@ func (c *DeptController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -46,6 +49,7 @@ func (c *DeptController) Get() {
 
 	data, err := c.deptService.GetUnitDeptList(deptDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -67,12 +71,14 @@ func (c *DeptController) GetUnitDeptTree() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.deptService.GetUnitDeptTree(baseParamDto, selectUnitIds)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -94,12 +100,14 @@ func (c *DeptController) GetUnitDeptPrincipal() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -113,6 +121,7 @@ func (c *DeptController) GetUnitDeptPrincipal() {
 
 	data, err := c.deptService.GetUnitDeptPrincipal(baseParamDto, deptPrincipalDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -150,12 +159,14 @@ func (c *DeptController) Edit() {
 func (c *DeptController) save(optType string) {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	deptDto, err := helper.GetReqBody[dept_dto.UnitDeptDto](c.Ctx)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -167,6 +178,7 @@ func (c *DeptController) save(optType string) {
 		err2 = errors.New("请调用添加接口")
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -174,6 +186,7 @@ func (c *DeptController) save(optType string) {
 
 	data, err := c.deptService.SaveUnitDept(baseParamDto, deptDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -195,17 +208,20 @@ func (c *DeptController) Del() {
 	deptDto, err1 := helper.GetReqBody[dept_dto.UnitDeptDto](c.Ctx)
 	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err1 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err1)
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err2)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err := c.deptService.Del(baseParamDto, deptDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

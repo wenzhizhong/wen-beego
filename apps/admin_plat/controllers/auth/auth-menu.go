@@ -4,6 +4,7 @@ package auth
 import (
 	menuService "WenBeego/apps/admin_plat/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 )
 
@@ -27,6 +28,7 @@ func (c *MenuController) GetAsyncRoutes() {
 	unitUserId := c.Ctx.Input.GetData("unitUserId")
 	data, err := c.MenuService.GetAsyncRoutes(c.ModuleName, unitId.(string), unitUserId.(string))
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

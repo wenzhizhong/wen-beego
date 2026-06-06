@@ -4,6 +4,7 @@ import (
 	platMonitorService "WenBeego/apps/admin_plat/services/monitor"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"time"
 )
@@ -26,6 +27,7 @@ func (c *CronLogController) Get() {
 	// baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -35,6 +37,7 @@ func (c *CronLogController) Get() {
 	if createdAtStr != "" {
 		createdAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
+			c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 			c.Data["json"] = helper.Response(500, err.Error(), nil)
 			c.ServeJSON()
 			return
@@ -48,6 +51,7 @@ func (c *CronLogController) Get() {
 
 	data, err := c.cronLogService.GetCronLogList(req)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

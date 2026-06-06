@@ -1,0 +1,6 @@
+package constant
+
+const ERROR_CODE_NONE = 0
+const ERROR_CODE_DB = 10000
+const ERROR_CODE_HELPER = 20000
+const ERROR_CODE_MIDDLEWARE = 30000

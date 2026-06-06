@@ -5,6 +5,7 @@ import (
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/user_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"strings"
 
@@ -33,11 +34,13 @@ func (c *UserController) GetUserList() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -52,6 +55,7 @@ func (c *UserController) GetUserList() {
 
 	data, err := c.UserService.GetUserList(userDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -102,16 +106,19 @@ func (c *UserController) save(optType string) {
 		err = helper.Ternary(err != nil, err, err2)
 		err = helper.Ternary(err != nil, err, err3)
 		err = helper.Ternary(err != nil, err, err4)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if optType == "edit" && userDto.Id == "" {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, "请调用添加接口", nil)
 		c.ServeJSON()
 		return
 	}
 	if optType == "add" && userDto.Id != "" {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, "请调用编辑接口", nil)
 		c.ServeJSON()
 		return
@@ -120,6 +127,7 @@ func (c *UserController) save(optType string) {
 	data, err := c.UserService.SaveUser(baseParamDto, &unitUserSaveDto)
 	if err != nil {
 		global.Log.Error("错误 %v", err)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -146,12 +154,14 @@ func (c *UserController) Del() {
 	req, err0 := helper.GetReqBody[*reqStruct](c.Ctx)
 	if err != nil || err0 != nil {
 		err = helper.Ternary(err != nil, err, err0)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.UserService.DelUnitUser(baseParamDto, req.Id)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -173,12 +183,14 @@ func (c *UserController) GetRoleTree() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.UserService.GetUnitRoleTree(baseParamDto, selectUnitIds)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

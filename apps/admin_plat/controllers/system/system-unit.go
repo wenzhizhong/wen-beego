@@ -6,6 +6,7 @@ import (
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/unit_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"errors"
 )
@@ -28,11 +29,13 @@ func (c *UnitController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -46,6 +49,8 @@ func (c *UnitController) Get() {
 
 	data, err := c.UnitService.GetUnitList(unitDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -57,11 +62,13 @@ func (c *UnitController) save(optType string) {
 	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
 	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err1 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err1)
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err2)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -74,6 +81,7 @@ func (c *UnitController) save(optType string) {
 		err3 = errors.New("请调用添加接口")
 	}
 	if err3 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err3)
 		c.Data["json"] = helper.Response(500, err3.Error(), nil)
 		c.ServeJSON()
 		return
@@ -81,6 +89,7 @@ func (c *UnitController) save(optType string) {
 
 	data, err := c.UnitService.Save(baseParamDto, unitDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -129,17 +138,20 @@ func (c *UnitController) Del() {
 	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
 	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err1 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err1)
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err2)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err := c.UnitService.Del(baseParamDto, unitDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

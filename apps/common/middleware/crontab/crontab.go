@@ -2,12 +2,11 @@ package crontab
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar"
 	"WenBeego/routers/crontab_task"
 	"fmt"
-	"runtime"
-	"strings"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -42,7 +41,7 @@ func (cm *CronManager) AddSafeTask(spec string, unsafeCmd func(), taskID string)
 			if r := recover(); r != nil {
 				result = false
 				// 记录日志或做其他处理
-				traceStr := cm.GetTraceStr()
+				traceStr := helper.GetTraceStr()
 				errMsg = fmt.Sprintf("Crontab Task %s panicked: %v\ntrace:\n%s\n", taskID, r, traceStr)
 				global.Log.Error(errMsg)
 			}
@@ -124,31 +123,4 @@ func (cm *CronManager) LoadCrontabFromDB() error {
 	}
 	global.Log.Info("loaded crontab from database!")
 	return nil
-}
-
-func (cm *CronManager) GetTraceStr() string {
-	pcs := make([]uintptr, 100)
-	n := runtime.Callers(0, pcs)
-	frames := runtime.CallersFrames(pcs[:n])
-
-	index := 0
-	traceStr := ""
-	tmoRootPath := strings.ReplaceAll(global.RootPath, "\\", "/")
-	for {
-		index++
-		frame, more := frames.Next()
-		if !more {
-			break
-		}
-		if index <= 4 {
-			continue
-		} else if index >= 100 {
-			break
-		}
-
-		if strings.HasPrefix(frame.File, tmoRootPath) {
-			traceStr += fmt.Sprintf("  %s:%d %s\n", frame.File, frame.Line, frame.Function)
-		}
-	}
-	return traceStr
 }

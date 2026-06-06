@@ -2,6 +2,7 @@ package database
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/app_error"
 	"WenBeego/apps/common/helper"
 	"database/sql"
 	"errors"
@@ -92,6 +93,8 @@ func doInitPgSql(config map[string]string) (*gorm.DB, error) {
 		return db, err
 	}
 
+	registerErrorCallback(db)
+
 	database, err = db.DB()
 	if err != nil {
 		return db, err
@@ -167,4 +170,11 @@ func getReadDdKeys(firstLevelKey string) ([]string, error) {
 	}
 
 	return keys, nil
+}
+func registerErrorCallback(db *gorm.DB) {
+	_ = db.Callback().Query().After("*").Register("custom:error_handler", func(db *gorm.DB) {
+		if db.Error != nil && !helper.DbNotFound(db.Error) {
+			db.Error = app_error.NewDbError(db.Error)
+		}
+	})
 }

@@ -3,6 +3,7 @@ package blocker
 import (
 	"WenBeego/apps/common/dto_vo/mq_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/app_error"
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/mq"
@@ -66,6 +67,7 @@ func RouterBefore() web.FilterFunc {
 	return func(ctx *beecontext.Context) {
 		moduleName := helper.ParseModuleFromRoute(ctx.Request.URL.Path)
 		ctx.Input.SetData(constant.MODULE_NAME, moduleName)
+		ctx.Input.SetData(constant.CTX_ERROR_KEY, nil)
 
 		dealSignAndEncrypt(ctx)
 	}
@@ -74,7 +76,21 @@ func RouterBefore() web.FilterFunc {
 // api 请求后
 func RouterAfter(whiteApiList *[]string, authApiList *[]string) web.FilterFunc {
 	return func(ctx *beecontext.Context) {
+		globalLogToFile(ctx)
 		statisticsApiLog(ctx, whiteApiList, authApiList)
+	}
+}
+
+// 非默认error类型，全局写入文件日志
+func globalLogToFile(ctx *beecontext.Context) {
+	errInfo := ctx.Input.GetData(constant.CTX_ERROR_KEY)
+	if errInfo == nil {
+		return
+	}
+	if be, ok := errInfo.(*app_error.BaseError); ok {
+		logString := fmt.Sprintf("Error: %v\n  Trace:\n%v\n", be.Err, be.Trace)
+		global.Log.Error(logString)
+		return
 	}
 }
 

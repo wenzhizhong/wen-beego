@@ -5,6 +5,7 @@ import (
 	mchntService "WenBeego/apps/admin_mchnt/services/auth"
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/auth_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"fmt"
 )
@@ -28,6 +29,7 @@ func (c *MchntController) GetUserUnitList() {
 	host := c.Ctx.Request.Host
 	data, err := c.MchntService.GetUserUnitList(userId.(string), host)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -57,6 +59,7 @@ func (c *MchntController) ChangeUnit() {
 	}
 	data, err := c.MchntService.ChangeUnit(c.ModuleName, userId.(string), ChangeUnitDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

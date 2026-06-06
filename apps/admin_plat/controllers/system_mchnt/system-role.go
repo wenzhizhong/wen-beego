@@ -5,6 +5,7 @@ import (
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/role_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"errors"
 	"strings"
@@ -29,11 +30,13 @@ func (c *RoleController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -48,6 +51,7 @@ func (c *RoleController) Get() {
 
 	data, err := c.roleService.GetUnitRoleList(roleDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -85,12 +89,14 @@ func (c *RoleController) Edit() {
 func (c *RoleController) save(optType string) {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	roleDto, err := helper.GetReqBody[role_dto.UnitRoleDto](c.Ctx)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -102,6 +108,7 @@ func (c *RoleController) save(optType string) {
 		err2 = errors.New("请调用添加接口")
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -109,6 +116,7 @@ func (c *RoleController) save(optType string) {
 
 	data, err := c.roleService.SaveUnitRole(baseParamDto, roleDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -130,17 +138,20 @@ func (c *RoleController) Del() {
 	roleDto, err1 := helper.GetReqBody[role_dto.UnitRoleDto](c.Ctx)
 	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err1 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err1)
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err2)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err := c.roleService.Del(baseParamDto, roleDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -161,12 +172,14 @@ func (c *RoleController) RoleMenu() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	selectUnitIds := helper.Ternary(c.GetString("selectUnitIds") != "", strings.Split(c.GetString("selectUnitIds"), ","), []string{baseParamDto.UnitId})
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.roleService.GetRoleMenu(baseParamDto, selectUnitIds)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -188,12 +201,14 @@ func (c *RoleController) RoleMenuIds() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	roleId := c.GetString("id")
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.roleService.GetRoleMenuIds(baseParamDto, roleId)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -218,6 +233,7 @@ func (c *RoleController) RoleMenuSave() {
 	roleMenuSaveDto, err1 := helper.GetReqBody[role_dto.RoleMenuSaveDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -225,6 +241,7 @@ func (c *RoleController) RoleMenuSave() {
 
 	err = c.roleService.RoleMenuSave(baseParamDto, roleMenuSaveDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

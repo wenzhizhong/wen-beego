@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/dto_vo/generate_code_dto"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"path/filepath"
 )
@@ -18,6 +19,7 @@ type GenerateCodeController struct {
 func (c *GenerateCodeController) GetDbTables() {
 	data, err := c.GenService.GetDbTableList()
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
@@ -28,12 +30,14 @@ func (c *GenerateCodeController) GetDbTables() {
 func (c *GenerateCodeController) GetDbTableDetail() {
 	dtoData, err := helper.GetReqBody[generate_code_dto.GetTableDetailDto](c.Ctx)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.GenService.GetDbTableDetail(dtoData.TableName)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
@@ -46,12 +50,14 @@ func (c *GenerateCodeController) Save() {
 	dtoData, err1 := helper.GetReqBody[generate_code_dto.SaveFormDetailDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.GenService.SaveFormDetail(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", nil)
@@ -62,12 +68,14 @@ func (c *GenerateCodeController) Save() {
 func (c *GenerateCodeController) Del() {
 	dtoData, err := helper.GetReqBody[generate_code_dto.DelFormDetailDto](c.Ctx)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.GenService.DelFormDetail(dtoData.Ids)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", nil)
@@ -80,6 +88,7 @@ func (c *GenerateCodeController) List() {
 	reqDataListDto, err1 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -91,6 +100,7 @@ func (c *GenerateCodeController) List() {
 
 	data, err := c.GenService.GetGenerateCodeList(*reqDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
@@ -101,6 +111,7 @@ func (c *GenerateCodeController) List() {
 func (c *GenerateCodeController) GetGenParams() {
 	data, err := c.GenService.GetGenerateCodeParam()
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
@@ -111,12 +122,14 @@ func (c *GenerateCodeController) GetGenParams() {
 func (c *GenerateCodeController) Run() {
 	dtoData, err := helper.GetReqBody[generate_code_dto.GenCodeRunDto](c.Ctx)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.GenService.GenerateCode(dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
@@ -127,12 +140,14 @@ func (c *GenerateCodeController) Run() {
 func (c *GenerateCodeController) Download() {
 	dtoData, err := helper.GetReqBody[generate_code_dto.DownloadCodeDto](c.Ctx)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	zipPath, err := c.GenService.DownloadCode(dtoData.ZipPath)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

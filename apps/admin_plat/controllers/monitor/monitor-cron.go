@@ -5,6 +5,7 @@ import (
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/cron_dto"
 	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 )
 
@@ -19,6 +20,7 @@ func (c *CronController) Get() {
 	reqDataListDto, err1 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -30,6 +32,7 @@ func (c *CronController) Get() {
 	data, err := c.cronService.GetCronList(reqDto)
 
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -43,6 +46,7 @@ func (c *CronController) Get() {
 func (c *CronController) GetAvailableCronList() {
 	data, err := c.cronService.GetAvailableCronList()
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -57,12 +61,14 @@ func (c *CronController) Add() {
 	dtoData, err1 := helper.GetReqBody[cron_dto.UnitCronDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.cronService.AddTask(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -77,12 +83,14 @@ func (c *CronController) Edit() {
 	dtoData, err1 := helper.GetReqBody[cron_dto.UnitCronDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.cronService.UpdateTask(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -107,12 +115,14 @@ func (c *CronController) startTask() {
 	dtoData, err1 := helper.GetReqBody[cron_dto.UnitCronDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.cronService.StartTask(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -125,12 +135,14 @@ func (c *CronController) stopTask() {
 	dtoData, err1 := helper.GetReqBody[cron_dto.UnitCronDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.cronService.StopTask(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -145,12 +157,14 @@ func (c *CronController) Del() {
 	dtoData, err1 := helper.GetReqBody[cron_dto.UnitCronDto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.cronService.DelTask(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

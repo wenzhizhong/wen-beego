@@ -3,7 +3,7 @@ package uploadV1
 import (
 	uploadServiceV1 "WenBeego/apps/api/services/upload/v1"
 	commonControllers "WenBeego/apps/common/controller"
-	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 )
 
@@ -27,6 +27,7 @@ func (c *UploadController) Upload() {
 	file, fileHeader, err := c.GetFile("file")
 	postData := c.Ctx.Request.PostForm
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -35,6 +36,7 @@ func (c *UploadController) Upload() {
 	data, err := c.uploadServiceV1.Upload(userId.(string), unitId.(string), &file, fileHeader, postData, c.ModuleName)
 	file.Close()
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -69,6 +71,7 @@ func (c *UploadController) VueSliceUpload() {
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(210)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -82,7 +85,8 @@ func (c *UploadController) VueSliceUpload() {
 	c.Ctx.Output.SetStatus(data.HttpCode)
 	if err != nil {
 		c.Ctx.Output.SetStatus(data.HttpCode)
-		global.Log.Error("VueSliceUpload() Error:\n" + err.Error())
+		// global.Log.Error("VueSliceUpload() Error:\n" + err.Error())
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), data)
 		c.ServeJSON()
 		return
@@ -113,6 +117,7 @@ func (c *UploadController) VueSliceUploadCheck() {
 	c.Ctx.Output.SetStatus(data.HttpCode)
 	if err != nil {
 		c.Ctx.Output.SetStatus(210)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), data)
 		c.ServeJSON()
 		return
@@ -137,6 +142,7 @@ func (c *UploadController) LinkSign() {
 	data, err := c.uploadServiceV1.LinkSign(host, urls)
 
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -160,6 +166,7 @@ func (c *UploadController) GetLinkById() {
 	ids := c.GetString("ids")
 	data, err := c.uploadServiceV1.GetLinkById(host, ids)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return

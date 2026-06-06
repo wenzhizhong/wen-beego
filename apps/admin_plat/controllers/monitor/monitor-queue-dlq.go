@@ -5,6 +5,7 @@ import (
 	commonControllers "WenBeego/apps/common/controller"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/dto_vo/queue_dlq_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"strconv"
 )
@@ -29,11 +30,13 @@ func (c *QueueDlqController) Get() {
 	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	reqDataListDto, err2 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -56,6 +59,7 @@ func (c *QueueDlqController) Get() {
 
 	data, err := c.QueueDlqService.GetList(dlqDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -76,11 +80,13 @@ func (c *QueueDlqController) Requeue() {
 	reqDto, err1 := helper.GetReqBody[queue_dlq_dto.RequeueDto](c.Ctx)
 	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
 	if err1 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err1)
 		c.Data["json"] = helper.Response(500, err1.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err2)
 		c.Data["json"] = helper.Response(500, err2.Error(), nil)
 		c.ServeJSON()
 		return
@@ -88,6 +94,7 @@ func (c *QueueDlqController) Requeue() {
 
 	count, err := c.QueueDlqService.Requeue(baseParamDto, reqDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
