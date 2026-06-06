@@ -2,6 +2,7 @@ package helper
 
 import (
 	dto "WenBeego/apps/common/dto_vo"
+	"WenBeego/apps/common/global/app_error"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -52,7 +53,7 @@ func GetReqBody[T any](ctx *beecontext.Context) (T, error) {
 	if len(reqBody) > 0 {
 		err := json.Unmarshal(reqBody, &data)
 		if err != nil {
-			return data, err
+			return data, app_error.NewHelperError(err)
 		}
 	}
 	return data, nil
@@ -72,13 +73,13 @@ func GetBaseParamDto(ctx *beecontext.Context, moduleName string) (dto.BaseParamD
 
 	data := dto.BaseParamDto{}
 	if moduleName == "" {
-		return data, errors.New("moduleName is empty")
+		return data, app_error.NewHelperError(errors.New("moduleName is empty"))
 	}
 	if unitId == "" {
-		return data, errors.New("unitId is empty")
+		return data, app_error.NewHelperError(errors.New("unitId is empty"))
 	}
 	if userId == "" {
-		return data, errors.New("userId is empty")
+		return data, app_error.NewHelperError(errors.New("userId is empty"))
 	}
 	data.Host = host
 	data.ModuleName = moduleName

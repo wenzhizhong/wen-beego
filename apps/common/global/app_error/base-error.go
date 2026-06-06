@@ -1,6 +1,6 @@
 package app_error
 
-import "WenBeego/apps/common/helper"
+import "WenBeego/apps/common/helper/base_helper"
 
 type BaseError struct {
 	Err   error
@@ -24,6 +24,6 @@ func baseError(err error, code int) error {
 	return &BaseError{
 		Err:   err,
 		Code:  code,
-		Trace: helper.GetTraceStr(),
+		Trace: base_helper.GetTraceStr(),
 	}
 }

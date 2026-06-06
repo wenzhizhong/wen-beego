@@ -2,6 +2,7 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/app_error"
 	"errors"
 	"os"
 	"strconv"
@@ -19,7 +20,7 @@ func MkdirAll(path string) error {
 	} else {
 		fileInfo, _ := os.Stat(path)
 		if !fileInfo.IsDir() {
-			return errors.New(path + " 不是一个目录")
+			return app_error.NewHelperError(errors.New(path + " 不是一个目录"))
 		}
 	}
 	return nil
@@ -43,7 +44,7 @@ func LocalFileSign(host, filePath string) (string, error) {
 	aud, err2 := global.GetConfigDiy("branca.common.aud")
 	exp, err3 := global.GetConfigDiy("branca.common.exp")
 	if err0 != nil || err1 != nil || err2 != nil || err3 != nil || iss == nil || aud == nil || exp == nil {
-		return "", errors.New("获取配置异常")
+		return "", app_error.NewHelperError(errors.New("获取配置异常"))
 	}
 
 	time := GetTimestamp()

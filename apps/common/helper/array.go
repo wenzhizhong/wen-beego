@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"WenBeego/apps/common/global/app_error"
 	"errors"
 	"reflect"
 )
@@ -9,7 +10,8 @@ import (
 func InArray(val string, array interface{}) (bool, error) {
 	reflectType := reflect.TypeOf(array)
 	if !(reflectType.Kind() == reflect.Slice || reflectType.Kind() == reflect.Array) {
-		return false, errors.New("InArray(): array must be slice or array")
+		// return false, errors.New("InArray(): array must be slice or array")
+		return false, app_error.NewHelperError(errors.New("InArray(): array must be slice or array"))
 	}
 	newArray := reflect.ValueOf(array)
 	for i := 0; i < newArray.Len(); i++ {

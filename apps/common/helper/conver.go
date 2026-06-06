@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"WenBeego/apps/common/global/app_error"
 	"errors"
 	"fmt"
 	"strconv"
@@ -14,7 +15,7 @@ func Interface2MapInterface(i interface{}) (map[string]interface{}, error) {
 	tmpMapConfig, ok := i.(map[string]interface{})
 	if !ok {
 		fmt.Println("类型转换错误, \ninput=", i)
-		return nil, errors.New("类型转换错误")
+		return nil, app_error.NewHelperError(errors.New("类型转换错误"))
 	}
 	return tmpMapConfig, nil
 }
@@ -48,7 +49,7 @@ func Interface2Int64(value interface{}) (int64, error) {
 		return int64(v), nil
 	case uint64:
 		if v > 1<<63-1 {
-			return 0, fmt.Errorf("uint64值过大: %d", v)
+			return 0, app_error.NewHelperError(fmt.Errorf("uint64值过大: %d", v))
 		}
 		return int64(v), nil
 	case uint32:
@@ -59,27 +60,29 @@ func Interface2Int64(value interface{}) (int64, error) {
 		return int64(v), nil
 	case float64:
 		if v < -1<<63 || v >= 1<<63 {
-			return 0, fmt.Errorf("float64值超出范围: %f", v)
+			return 0, app_error.NewHelperError(fmt.Errorf("float64值超出范围: %f", v))
 		}
 		return int64(v), nil
 	case float32:
 		if v < -1<<63 || v >= 1<<63 {
-			return 0, fmt.Errorf("float32值超出范围: %f", v)
+			return 0, app_error.NewHelperError(fmt.Errorf("float32值超出范围: %f", v))
 		}
 		return int64(v), nil
 	case string:
 		return strconv.ParseInt(v, 10, 64)
 	default:
-		return 0, fmt.Errorf("不支持的类型: %T", value)
+		return 0, app_error.NewHelperError(fmt.Errorf("不支持的类型: %T", value))
 	}
 }
 
 func String2Int64(value string) (int64, error) {
-	return strconv.ParseInt(value, 10, 64)
+	val, err := strconv.ParseInt(value, 10, 64)
+	return val, app_error.NewHelperError(err)
 }
 
 func String2Int(value string) (int, error) {
-	return strconv.Atoi(value)
+	val, err := strconv.Atoi(value)
+	return val, app_error.NewHelperError(err)
 }
 
 func Int2String(value int) string {

@@ -2,6 +2,7 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/app_error"
 	"context"
 	"encoding/json"
 	"time"
@@ -34,7 +35,7 @@ func RedisPut(key string, value interface{}, timeoutAfter int) error {
 	default:
 		valueStr, err := json.Marshal(value)
 		if err != nil {
-			return err
+			return app_error.NewHelperError(err)
 		}
 		value = string(valueStr)
 	}
@@ -64,7 +65,7 @@ func RedisGet(key string) (string, error) {
 	data, err = global.RedisCache.Get(ctx, key).Result()
 	err = Ternary(err == nil || err == redis.Nil, nil, err)
 	if err != nil && err != redis.Nil {
-		return "", err
+		return "", app_error.NewHelperError(err)
 	}
 	return data, err
 }
@@ -80,7 +81,7 @@ func RedisDel(key string) error {
 	err = global.RedisCache.Del(ctx, key).Err()
 	err = Ternary(err == nil || err == redis.Nil, nil, err)
 	if err != nil {
-		return err
+		return app_error.NewHelperError(err)
 	}
 	return nil
 }

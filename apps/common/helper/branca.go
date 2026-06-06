@@ -2,6 +2,7 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/app_error"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -30,7 +31,7 @@ func BrancaEncode(data BrancaData, moduleName string) (string, error) {
 
 	needEncodeString, err := json.Marshal(data)
 	if err != nil {
-		return "", err
+		return "", app_error.NewHelperError(err)
 	}
 
 	brancaObj := branca.NewBranca(key)
@@ -48,13 +49,13 @@ func BrancaDecode(needDecodeString string, moduleName string) (BrancaData, error
 	brancaObj := branca.NewBranca(key)
 	dataStr, err := brancaObj.DecodeToString(needDecodeString)
 	if err != nil {
-		return BrancaData{}, err
+		return BrancaData{}, app_error.NewHelperError(err)
 	}
 
 	data := BrancaData{}
 	err = json.Unmarshal([]byte(dataStr), &data)
 	if err != nil {
-		return BrancaData{}, err
+		return BrancaData{}, app_error.NewHelperError(err)
 	}
 	return data, nil
 }

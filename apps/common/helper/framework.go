@@ -2,6 +2,7 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/app_error"
 	"WenBeego/apps/common/global/constant"
 	"errors"
 	"fmt"
@@ -38,7 +39,7 @@ func Output_ASCII_ArtisticCharacters() {
 func AppName() (string, error) {
 	tmpAppName, err := global.GetConfigDiy("appname")
 	if err != nil {
-		return "", errors.New("获取系统应用名称错误")
+		return "", app_error.NewHelperError(errors.New("获取系统应用名称错误"))
 	}
 	appName := tmpAppName.(string)
 	return appName, nil
@@ -48,7 +49,7 @@ func AppName() (string, error) {
 func AppVersion() (string, error) {
 	tmpVersion, err := global.GetConfigDiy("version")
 	if err != nil {
-		return "", errors.New("获取版本号错误")
+		return "", app_error.NewHelperError(errors.New("获取版本号错误"))
 	}
 	version := tmpVersion.(string)
 	return version, nil
@@ -58,7 +59,7 @@ func AppVersion() (string, error) {
 func AppRunmode() (string, error) {
 	tmp, err := global.GetConfigDiy("runmode")
 	if err != nil {
-		return "", errors.New("获取runmode错误")
+		return "", app_error.NewHelperError(errors.New("获取runmode错误"))
 	}
 	data := tmp.(string)
 	return data, nil
