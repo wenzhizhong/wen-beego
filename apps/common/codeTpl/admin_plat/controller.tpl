@@ -20,6 +20,7 @@ func (c *{{.ModelName}}Controller) Get() {
 	reqDataListDto, err1 := helper.GetReqDataListDto(&c.Controller)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
@@ -37,6 +38,7 @@ func (c *{{.ModelName}}Controller) Get() {
 
 	data, err := c.Service.GetList(baseParamDto, reqDataListDto.PageSize, reqDataListDto.Offset, searchDto)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
@@ -49,12 +51,14 @@ func (c *{{.ModelName}}Controller) Add() {
 	dtoData, err1 := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.Service.Add(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", nil)
@@ -67,12 +71,14 @@ func (c *{{.ModelName}}Controller) Edit() {
 	dtoData, err1 := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.Service.Edit(baseParamDto, dtoData)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", nil)
@@ -85,12 +91,14 @@ func (c *{{.ModelName}}Controller) Del() {
 	dtoData, err1 := helper.GetReqBody[{{.MenuModule}}_dto.{{.ModelName}}Dto](c.Ctx)
 	if err != nil || err1 != nil {
 		err = helper.Ternary(err != nil, err, err1)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	err = c.Service.Del(baseParamDto, dtoData.Id)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", nil)
@@ -105,12 +113,14 @@ func (c *{{.ModelName}}Controller) Detail() {
 	dtoData := {{.MenuModule}}_dto.{{.ModelName}}Dto{}
 	dtoData.Id = id
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 		c.ServeJSON()
 		return
 	}
 	data, err := c.Service.GetDetail(baseParamDto, dtoData.Id)
 	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
 	} else {
 		c.Data["json"] = helper.Response(200, "success", data)
