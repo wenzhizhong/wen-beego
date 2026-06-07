@@ -251,12 +251,14 @@ func GetUserPermissions[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf, Role
 }
 
 // 获取单位权限列表
-func GetUnitPermissions[MenuModel itf.MenuItf](unitId string, menuModel MenuModel) (menuList []base_model.UnitMenu, err error) {
+func GetUnitPermissions[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf](unitId string, menuModel MenuModel, menuMapModel MenuMapModel) (menuList []base_model.UnitMenu, err error) {
 	tableMenuName := menuModel.TableName()
+	tableMenuMapName := menuMapModel.TableName()
 	err = global.GetReadDb().
 		Model(menuModel).
 		Select(tableMenuName+".*").
-		Where(tableMenuName+".unit_id = ?", unitId).
+		Joins("inner join "+tableMenuMapName+" on "+tableMenuMapName+".menu_id = "+tableMenuName+".id").
+		Where(tableMenuMapName+".unit_id = ?", unitId).
 		Where(tableMenuName+".deleted = ?", 0).
 		Where(tableMenuName+".menu_type IN ?", OperateMenuTypeArr).
 		Find(&menuList).Error

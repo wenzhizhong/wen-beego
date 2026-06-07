@@ -11,5 +11,8 @@ type ApiLogDataUnitDto struct {
 }
 
 type ApiLogDataUriDto struct {
-	UriMap map[string][]mq_dto.ApiLogDto
+	UriMap map[string]*ApiLogDataUnitUserDto
+}
+type ApiLogDataUnitUserDto struct {
+	UnitUserMap map[string][]mq_dto.ApiLogDto
 }

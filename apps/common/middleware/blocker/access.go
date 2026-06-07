@@ -105,13 +105,14 @@ func statisticsApiLog(ctx *beecontext.Context, whiteApiList *[]string, authApiLi
 	if modules != nil && !isInArray {
 		if res, err := helper.InArray(moduleName, modules); err == nil && res {
 
-			userId, unitId := "", ""
+			userId, unitId, unitUserId := "", "", ""
 			if headerBaseInfo.token != "" {
 				brancaData, _ := helper.BrancaDecode(headerBaseInfo.token, moduleName)
 				userId = brancaData.Sub
 				unitId = brancaData.SubUnit
+				unitUserId = brancaData.SubUnitUser
 			}
-			data := mq_dto.ApiLogDto{Uri: headerBaseInfo.url, Host: headerBaseInfo.host, Ip: headerBaseInfo.ip, Method: headerBaseInfo.method, UserId: userId, UnitId: unitId}
+			data := mq_dto.ApiLogDto{Uri: headerBaseInfo.url, Host: headerBaseInfo.host, Ip: headerBaseInfo.ip, Method: headerBaseInfo.method, UserId: userId, UnitId: unitId, UnitUserId: unitUserId}
 
 			// 加锁操作共享变量
 			cacheMutex.Lock()

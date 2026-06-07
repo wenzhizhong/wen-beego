@@ -9,6 +9,7 @@ import (
 	"WenBeego/apps/common/models/itf"
 	"WenBeego/apps/common/models_ar/base_ar"
 	mqTaskDto "WenBeego/apps/mq_task/dto_vo"
+	"fmt"
 )
 
 type ApiLog struct {
@@ -34,7 +35,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (result interface{}, err erro
 		}
 		switch moduleName {
 		case "admin_plat":
-			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.PlatMenu{})
+			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.PlatMenu{}, &models.PlatMenuMap{})
 			if err != nil {
 				return nil, err
 			}
@@ -43,7 +44,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (result interface{}, err erro
 				return nil, err
 			}
 		case "admin_mchnt":
-			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.MchntMenu{})
+			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.MchntMenu{}, &models.MchntMenuMap{})
 			if err != nil {
 				return nil, err
 			}
@@ -78,11 +79,20 @@ func (s *ApiLog) groupData(data []mq_dto.ApiLogDto) (groupData mqTaskDto.ApiLogD
 		uriMap, ok := unitMap.UnitMap[item.UnitId]
 		if !ok {
 			uriMap = &mqTaskDto.ApiLogDataUriDto{
-				UriMap: make(map[string][]mq_dto.ApiLogDto),
+				UriMap: make(map[string]*mqTaskDto.ApiLogDataUnitUserDto),
 			}
 		}
-
-		uriMap.UriMap[item.Uri] = append(uriMap.UriMap[item.Uri], item)
+		unitUserMap, ok := uriMap.UriMap[item.Uri]
+		if !ok {
+			unitUserMap = &mqTaskDto.ApiLogDataUnitUserDto{
+				UnitUserMap: make(map[string][]mq_dto.ApiLogDto, 0),
+			}
+		}
+		if _, ok := unitUserMap.UnitUserMap[item.UnitUserId]; !ok {
+			unitUserMap.UnitUserMap[item.UnitUserId] = []mq_dto.ApiLogDto{}
+		}
+		unitUserMap.UnitUserMap[item.UnitUserId] = append(unitUserMap.UnitUserMap[item.UnitUserId], item)
+		uriMap.UriMap[item.Uri] = unitUserMap
 		unitMap.UnitMap[item.UnitId] = uriMap
 		groupData.ModuleMap[moduleName] = unitMap
 	}
@@ -90,9 +100,9 @@ func (s *ApiLog) groupData(data []mq_dto.ApiLogDto) (groupData mqTaskDto.ApiLogD
 }
 
 // 获取报错api数据
-func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDto, menuModel itf.MenuItf) (apiLogData []*base_model.UnitApiStatistics, err error) {
+func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDto, menuModel itf.MenuItf, menuMapModel itf.MenuMapItf) (apiLogData []*base_model.UnitApiStatistics, err error) {
 	for unitId, itemUriMap := range unitMap {
-		dbPermsMap, err := s.getUnitPermissions(unitId, menuModel)
+		dbPermsMap, err := s.getUnitPermissions(unitId, menuModel, menuMapModel)
 		if err != nil {
 			return apiLogData, err
 		}
@@ -101,49 +111,56 @@ func (s *ApiLog) getApiLogSaveData(unitMap map[string]*mqTaskDto.ApiLogDataUriDt
 			return apiLogData, err
 		}
 
-		for uri, apiDtoArr := range itemUriMap.UriMap {
-			uuid, err := helper.GetUuid()
-			pv := 0
-			uv := 0
-			permId := ""
-			modulename := helper.ParseModuleFromRoute(uri)
-			if err != nil {
-				return apiLogData, err
-			}
-			if dbPermsMap[uri].Id != "" {
-				permId = dbPermsMap[uri].Id
-			}
-			if todayApiLogMap[uri] != (base_model.UnitApiStatistics{}) {
-				uuid = todayApiLogMap[uri].ID
-				pv = todayApiLogMap[uri].PV
-				uv = todayApiLogMap[uri].UV
-			}
-			for _, apiDto := range apiDtoArr {
-				pv++
-				if apiDto.UserId != "" {
-					uv++
+		for uri, apiDtoMap := range itemUriMap.UriMap {
+			for unitUserId, apiDtoArr := range apiDtoMap.UnitUserMap {
+				uuid, err := helper.GetUuid()
+				pv := 0
+				uv := 0
+				userId := ""
+				permId := ""
+				modulename := helper.ParseModuleFromRoute(uri)
+				if err != nil {
+					return apiLogData, err
 				}
-			}
+				if dbPermsMap[uri].Id != "" {
+					permId = dbPermsMap[uri].Id
+				}
+				tmpKey := s.getTodayStatisticsKey(modulename, uri, unitId, unitUserId)
+				if todayApiLogMap[tmpKey] != (base_model.UnitApiStatistics{}) {
+					uuid = todayApiLogMap[tmpKey].ID
+					pv = todayApiLogMap[tmpKey].PV
+					uv = todayApiLogMap[tmpKey].UV
+				}
+				for _, apiDto := range apiDtoArr {
+					pv++
+					userId = apiDto.UserId
+					if apiDto.UserId != "" {
+						uv++
+					}
+				}
 
-			item := &base_model.UnitApiStatistics{
-				ID:         uuid,
-				UnitId:     unitId,
-				PermsID:    permId,
-				URI:        uri,
-				PV:         pv,
-				UV:         uv,
-				Date:       helper.GetDateStamp(),
-				ModuleName: modulename,
+				item := &base_model.UnitApiStatistics{
+					ID:         uuid,
+					UnitId:     unitId,
+					UserId:     userId,
+					UnitUserId: unitUserId,
+					PermsID:    permId,
+					URI:        uri,
+					PV:         pv,
+					UV:         uv,
+					Date:       helper.GetDateStamp(),
+					ModuleName: modulename,
+				}
+				apiLogData = append(apiLogData, item)
 			}
-			apiLogData = append(apiLogData, item)
 		}
 	}
 	return apiLogData, nil
 }
 
 // 获取组织单位权限列表
-func (s *ApiLog) getUnitPermissions(unitId string, menuModel itf.MenuItf) (dbPermsMap map[string]base_model.UnitMenu, err error) {
-	dbPermsList, err := base_ar.GetUnitPermissions(unitId, menuModel)
+func (s *ApiLog) getUnitPermissions(unitId string, menuModel itf.MenuItf, menuMapModel itf.MenuMapItf) (dbPermsMap map[string]base_model.UnitMenu, err error) {
+	dbPermsList, err := base_ar.GetUnitPermissions(unitId, menuModel, menuMapModel)
 	if err != nil {
 		return dbPermsMap, err
 	}
@@ -164,7 +181,13 @@ func (s *ApiLog) getTodayStatistics(unitId string, ApiStatisticsModel itf.ApiSta
 
 	dataMap = make(map[string]base_model.UnitApiStatistics)
 	for _, item := range dataList {
-		dataMap[item.URI] = *item
+		key := s.getTodayStatisticsKey(item.ModuleName, item.URI, item.UnitId, item.UnitUserId)
+		dataMap[key] = *item
 	}
 	return dataMap, nil
+}
+
+func (s *ApiLog) getTodayStatisticsKey(moduleName, uri, unitId, unitUserId string) string {
+	key := fmt.Sprintf("%s_%s_%s_%s", moduleName, uri, unitId, unitUserId)
+	return helper.Md5(key)
 }

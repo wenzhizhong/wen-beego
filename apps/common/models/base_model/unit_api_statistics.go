@@ -8,5 +8,7 @@ type UnitApiStatistics struct {
 	UV         int    `gorm:"column:uv;type:int8;not null;default:0" json:"uv"`                          // 单日UV
 	Date       int64  `gorm:"column:date;type:int8;not null" json:"date"`                                // 日期
 	UnitId     string `gorm:"column:unit_id;type:bpchar(36);not null" json:"unit_id"`                    // 组织单位id
+	UserId     string `gorm:"column:user_id;type:bpchar(36);not null" json:"user_id"`                    // 组织单位id
+	UnitUserId string `gorm:"column:unit_user_id;type:bpchar(36);not null" json:"unit_user_id"`          // 组织单位内部用户id
 	ModuleName string `gorm:"column:modulename;type:varchar(100);not null;default:''" json:"modulename"` // 模块名称
 }
