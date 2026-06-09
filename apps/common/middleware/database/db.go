@@ -172,9 +172,24 @@ func getReadDdKeys(firstLevelKey string) ([]string, error) {
 	return keys, nil
 }
 func registerErrorCallback(db *gorm.DB) {
-	_ = db.Callback().Query().After("*").Register("custom:error_handler", func(db *gorm.DB) {
-		if db.Error != nil && !helper.DbNotFound(db.Error) {
-			db.Error = app_error.NewDbError(db.Error)
+
+	errorHandler := func(operation string) func(db *gorm.DB) {
+		return func(db *gorm.DB) {
+			if db.Error != nil && !helper.DbNotFound(db.Error) {
+				// global.Log.Errorf("[%s] Database error: %v | SQL: %s",
+				//     operation,
+				//     db.Error,
+				//     db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...))
+				db.Error = app_error.NewDbError(db.Error)
+			}
 		}
-	})
+	}
+
+	// CRUD 操作
+	db.Callback().Query().After("gorm:query").Register("myapp:query_error", errorHandler("QUERY"))
+	db.Callback().Create().After("gorm:create").Register("myapp:create_error", errorHandler("CREATE"))
+	db.Callback().Update().After("gorm:update").Register("myapp:update_error", errorHandler("UPDATE"))
+	db.Callback().Delete().After("gorm:delete").Register("myapp:delete_error", errorHandler("DELETE"))
+	db.Callback().Raw().After("gorm:raw").Register("myapp:raw_error", errorHandler("RAW"))
+	db.Callback().Row().After("gorm:row").Register("myapp:row_error", errorHandler("ROW"))
 }
