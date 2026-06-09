@@ -11,7 +11,13 @@ metadata:
 # wen-beego 二次开发指南
 
 ## 项目简介
-wen-beego 框架是基于 beego 的 web 开发框架，包含平台端（`apps/admin_plat`）、商户端（`apps/admin_mchnt`）、对外端（`apps/api`）的多用户体系管理系统，适用于二次开发。
+- wen-beego 框架是基于 beego 的 web 开发框架，包含平台端（`apps/admin_plat`）、商户端（`apps/admin_mchnt`）、对外端（`apps/api`）的多用户体系管理系统，适用于二次开发。
+- 用户体系，
+1.用户都来源于`user`； 
+2.基于`user`，新建数据表在区分出：
+平台用户（`plat_user`）、
+商户用户（`mchnt_user`）、
+商户会员用户（`mchnt_customer`）。
 
 ## 快速开始
 ### 运行服务

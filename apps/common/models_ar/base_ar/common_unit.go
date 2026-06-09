@@ -213,7 +213,7 @@ func GetUnitListForAdminPlat[UnitModel itf.UnitItf, UnitUserModel itf.UnitUserIt
 	return
 }
 
-func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel) (id string, err error) {
+func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unitModel UnitModel, currentUnitId string) (id string, err error) {
 	if unitDto.Id == "" {
 		unitDto.IsOfficial = false
 		unitDto.Id, err = helper.GetUuid()
@@ -227,10 +227,14 @@ func SaveUnit[UnitModel itf.UnitItf](tx *gorm.DB, unitDto unit_dto.UnitDto, unit
 			return
 		}
 	} else {
+		omits := []string{"is_official", "deleted", "created_at", "deleted_at", "plat_status"}
+		if currentUnitId != "" && currentUnitId == unitDto.Id {
+			omits = append(omits, "status")
+		}
 		err = tx.Model(unitModel).
 			Where("id = ?", unitDto.Id).
 			Select("*").
-			Omit("is_official", "deleted", "created_at", "deleted_at").
+			Omit(omits...).
 			Updates(&unitDto).Error
 	}
 	if err != nil {

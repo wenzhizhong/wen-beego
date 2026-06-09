@@ -28,3 +28,8 @@ func (s *UnitService) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDt
 	// 删除组织单位
 	return s.commonSystemUnit.Del(baseParamDto, unitDto)
 }
+
+// 系统管理- 变更组织状态
+func (s *UnitService) ChangeStatus(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) error {
+	return s.commonSystemUnit.ChangeStatus(baseParamDto, unitDto)
+}

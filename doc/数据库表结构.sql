@@ -141,6 +141,7 @@ CREATE TABLE public.mchnt (
 	license varchar(512) NOT NULL DEFAULT ''::character varying, -- 营业执照
 	address varchar(255) NULL DEFAULT ''::character varying, -- 地址
 	status int4 NOT NULL DEFAULT 0, -- 0未审核，1审核通过，2审核不通过，3禁用
+	plat_status int4 NOT NULL DEFAULT 0, -- 平台审核状态(同上)
 	deleted int4 NULL DEFAULT 0, -- 是否删除：0否1是
 	created_at int8 NULL, -- 创建时间
 	updated_at int8 NULL, -- 更新时间
@@ -164,6 +165,7 @@ COMMENT ON COLUMN public.mchnt.corporation IS '法人';
 COMMENT ON COLUMN public.mchnt.license IS '营业执照';
 COMMENT ON COLUMN public.mchnt.address IS '地址';
 COMMENT ON COLUMN public.mchnt.status IS '0未审核，1审核通过，2审核不通过，3禁用';
+COMMENT ON COLUMN public.mchnt.plat_status IS '平台审核状态(同上)';
 COMMENT ON COLUMN public.mchnt.deleted IS '是否删除：0否1是';
 COMMENT ON COLUMN public.mchnt.created_at IS '创建时间';
 COMMENT ON COLUMN public.mchnt.updated_at IS '更新时间';
@@ -602,6 +604,7 @@ CREATE TABLE public.plat (
 	license varchar(512) NOT NULL DEFAULT ''::character varying, -- 营业执照
 	address varchar(255) NULL DEFAULT ''::character varying, -- 地址
 	status int4 NOT NULL DEFAULT 0, -- 0未审核，1审核通过，2审核不通过，3禁用
+	plat_status int4 NOT NULL DEFAULT 0, -- 平台审核状态(同上)
 	deleted int4 NULL DEFAULT 0, -- 是否删除：0否1是
 	created_at int8 NULL, -- 创建时间
 	updated_at int8 NULL, -- 更新时间
@@ -626,6 +629,7 @@ COMMENT ON COLUMN public.plat.corporation IS '法人';
 COMMENT ON COLUMN public.plat.license IS '营业执照';
 COMMENT ON COLUMN public.plat.address IS '地址';
 COMMENT ON COLUMN public.plat.status IS '0未审核，1审核通过，2审核不通过，3禁用';
+COMMENT ON COLUMN public.plat.plat_status IS '平台审核状态(同上)';
 COMMENT ON COLUMN public.plat.deleted IS '是否删除：0否1是';
 COMMENT ON COLUMN public.plat.created_at IS '创建时间';
 COMMENT ON COLUMN public.plat.updated_at IS '更新时间';

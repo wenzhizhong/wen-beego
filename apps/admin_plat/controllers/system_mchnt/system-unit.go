@@ -158,3 +158,37 @@ func (c *UnitController) Del() {
 	c.Data["json"] = helper.Response(200, "success", nil)
 	c.ServeJSON()
 }
+
+// @Summary 变更内部组织状态
+// @Description 变更内部组织状态
+// @Tags 系统管理-内部组织管理
+// @Accept application/json
+// @Produce application/json
+// @Param unitDto body unit_dto.UnitDto true "内部组织管理"
+// @Success 200 {object} dto.Response "返回结果"
+// @Router /admin_plat/admin_mchnt/system-unit/change-status [post]
+func (c *UnitController) ChangeStatus() {
+	unitDto, err1 := helper.GetReqBody[unit_dto.UnitDto](c.Ctx)
+	baseParamDto, err2 := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	if err1 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err1)
+		c.Data["json"] = helper.Response(500, err1.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	if err2 != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err2)
+		c.Data["json"] = helper.Response(500, err2.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	err := c.UnitService.ChangeStatus(baseParamDto, unitDto)
+	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", nil)
+	c.ServeJSON()
+}

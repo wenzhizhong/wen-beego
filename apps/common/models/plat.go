@@ -9,6 +9,7 @@ var _ itf.UnitItf = (*Plat)(nil)
 
 type Plat struct {
 	base_model.Unit
+	IsOfficial bool `json:"isOfficial" gorm:"type:bool;default:false;comment:是否官方平台"`
 }
 
 func (m *Plat) TableName() string {

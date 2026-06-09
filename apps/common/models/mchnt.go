@@ -9,6 +9,7 @@ var _ itf.UnitItf = (*Mchnt)(nil)
 
 type Mchnt struct {
 	base_model.Unit
+	PlatStatus int `json:"plat_status" gorm:"type:int4;not null;default:0;comment:平台审核状态（0未审核，1审核通过，2审核不通过，3禁用）"`
 }
 
 func (m *Mchnt) TableName() string {

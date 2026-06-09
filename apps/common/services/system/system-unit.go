@@ -127,6 +127,84 @@ func (s *Unit) DelForAdminPlat(baseParamDto dto.BaseParamDto, unitDto unit_dto.U
 	}
 	return
 }
+
+// ChangeMchntStatus 平台审核商户组织状态（同步 plat_status + status）
+func (s *Unit) ChangeMchntStatus(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err error) {
+	if unitDto.Id == "" {
+		return errors.New("ChangeMchntStatus：参数id不能为空")
+	}
+	if unitDto.Status < 0 || unitDto.Status > 3 {
+		return errors.New("ChangeMchntStatus：状态值不合法")
+	}
+	timeInt := helper.GetTimestamp()
+	return global.GetWriteDb().
+		Model(&models.Mchnt{}).
+		Where("id = ?", unitDto.Id).
+		Updates(map[string]interface{}{
+			"status":      unitDto.Status,
+			"plat_status": unitDto.Status,
+			"updated_by":  baseParamDto.UnitUserId,
+			"updated_at":  timeInt,
+		}).Error
+}
+
+func (s *Unit) ChangeStatus(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err error) {
+	if unitDto.Id == "" {
+		return errors.New("ChangeStatus：参数id不能为空")
+	}
+	if unitDto.Id == baseParamDto.UnitId {
+		return errors.New("不能修改自身状态")
+	}
+	if unitDto.Status < 0 || unitDto.Status > 3 {
+		return errors.New("ChangeStatus：状态值不合法")
+	}
+
+	switch baseParamDto.ModuleName {
+	case "admin_mchnt":
+		var curUnit models.Mchnt
+		if err = global.GetReadDb().Model(&models.Mchnt{}).Where("id = ?", unitDto.Id).Take(&curUnit).Error; err != nil {
+			return err
+		}
+		// plat_status determines platform's decision; priority over merchant
+		if curUnit.PlatStatus == base_model.UNIT_STATUS_DISABLED {
+			return errors.New("平台已禁用该组织，无法修改状态")
+		}
+		if curUnit.PlatStatus == base_model.UNIT_STATUS_UNPASSED && unitDto.Status == base_model.UNIT_STATUS_PASSED {
+			return errors.New("平台已审核不通过，无法改为审核通过")
+		}
+		return updateUnitStatus(&models.Mchnt{}, unitDto.Id, unitDto.Status, baseParamDto.UnitUserId)
+	case "admin_plat":
+		// platform org: sync both plat_status and status
+		return updateUnitPlatStatus(&models.Plat{}, unitDto.Id, unitDto.Status, baseParamDto.UnitUserId)
+	default:
+		return errors.New("ChangeStatus:模块名称错误")
+	}
+}
+
+func updateUnitStatus[M interface{ TableName() string }](model M, id string, status int, userId string) error {
+	timeInt := helper.GetTimestamp()
+	return global.GetWriteDb().
+		Model(model).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"status":     status,
+			"updated_by": userId,
+			"updated_at": timeInt,
+		}).Error
+}
+
+func updateUnitPlatStatus[M interface{ TableName() string }](model M, id string, status int, userId string) error {
+	timeInt := helper.GetTimestamp()
+	return global.GetWriteDb().
+		Model(model).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"status":      status,
+			"plat_status": status,
+			"updated_by":  userId,
+			"updated_at":  timeInt,
+		}).Error
+}
 func doSave[
 	UnitModel itf.UnitItf,
 	UnitUserModel itf.UnitUserItf,
@@ -151,7 +229,7 @@ func doSave[
 ) (newUnitId string, err error) {
 
 	err = global.GetWriteDb().Transaction(func(tx *gorm.DB) error {
-		newUnitId, err = base_ar.SaveUnit(tx, unitDto, unitModel)
+		newUnitId, err = base_ar.SaveUnit(tx, unitDto, unitModel, baseParamDto.UnitId)
 		if err != nil {
 			return err
 		}

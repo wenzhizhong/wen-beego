@@ -41,6 +41,7 @@ func commonSlices(gotoModuleName string) []beego.LinkNamespace {
 		beego.NSCtrlPost("/system-unit/add", (*adminSystem.UnitController).Add),
 		beego.NSCtrlPost("/system-unit/edit", (*adminSystem.UnitController).Edit),
 		beego.NSCtrlPost("/system-unit/del", (*adminSystem.UnitController).Del),
+		beego.NSCtrlPost("/system-unit/change-status", (*adminSystem.UnitController).ChangeStatus),
 	}
 	if gotoModuleName == constant.ADMIN_PLAT {
 		unit = []beego.LinkNamespace{
@@ -48,6 +49,7 @@ func commonSlices(gotoModuleName string) []beego.LinkNamespace {
 			beego.NSCtrlPost("/admin_mchnt/system-unit/add", (*adminSystemPlat.UnitController).Add),
 			beego.NSCtrlPost("/admin_mchnt/system-unit/edit", (*adminSystemPlat.UnitController).Edit),
 			beego.NSCtrlPost("/admin_mchnt/system-unit/del", (*adminSystemPlat.UnitController).Del),
+			beego.NSCtrlPost("/admin_mchnt/system-unit/change-status", (*adminSystemPlat.UnitController).ChangeStatus),
 		}
 	}
 

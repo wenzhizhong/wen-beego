@@ -61,6 +61,7 @@ func platSystemSlices() []beego.LinkNamespace {
 		beego.NSCtrlPost("/system-unit/add", (*adminSystem.UnitController).Add),
 		beego.NSCtrlPost("/system-unit/edit", (*adminSystem.UnitController).Edit),
 		beego.NSCtrlPost("/system-unit/del", (*adminSystem.UnitController).Del),
+		beego.NSCtrlPost("/system-unit/change-status", (*adminSystem.UnitController).ChangeStatus),
 
 		beego.NSCtrlGet("/system-dept/get", (*adminSystem.DeptController).Get),
 		beego.NSCtrlPost("/system-dept/add", (*adminSystem.DeptController).Add),

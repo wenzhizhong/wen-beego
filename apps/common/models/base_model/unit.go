@@ -20,7 +20,6 @@ type Unit struct {
 	UpdatedBy   string `json:"updated_by" gorm:"type:bpchar(36);default:'';comment:更新者"`
 	DeletedBy   string `json:"deleted_by" gorm:"type:bpchar(36);default:'';comment:删除者"`
 	Sort        int    `json:"sort" gorm:"type:int4;default:0;comment:排序"`
-	IsOfficial  bool   `json:"isOfficial" gorm:"type:bool;default:false;comment:是否官方平台"`
 }
 
 var UNIT_STATUS_UNREVIEWED = 0
