@@ -3,6 +3,7 @@ package base_ar
 import (
 	"WenBeego/apps/common/dto_vo/auth_vo"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
@@ -110,6 +111,12 @@ func GetRoleMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf](unitIds []s
 		return dataList, errors.New(str)
 	}
 
+	isOfficial, err1 := helper.IsOfficial(constant.ADMIN_PLAT, unitIds[0])
+	if err1 != nil {
+		err = err1
+		return
+	}
+
 	tableMenu := menuModel.TableName()
 	tableMenuMap := menuMapModel.TableName()
 	tableStruct := struct {
@@ -120,24 +127,36 @@ func GetRoleMenu[MenuModel itf.MenuItf, MenuMapModel itf.MenuMapItf](unitIds []s
 		TableMenuMap: tableMenuMap,
 	}
 
-	selectStr, err := helper.ParseStringTpl(`{{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title`, tableStruct)
-	joinStr, err2 := helper.ParseStringTpl(`INNER JOIN {{.TableMenuMap}} ON {{.TableMenuMap}}.menu_id={{.TableMenu}}.id`, tableStruct)
-	if err != nil || err2 != nil {
+	selectStr, err := helper.ParseStringTpl(`DISTINCT ON ({{.TableMenu}}.id) {{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title,{{.TableMenu}}.rank`, tableStruct)
+	selectStr2, err2 := helper.ParseStringTpl(`{{.TableMenu}}.id,{{.TableMenu}}.parent_id,{{.TableMenu}}.menu_type,{{.TableMenu}}.title,{{.TableMenu}}.rank`, tableStruct)
+	joinStr, err3 := helper.ParseStringTpl(`INNER JOIN {{.TableMenuMap}} ON {{.TableMenuMap}}.menu_id={{.TableMenu}}.id`, tableStruct)
+	if err != nil || err2 != nil || err3 != nil {
 		err = helper.Ternary(err2 != nil, err2, err)
+		err = helper.Ternary(err3 != nil, err3, err)
 		return dataList, err
 	}
 
-	err = global.GetReadDb().
-		Model(menuModel).
-		Select(selectStr).
-		Joins(joinStr).
-		Where(tableMenuMap+".unit_id in ?", unitIds).
-		Where(tableMenuMap+".deleted = 0").
-		Where(tableMenu+".deleted = ?", 0).
-		Group(tableMenu + ".id").
-		Order(tableMenu + ".rank asc").
-		Find(&dataList).
-		Error
+	if isOfficial {
+		err = global.GetReadDb().
+			Model(menuModel).
+			Select(selectStr2).
+			Where("deleted = 0").
+			Order("rank asc").
+			Scan(&dataList).
+			Error
+	} else {
+		err = global.GetReadDb().
+			Model(menuModel).
+			Select(selectStr).
+			Joins(joinStr).
+			Where(tableMenuMap+".unit_id in ?", unitIds).
+			Where(tableMenuMap+".deleted = 0").
+			Where(tableMenu+".deleted = ?", 0).
+			Group(tableMenu + ".id").
+			Order(tableMenu + ".rank asc").
+			Find(&dataList).
+			Error
+	}
 
 	if err != nil {
 		return dataList, err

@@ -5,7 +5,6 @@ import (
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
-	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 	"strconv"
@@ -14,7 +13,6 @@ import (
 
 // 认证中间件服务层
 type AuthMiddleware struct {
-	PlatMenuViewAr models_ar.PlatMenuViewAr
 }
 
 /**
@@ -305,8 +303,7 @@ func (s *AuthMiddleware) checkUserRolePermissions(moduleName string, unitUserId 
 		var permissions []base_model.UnitMenu
 		switch moduleName {
 		case "admin_plat":
-			// permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-			permissions, err = s.PlatMenuViewAr.GetUserPermissions(moduleName, unitId, unitUserId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{}, models.PlatUserRole{}, models.PlatRole{})
+			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		case "admin_mchnt":
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		default:

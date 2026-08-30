@@ -12,8 +12,7 @@ import (
 )
 
 type CommonMenu struct {
-	PlatMenuAr     models_ar.PlatMenuAr
-	PlatMenuViewAr models_ar.PlatMenuViewAr
+	PlatMenuAr models_ar.PlatMenuAr
 }
 
 /**
@@ -33,13 +32,11 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId
 	var roleClassifies []base_model.UnitRoleClassify
 	switch moduleName {
 	case "admin_plat":
-		// menuAuthList, err = models_ar.GetUserMenu(moduleName, unitId, unitUserId, &models.PlatMenuView{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-		menuAuthList, err = s.PlatMenuViewAr.GetUserMenu(moduleName, unitId, unitUserId, &models.PlatMenuView{}, &models.PlatMenuMapView{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
+		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}
-		// permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-		permissions, err = s.PlatMenuViewAr.GetUserPermissions(moduleName, unitId, unitUserId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{}, models.PlatUserRole{}, models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
 		}

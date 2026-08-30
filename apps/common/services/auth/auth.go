@@ -18,9 +18,8 @@ import (
 )
 
 type CommonAuth struct {
-	userAr         models_ar.UserAr
-	userProfileAr  models_ar.UserProfileAr
-	PlatMenuViewAr models_ar.PlatMenuViewAr
+	userAr        models_ar.UserAr
+	userProfileAr models_ar.UserProfileAr
 }
 
 // 登录
@@ -401,8 +400,7 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, unitUs
 	var permissions []base_model.UnitMenu
 	switch moduleName {
 	case "admin_plat":
-		// permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-		permissions, err = s.PlatMenuViewAr.GetUserPermissions(moduleName, unitId, unitUserId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{}, models.PlatUserRole{}, models.PlatRole{})
+		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 	case "admin_mchnt":
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 	default:

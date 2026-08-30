@@ -11,7 +11,6 @@ import (
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
-	"WenBeego/apps/common/models_ar"
 	"WenBeego/apps/common/models_ar/base_ar"
 	"errors"
 
@@ -19,7 +18,6 @@ import (
 )
 
 type Role struct {
-	PlatMenuViewAr models_ar.PlatMenuViewAr
 }
 
 // 获取角色列表
@@ -180,8 +178,7 @@ func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string
 	var dataList interface{}
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		// dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
-		dataList, err = s.PlatMenuViewAr.GetRoleMenu(selectUnitIds, models.PlatMenuView{}, models.PlatMenuMap{})
+		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
 	case "admin_mchnt":
 		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntMenuMap{})
 	default:
@@ -219,8 +216,7 @@ func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dat
 
 	switch baseParamDto.ModuleName {
 	case "admin_plat":
-		// dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
-		dataList, err = s.PlatMenuViewAr.GetRoleMenuIds(baseParamDto, roleId, models.PlatMenuView{}, models.PlatMenuMapView{}, models.PlatRoleMenu{})
+		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
 	case "admin_mchnt":
 		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{})
 	default:

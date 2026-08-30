@@ -806,6 +806,7 @@ CREATE TABLE public.plat_menu (
 	deleted int4 NULL DEFAULT 0, -- 是否删除：0否1是
 	clone int4 NULL DEFAULT 0, -- 是否允许克隆：0否1是
 	remark varchar NULL DEFAULT ''::character varying, -- 备注
+	menu_from varchar(20) DEFAULT 'admin_plat' NOT NULL,
 	CONSTRAINT plat_menu_pkey PRIMARY KEY (id)
 );
 CREATE INDEX plat_idx_menu_parent_id ON public.plat_menu USING btree (parent_id);
@@ -838,6 +839,7 @@ COMMENT ON COLUMN public.plat_menu.show_parent IS '显示父级菜单';
 COMMENT ON COLUMN public.plat_menu.deleted IS '是否删除：0否1是';
 COMMENT ON COLUMN public.plat_menu.clone IS '是否允许克隆：0否1是';
 COMMENT ON COLUMN public.plat_menu.remark IS '备注';
+COMMENT ON COLUMN public.plat_menu.menu_from IS '系统菜单分类：admin_plat、admin_mchnt；admin_mchnt表示作为商户系统数据管理';
 
 
 -- public.plat_menu_map definition
@@ -1244,104 +1246,6 @@ COMMENT ON COLUMN public.user_profile.deleted_at IS '删除时间';
 COMMENT ON COLUMN public.user_profile.deleted IS '是否删除：0否1是';
 COMMENT ON COLUMN public.user_profile.graduated_from IS '毕业院校';
 COMMENT ON COLUMN public.user_profile."source" IS '注册来源：1系统录入2微信3web端4app5其它';
-
--- public.plat_menu_map_view source
-
-CREATE OR REPLACE VIEW public.plat_menu_map_view
-AS SELECT plat_menu_map.id,
-    plat_menu_map.unit_id,
-    plat_menu_map.menu_id,
-    plat_menu_map.updated_at,
-    plat_menu_map.deleted,
-    'admin_plat'::text AS menu_from
-   FROM plat_menu_map
-  WHERE plat_menu_map.deleted = 0
-UNION ALL
- SELECT row_number() OVER ()::text AS id,
-    p.id AS unit_id,
-    mm.id AS menu_id,
-    0 AS updated_at,
-    0 AS deleted,
-    'admin_mchnt'::text AS menu_from
-   FROM mchnt_menu mm
-     FULL JOIN plat p ON 1 = 1
-  WHERE mm.deleted = 0 AND p.deleted = 0;
-
-
--- public.plat_menu_view source
-
-CREATE OR REPLACE VIEW public.plat_menu_view
-AS SELECT x.id,
-    x.parent_id,
-    x.menu_type,
-    x.title,
-    x.name,
-    x.path,
-    x.component,
-    x.rank,
-    x.redirect,
-    x.icon,
-    x.extra_icon,
-    x.enter_transition,
-    x.leave_transition,
-    x.active_path,
-    x.auths,
-    x.frame_src,
-    x.frame_loading,
-    x.keep_alive,
-    x.hidden_tag,
-    x.fixed_tag,
-    x.show_link,
-    x.show_parent,
-    x.created_at,
-    x.updated_at,
-    x.deleted,
-    x.clone,
-    x.remark,
-    'admin_plat'::text AS menu_from
-   FROM plat_menu x
-UNION ALL
- SELECT y.id,
-    y.parent_id,
-    y.menu_type,
-    y.title,
-        CASE
-            WHEN TRIM(BOTH FROM y.name) <> ''::text AND y.name IS NOT NULL THEN concat('AdminMenu', y.name)
-            ELSE ''::text
-        END AS name,
-        CASE
-            WHEN TRIM(BOTH FROM y.path) <> ''::text AND y.path IS NOT NULL THEN concat('/admin_plat', y.path)
-            ELSE ''::text
-        END AS path,
-        CASE
-            WHEN TRIM(BOTH FROM y.component) <> ''::text AND y.component IS NOT NULL THEN replace(y.component::text, '/system/'::text, '/system-mchnt/'::text)
-            ELSE ''::text
-        END AS component,
-    y.rank,
-    y.redirect,
-    y.icon,
-    y.extra_icon,
-    y.enter_transition,
-    y.leave_transition,
-    y.active_path,
-    y.auths,
-    y.frame_src,
-    y.frame_loading,
-    y.keep_alive,
-    y.hidden_tag,
-    y.fixed_tag,
-    y.show_link,
-    y.show_parent,
-    y.created_at,
-    y.updated_at,
-    y.deleted,
-    y.clone,
-    y.remark,
-    'admin_mchnt'::text AS menu_from
-   FROM mchnt_menu y
-  GROUP BY y.id;
-
-COMMENT ON VIEW public.plat_menu_view IS '平台端菜单视图：合并平台端、商户端菜单';
 
 -- ----------------------------
 -- 代码生成配置表
