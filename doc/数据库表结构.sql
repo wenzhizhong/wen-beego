@@ -215,19 +215,19 @@ COMMENT ON COLUMN public.mchnt_api_statistics.modulename IS '模块';
 
 CREATE TABLE public.mchnt_customer (
 	id bpchar(36) NOT NULL, -- ID
-	mchnt_id bpchar(36) NOT NULL, -- 组织id
+	unit_id bpchar(36) NOT NULL, -- 组织id
 	customer_id bpchar(36) NOT NULL, -- 用户id
 	status int4 NOT NULL DEFAULT 1, -- 当前组织内状态：0禁用,1正常
 	deleted int2 NOT NULL DEFAULT 0, -- 是否已删除
-	CONSTRAINT org_customer_pkey PRIMARY KEY (id)
+	CONSTRAINT mchnt_customer_pkey PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX org_customer_org_id_customer_id_idx ON public.mchnt_customer USING btree (mchnt_id, customer_id);
+CREATE UNIQUE INDEX mchnt_customer_org_id_customer_id_idx ON public.mchnt_customer USING btree (unit_id, customer_id);
 COMMENT ON TABLE public.mchnt_customer IS '组织用户关系表-Merchant';
 
 -- Column comments
 
 COMMENT ON COLUMN public.mchnt_customer.id IS 'ID';
-COMMENT ON COLUMN public.mchnt_customer.mchnt_id IS '组织id';
+COMMENT ON COLUMN public.mchnt_customer.unit_id IS '组织id';
 COMMENT ON COLUMN public.mchnt_customer.customer_id IS '用户id';
 COMMENT ON COLUMN public.mchnt_customer.status IS '当前组织内状态：0禁用,1正常';
 COMMENT ON COLUMN public.mchnt_customer.deleted IS '是否已删除';
@@ -734,6 +734,27 @@ COMMENT ON COLUMN public.plat_crontab_log.name_en IS 'crontab表id';
 COMMENT ON COLUMN public.plat_crontab_log.created_at IS '创建时间';
 COMMENT ON COLUMN public.plat_crontab_log."result" IS '执行结果';
 COMMENT ON COLUMN public.plat_crontab_log.remark IS '备注';
+
+
+
+CREATE TABLE public.plat_customer (
+	id bpchar(36) NOT NULL, -- ID
+	unit_id bpchar(36) NOT NULL, -- 组织id
+	customer_id bpchar(36) NOT NULL, -- 用户id
+	status int4 NOT NULL DEFAULT 1, -- 当前组织内状态：0禁用,1正常
+	deleted int2 NOT NULL DEFAULT 0, -- 是否已删除
+	CONSTRAINT plat_customer_pkey PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX plat_customer_org_id_customer_id_idx ON public.plat_customer USING btree (unit_id, customer_id);
+COMMENT ON TABLE public.plat_customer IS '组织用户关系表-Platform';
+
+-- Column comments
+
+COMMENT ON COLUMN public.plat_customer.id IS 'ID';
+COMMENT ON COLUMN public.plat_customer.unit_id IS '组织id';
+COMMENT ON COLUMN public.plat_customer.customer_id IS '用户id';
+COMMENT ON COLUMN public.plat_customer.status IS '当前组织内状态：0禁用,1正常';
+COMMENT ON COLUMN public.plat_customer.deleted IS '是否已删除';
 
 
 -- public.plat_dept definition
