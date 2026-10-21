@@ -9,6 +9,8 @@ import (
 	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
+	"WenBeego/apps/common/models/base_model"
+	"WenBeego/apps/common/models_ar/base_ar"
 	"archive/zip"
 	"encoding/json"
 	"fmt"
@@ -211,6 +213,7 @@ type TemplateData struct {
 	HasUpdateTime          bool
 	HasCreateTime          bool
 	HasDeleteTime          bool
+	HasTimeType            bool
 	HasUnitId              bool
 	HasCreateUserId        bool
 	HasUpdateUserId        bool
@@ -261,6 +264,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 			return nil, fmt.Errorf("解析字段配置失败: %v", err)
 		}
 	}
+	hasTimeType := false
 	hasDeleted := false
 	deletedField := ""
 	hasCreateTime := false
@@ -283,12 +287,15 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 		if goType == "time.Time" && contains(updateTimeFields, columnConfigs[i].Name) {
 			goType = "*time.Time"
+		} else if goType == "int" || (contains(createTimeFields, columnConfigs[i].Name) || contains(updateTimeFields, columnConfigs[i].Name) || contains(deletedTimeFields, columnConfigs[i].Name)) {
+			goType = "int64"
 		}
 		columnConfigs[i].GoType = goType
 		columnConfigs[i].PgType = pgType
 		columnConfigs[i].TsType = getTsType(columnConfigs[i].Type)
 		columnConfigs[i].SkipForm = isSkipFormField(columnConfigs[i].Name)
 
+		tmpHasTime := strings.Contains(goType, "time.Time")
 		tmpHasDeleted, tmpDeletedField := hasColumn(hasDeletedFields, columnConfigs[i].Name)
 		tmpHasCreateTime, tmpCreateTimeField := hasColumn(createTimeFields, columnConfigs[i].Name)
 		tmpHasUpdateTime, tmpUpdateTimeField := hasColumn(updateTimeFields, columnConfigs[i].Name)
@@ -297,6 +304,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		tmpHasCreateUserId, tmpCreateUserIdField := hasColumn(createUserIdFields, columnConfigs[i].Name)
 		tmpHasUpdateUserId, tmpUpdateUserIdField := hasColumn(updateUserIdFields, columnConfigs[i].Name)
 
+		hasTimeType = helper.Ternary(tmpHasTime, true, hasTimeType)
 		hasDeleted = helper.Ternary(hasDeleted, hasDeleted, tmpHasDeleted)
 		hasCreateTime = helper.Ternary(hasCreateTime, hasCreateTime, tmpHasCreateTime)
 		hasUpdateTime = helper.Ternary(hasUpdateTime, hasUpdateTime, tmpHasUpdateTime)
@@ -402,6 +410,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		HasUpdateTime:     hasUpdateTime,
 		HasCreateTime:     hasCreateTime,
 		HasDeleteTime:     hasDeleteTime,
+		HasTimeType:       hasTimeType,
 		HasUnitId:         hasUnitId,
 		HasCreateUserId:   hasCreateUserId,
 		HasUpdateUserId:   hasUpdateUserId,
@@ -665,8 +674,15 @@ func (s *GenerateCodeService) generateDDL(tableName string, columns []ColumnConf
 // func (s *GenerateCodeService) generateMenuDML(tableName, menuName, apiUrlPrefix, menuModule, bizModuleLower, appModule string) string {
 func (s *GenerateCodeService) generateMenuDML(tableName, menuName, bizModuleLower string, td *TemplateData) string {
 	menuTable := "plat_menu"
+	moduleName := constant.ADMIN_PLAT
 	if strings.HasPrefix(tableName, "mchnt_") {
 		menuTable = "mchnt_menu"
+		moduleName = constant.ADMIN_MCHNT
+	}
+	menuMapTable := menuTable + "_map"
+	getUnitAllIds, err := getUnitAllIds(moduleName)
+	if err != nil {
+		return ""
 	}
 
 	menuId, _ := helper.GetUuid()
@@ -675,6 +691,7 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, bizModuleLowe
 	editId, _ := helper.GetUuid()
 	delId, _ := helper.GetUuid()
 	detailId, _ := helper.GetUuid()
+	menuIds := []string{menuId, listId, addId, editId, delId, detailId}
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("-- Menu DML for: %s (%s)\n", tableName, menuName))
@@ -701,6 +718,22 @@ func (s *GenerateCodeService) generateMenuDML(tableName, menuName, bizModuleLowe
 	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id, parent_id, menu_type, title, name, path, component, rank, auths, show_link, keep_alive, show_parent) VALUES (\n", menuTable))
 	sb.WriteString(fmt.Sprintf("  '%s', '%s', 3, '详情', '%sDetail', '%s', '', 5, '%s', false, false, false\n", detailId, menuId, bizModuleLower, td.ApiUrlPrefix+"/detail", td.AuthDetail))
 	sb.WriteString(");\n")
+
+	menuIdsLen := len(menuIds)
+	unitAllIdsLen := len(getUnitAllIds)
+	sb.WriteString(fmt.Sprintf("INSERT INTO %s (id,unit_id,menu_id,updated_at,deleted) VALUES\n", menuMapTable))
+	for k, item := range getUnitAllIds {
+		tmpUnitId := item.Id
+		for k2, tmpMenuId := range menuIds {
+			tmpId, _ := helper.GetUuid()
+			mptUpdateAt := helper.GetTime().Unix()
+			tmpComma := helper.Ternary(unitAllIdsLen == k+1 && menuIdsLen == k2+1, "", ",")
+
+			sb.WriteString(fmt.Sprintf("( '%s','%s','%s', '%d', '%d')%s ", tmpId, tmpUnitId, tmpMenuId, mptUpdateAt, 0, tmpComma))
+		}
+		sb.WriteString("\n")
+	}
+	sb.WriteString(";\n")
 
 	return sb.String()
 }
@@ -791,6 +824,19 @@ func (s *GenerateCodeService) buildListSelectCols(tableName string, columns []Co
 		}
 	}
 	return strings.Join(cols, ", ")
+}
+
+func getUnitAllIds(moduleName string) ([]base_model.Unit, error) {
+	fields := "id"
+	var err error
+	unitDataList := make([]base_model.Unit, 0)
+	switch moduleName {
+	case constant.ADMIN_PLAT:
+		unitDataList, err = base_ar.GetAllUnit(&models.Plat{}, fields)
+	case constant.ADMIN_MCHNT:
+		unitDataList, err = base_ar.GetAllUnit(&models.Mchnt{}, fields)
+	}
+	return unitDataList, err
 }
 
 func snakeToPascal(s string) string {

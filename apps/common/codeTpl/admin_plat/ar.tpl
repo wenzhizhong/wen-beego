@@ -3,8 +3,8 @@ package models_ar
 
 import (
 	"WenBeego/apps/common/models"
-	{{if .HasDeleted -}}
-	_ "context"
+	{{if not .HasDeleted -}}
+	"context"
 	{{- end}}
 )
 
@@ -28,11 +28,11 @@ import (
 	"WenBeego/apps/common/dto_vo/{{.MenuModule}}_vo"
 	{{if .HasUnitId}}"strings"{{end}}
 	"fmt"
-	"time"
+	{{if .HasTimeType}}"time"{{end}}
 
 	"gorm.io/gorm"
-	{{if .HasDeleted -}}
-	_ "context"
+	{{if not .HasDeleted -}}
+	"context"
 	{{- end}}
 )
 

@@ -35,7 +35,7 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
 				{{ else -}}
 		curTime := helper.GetTime()
-		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime{{- if eq .GoType "int64"}}.Unix(){{end}}
 				{{- end -}}
 			{{end -}}
 		{{end}}
@@ -59,7 +59,7 @@ func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.Menu
 		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
 				{{ else }}	
 		curTime := helper.GetTime()
-		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime{{- if eq .GoType "int64"}}.Unix(){{end}}
 				{{- end -}}
 			{{ else if isUpdateUserIdFields .Name -}}	
 		data.{{.GoFieldName}} = baseParamDto.UnitUserId 
@@ -172,7 +172,7 @@ func (s *{{.ModelName}}Service) Add(baseParamDto dto.BaseParamDto, data {{.MenuM
 		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
 				{{ else -}}
 		curTime := helper.GetTime()
-		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime{{- if eq .GoType "int64"}}.Unix(){{end}}
 				{{- end -}}
 			{{end -}}
 		{{end}}
@@ -190,7 +190,7 @@ func (s *{{.ModelName}}Service) Edit(baseParamDto dto.BaseParamDto, data {{.Menu
 		data.{{.GoFieldName}} = helper.GetTimeString("2006-01-02 15:04:05")
 				{{ else }}	
 		curTime := helper.GetTime()
-		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime
+		data.{{.GoFieldName}} = {{- if eq .GoType "*time.Time"}}&{{end}}curTime{{- if eq .GoType "int64"}}.Unix(){{end}}
 				{{- end -}}
 			{{ else if isUpdateUserIdFields .Name -}}	
 		data.{{.GoFieldName}} = baseParamDto.UnitUserId 

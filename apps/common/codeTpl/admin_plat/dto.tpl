@@ -6,7 +6,7 @@ import (
 	{{- else}}
 	"WenBeego/apps/common/models"
 	{{- end}}
-	"time"
+	{{if .HasTimeType}}	"time"{{end}}
 )
 
 type {{.ModelName}}Dto struct {
