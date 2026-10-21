@@ -29,3 +29,7 @@ func (s *UserService) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *u
 func (s *UserService) DelUnitUser(baseParamDto dto.BaseParamDto, ids []string) error {
 	return s.commonSystemUser.DelUnitUser(baseParamDto, ids)
 }
+
+func (s *UserService) ResetPassword(baseParamDto dto.BaseParamDto, id, password string) error {
+	return s.commonSystemUser.ResetPassword(baseParamDto, id, password)
+}

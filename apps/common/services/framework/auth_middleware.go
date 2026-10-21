@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
@@ -114,9 +115,9 @@ func (s *AuthMiddleware) checkUnitUserProfileStatus(moduleName string, userId st
 
 	var data base_model.UnitUserProfile
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, err = base_ar.GetUserProfileOfUnitById[*models.PlatUser, *models.PlatUserProfile](userId, unitId)
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, err = base_ar.GetUserProfileOfUnitById[*models.MchntUser, *models.MchntUserProfile](userId, unitId)
 	default:
 		err = errors.New("checkUnitUserProfileStatus:未知的模块名称")
@@ -183,12 +184,12 @@ func (s *AuthMiddleware) checkUnitStatus(moduleName string, userId string, unitI
 	index, err = business_store.GetAumidUs(userId, unitId, -1)
 	if err == nil && index > -1 {
 		switch moduleName {
-		case "admin_plat":
+		case constant.ADMIN_PLAT:
 			status = index == base_model.UNIT_STATUS_PASSED
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
 			}
-		case "admin_mchnt":
+		case constant.ADMIN_MCHNT:
 			status = index == base_model.UNIT_STATUS_PASSED
 			if !status {
 				err = errors.New("用户" + base_model.UNIT_STATUS_MAP[index])
@@ -203,9 +204,9 @@ func (s *AuthMiddleware) checkUnitStatus(moduleName string, userId string, unitI
 
 	var data interface{}
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Plat{}, &models.PlatUser{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, err = base_ar.GetUserUnitById(userId, unitId, &models.Mchnt{}, &models.MchntUser{})
 	default:
 		err = errors.New("未知的模块名称")
@@ -256,9 +257,9 @@ func (s *AuthMiddleware) checkUserRoleStatus(moduleName string, unitUserId strin
 
 	var roles []base_model.UnitRole
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		roles, err = base_ar.GetUserRole(moduleName, unitUserId, &models.PlatUserRole{}, &models.PlatRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		roles, err = base_ar.GetUserRole(moduleName, unitUserId, &models.MchntUserRole{}, &models.MchntRole{})
 	default:
 		err = errors.New("未知的模块名称")
@@ -302,9 +303,9 @@ func (s *AuthMiddleware) checkUserRolePermissions(moduleName string, unitUserId 
 	} else {
 		var permissions []base_model.UnitMenu
 		switch moduleName {
-		case "admin_plat":
+		case constant.ADMIN_PLAT:
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-		case "admin_mchnt":
+		case constant.ADMIN_MCHNT:
 			permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		default:
 			err = errors.New("checkUserRolePermissions:未知的模块名称")

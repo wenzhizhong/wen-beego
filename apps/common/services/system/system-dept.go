@@ -5,6 +5,7 @@ import (
 	"WenBeego/apps/common/dto_vo/dept_dto"
 	"WenBeego/apps/common/dto_vo/dept_vo"
 	"WenBeego/apps/common/dto_vo/page_dto"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -26,9 +27,9 @@ func (s *Dept) GetUnitDeptList(deptDto page_dto.SystemDeptListReqDto) (resultDto
 	}
 
 	switch deptDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Plat{}, &models.PlatDept{}, &models.PlatUser{}, &models.PlatUserProfile{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, count, err = base_ar.GetUnitDeptList(deptDto, &models.Mchnt{}, &models.MchntDept{}, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
@@ -64,9 +65,9 @@ func (s *Dept) GetUnitDeptTree(baseParamDto dto.BaseParamDto, selectUnitIds []st
 	}
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.PlatDept{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		dataList, err = base_ar.GetUnitDeptTree(selectUnitIds, &models.MchntDept{})
 	default:
 		err = errors.New("GetUnitDeptTree:模块名称错误")
@@ -114,9 +115,9 @@ func (s *Dept) GetUnitDeptPrincipal(baseParamDto dto.BaseParamDto, deptPrincipal
 	}
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.PlatUser{}, &models.PlatUserProfile{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, count, err = base_ar.GetUnitDeptPrincipal(deptPrincipalDto, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		err = errors.New("GetUnitDeptPrincipal:模块名称错误")
@@ -166,9 +167,9 @@ func (s *Dept) SaveUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.Unit
 	}
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		id, err = base_ar.SaveUnitDept(deptDto, &models.PlatDept{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		id, err = base_ar.SaveUnitDept(deptDto, &models.MchntDept{})
 	default:
 		err = errors.New("模块名称错误")
@@ -194,9 +195,9 @@ func (s *Dept) DelUnitDept(baseParamDto dto.BaseParamDto, deptDto dept_dto.UnitD
 	updateData.Deleted = 1
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		err = base_ar.DelUnitDept(updateData, &models.PlatDept{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		err = base_ar.DelUnitDept(updateData, &models.MchntDept{})
 	default:
 		err = errors.New("模块名称错误")

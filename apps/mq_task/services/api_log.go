@@ -3,6 +3,7 @@ package services
 import (
 	"WenBeego/apps/common/dto_vo/mq_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -34,7 +35,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (result interface{}, err erro
 			continue
 		}
 		switch moduleName {
-		case "admin_plat":
+		case constant.ADMIN_PLAT:
 			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.PlatMenu{}, &models.PlatMenuMap{})
 			if err != nil {
 				return nil, err
@@ -43,7 +44,7 @@ func (s *ApiLog) SaveToDb(data []mq_dto.ApiLogDto) (result interface{}, err erro
 			if err != nil {
 				return nil, err
 			}
-		case "admin_mchnt":
+		case constant.ADMIN_MCHNT:
 			apiLogData, err := s.getApiLogSaveData(unitGroupData.UnitMap, &models.MchntMenu{}, &models.MchntMenuMap{})
 			if err != nil {
 				return nil, err

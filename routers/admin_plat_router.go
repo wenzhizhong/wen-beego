@@ -83,6 +83,7 @@ func platSystemSlices() []beego.LinkNamespace {
 		beego.NSCtrlPost("/system-user/edit", (*adminSystem.UserController).Edit),
 		beego.NSCtrlPost("/system-user/del", (*adminSystem.UserController).Del),
 		beego.NSCtrlGet("/system-user/get-role-tree", (*adminSystem.UserController).GetRoleTree),
+		beego.NSCtrlPost("/system-user/reset-password", (*adminSystem.UserController).ResetPassword),
 
 		beego.NSCtrlGet("/system-menu/get-plat", (*adminSystem.MenuPlatController).Get),
 		beego.NSCtrlPost("/system-menu/add-plat", (*adminSystem.MenuPlatController).Add),

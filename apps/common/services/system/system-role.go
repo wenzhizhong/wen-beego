@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/dto_vo/role_dto"
 	"WenBeego/apps/common/dto_vo/role_vo"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
@@ -31,9 +32,9 @@ func (s *Role) GetUnitRoleList(RoleDto page_dto.SystemRoleListReqDto) (resultDto
 	}
 
 	switch RoleDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, count, err = base_ar.GetUnitRoleList(RoleDto, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, count, err = base_ar.GetUnitRoleList(RoleDto, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
@@ -100,9 +101,9 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.Unit
 		}
 	} else {
 		switch baseParamDto.ModuleName {
-		case "admin_plat":
+		case constant.ADMIN_PLAT:
 			classifyData, err = base_ar.GetRoleClassifyByRoleId(roleDto.Id, &models.PlatRoleClassify{})
-		case "admin_mchnt":
+		case constant.ADMIN_MCHNT:
 			classifyData, err = base_ar.GetRoleClassifyByRoleId(roleDto.Id, &models.MchntRoleClassify{})
 		default:
 			err = errors.New("模块名称错误")
@@ -118,10 +119,10 @@ func (s *Role) SaveUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.Unit
 
 	err = global.WriteDb.Transaction(func(tx *gorm.DB) (err error) {
 		switch baseParamDto.ModuleName {
-		case "admin_plat":
+		case constant.ADMIN_PLAT:
 			id, err = base_ar.SaveUnitRole(tx, roleDto, &models.PlatRole{})
 			base_ar.InsertUserRoleClassifies[*models.PlatRoleClassify](tx, classifyData)
-		case "admin_mchnt":
+		case constant.ADMIN_MCHNT:
 			id, err = base_ar.SaveUnitRole(tx, roleDto, &models.MchntRole{})
 			base_ar.InsertUserRoleClassifies[*models.MchntRoleClassify](tx, classifyData)
 		default:
@@ -152,9 +153,9 @@ func (s *Role) DelUnitRole(baseParamDto dto.BaseParamDto, roleDto role_dto.UnitR
 	updateData.Deleted = 1
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		err = base_ar.DelUnitRole(updateData, &models.PlatRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		err = base_ar.DelUnitRole(updateData, &models.MchntRole{})
 	default:
 		err = errors.New("模块名称错误")
@@ -177,9 +178,9 @@ func (s *Role) GetRoleMenu(baseParamDto dto.BaseParamDto, selectUnitIds []string
 
 	var dataList interface{}
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.PlatMenu{}, &models.PlatMenuMap{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		dataList, err = base_ar.GetRoleMenu(selectUnitIds, &models.MchntMenu{}, &models.MchntMenuMap{})
 	default:
 		err = errors.New("GetRoleMenu：模块名称错误")
@@ -215,9 +216,9 @@ func (s *Role) GetRoleMenuIds(baseParamDto dto.BaseParamDto, roleId string) (dat
 	dataList := make([]base_model.UnitRoleMenu, 0)
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		dataList, err = base_ar.GetRoleMenuIds(roleId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{})
 	default:
 		err = errors.New("GetRoleMenuIds：模块名称错误")
@@ -264,13 +265,13 @@ func (s *Role) RoleMenuSave(baseParamDto dto.BaseParamDto, roleMenuSaveDto role_
 
 	err = global.WriteDb.Transaction(func(tx *gorm.DB) (err error) {
 		switch baseParamDto.ModuleName {
-		case "admin_plat":
+		case constant.ADMIN_PLAT:
 			roleClassify, err1 := base_ar.GetRoleClassifyByRoleId(roleId, &models.PlatRoleClassify{})
 			if err1 == nil && roleClassify.Id != "" && roleClassify.Name == "admin" {
 				return errors.New("RoleMenuSave：系统管理员角色不能修改菜单")
 			}
 			err = s.doRoleMenuSave(tx, roleId, menuIds, &models.PlatRoleMenu{})
-		case "admin_mchnt":
+		case constant.ADMIN_MCHNT:
 			roleClassify, err1 := base_ar.GetRoleClassifyByRoleId(roleId, &models.MchntRoleClassify{})
 			if err1 == nil && roleClassify.Id != "" && roleClassify.Name == "admin" {
 				return errors.New("RoleMenuSave：系统管理员的角色不能修改菜单")

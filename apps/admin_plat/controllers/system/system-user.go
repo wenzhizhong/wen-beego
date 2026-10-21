@@ -196,3 +196,38 @@ func (c *UserController) GetRoleTree() {
 	c.Data["json"] = helper.Response(200, "success", data)
 	c.ServeJSON()
 }
+
+// 重置密码
+// @Summary 重置密码
+// @Description 重置密码
+// @Tags 用户管理
+// @Accept  json
+// @Produce  json
+// @Param   selectUnitIds query string true "selectUnitIds"
+// @Success 200 {object}  interface{} "返回结果"
+// @Router /admin_plat/system-user/reset-password [post]
+func (c *UserController) ResetPassword() {
+	type reqStruct struct {
+		Id       string `json:"id"`
+		Password string `json:"password"`
+	}
+
+	baseParamDto, err := helper.GetBaseParamDto(c.Ctx, c.ModuleName)
+	req, err0 := helper.GetReqBody[*reqStruct](c.Ctx)
+	if err != nil || err0 != nil {
+		err = helper.Ternary(err != nil, err, err0)
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	err = c.UserService.ResetPassword(baseParamDto, req.Id, req.Password)
+	if err != nil {
+		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
+		c.Data["json"] = helper.Response(500, err.Error(), nil)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = helper.Response(200, "success", nil)
+	c.ServeJSON()
+}

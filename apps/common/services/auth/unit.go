@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -14,9 +15,9 @@ type CommonUnit struct {
 
 func (a *CommonUnit) ChangeUnit(moduleName string, userId string, unitId string) (result interface{}, err error) {
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		err = changeUnit[*models.Plat, *models.PlatUser, *models.PlatUserProfile](userId, unitId)
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		err = changeUnit[*models.Mchnt, *models.MchntUser, *models.MchntUserProfile](userId, unitId)
 	default:
 		err = errors.New("ChangeUnit:模块名称错误")

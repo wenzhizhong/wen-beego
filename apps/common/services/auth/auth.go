@@ -83,7 +83,7 @@ func (s *CommonAuth) doLogin(data auth_dto.LoginDto, moduleName string) (*auth_d
 	}
 
 	loginInfo := &auth_dto.UserLoginInfoDto{}
-	if moduleName == "admin_plat" || moduleName == "admin_mchnt" {
+	if moduleName == constant.ADMIN_PLAT || moduleName == constant.ADMIN_MCHNT {
 		loginInfo, err = s.GetAdminLoginInfo(moduleName, user.Id)
 	} else {
 		loginInfo, err = s.GetApiLoginInfo(moduleName, user.Id)
@@ -343,9 +343,9 @@ func (s *CommonAuth) GetApiLoginInfo(moduleName string, userId string) (*auth_dt
 // 获取用户默认组织
 func (s *CommonAuth) GetUserDefaultUnitId(moduleName string, userId string) (unitUserData unit_vo.UnitListVo, err error) {
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Plat, *models.PlatUser](userId)
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		unitUserData, err = base_ar.GetUserDefaultUnit[*models.Mchnt, *models.MchntUser](userId)
 	default:
 		err = errors.New("GetUserDefaultUnitId:模块名称错误")
@@ -367,9 +367,9 @@ func (s *CommonAuth) getUserRolesClassifies(moduleName string, unitId string, un
 	}
 	var roleClassifies []base_model.UnitRoleClassify
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Mchnt{}, &models.MchntRole{}, &models.MchntRoleClassify{}, &models.MchntUserRole{})
 	default:
 		err = errors.New("getUserRolesClassifies:模块名称错误")
@@ -399,9 +399,9 @@ func (s *CommonAuth) GetUserPermissions(moduleName string, unitId string, unitUs
 
 	var permissions []base_model.UnitMenu
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		permissions, err = base_ar.GetUserPermissions(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 	default:
 		err = errors.New("GetUserPermissions:模块名称错误")
@@ -421,7 +421,7 @@ func (s *CommonAuth) RefreshToken(moduleName string, brancaToken string, refresh
 		return loginInfo, errors.New("refreshToken已过期，请重新登录")
 	}
 
-	if moduleName == "admin_plat" || moduleName == "admin_mchnt" {
+	if moduleName == constant.ADMIN_PLAT || moduleName == constant.ADMIN_MCHNT {
 		loginInfo, err = s.GetAdminLoginInfo(moduleName, userId)
 	} else {
 		loginInfo, err = s.GetApiLoginInfo(moduleName, userId)

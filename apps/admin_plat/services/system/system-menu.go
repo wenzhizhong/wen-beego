@@ -5,6 +5,7 @@ import (
 	"WenBeego/apps/common/dto_vo/menu_dto"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -33,9 +34,9 @@ func (s *MenuService) GetMenuList(pageDto page_dto.SystemMenuListReqDto, platfor
 	count := int64(0)
 
 	switch platformType {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		list, count, err = base_ar.GetPageMenuList(pageDto, &models.PlatMenu{}, &models.PlatMenuMap{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		list, count, err = base_ar.GetPageMenuList(pageDto, &models.MchntMenu{}, &models.MchntMenuMap{})
 	}
 
@@ -72,9 +73,11 @@ func (s *MenuService) doSave(tx *gorm.DB, baseParamDto dto.BaseParamDto, menuDto
 	}
 
 	switch platformType {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
+		menuDto.MenuFrom = constant.ADMIN_PLAT
 		err = base_ar.SaveMenu(tx, menuDto, &models.PlatMenu{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
+		menuDto.MenuFrom = constant.ADMIN_MCHNT
 		err = base_ar.SaveMenu(tx, menuDto, &models.MchntMenu{})
 	}
 
@@ -96,9 +99,9 @@ func (s *MenuService) doAsyncMenuMap(tx *gorm.DB, baseParamDto dto.BaseParamDto,
 	}
 
 	switch platformType {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		err = base_ar.RefreshUnitMenuMap(tx, userUnitIds, menuDto.Id, &models.Plat{}, &models.PlatMenu{}, &models.PlatMenuMap{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		err = base_ar.RefreshUnitMenuMap(tx, userUnitIds, menuDto.Id, &models.Mchnt{}, &models.MchntMenu{}, &models.MchntMenuMap{})
 	}
 
@@ -111,9 +114,9 @@ func (s *MenuService) Del(baseParamDto dto.BaseParamDto, menuDto menu_dto.MenuDt
 		return errors.New("Del():参数错误")
 	}
 	switch platformType {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		err = base_ar.DelMenu(menuDto.Id, &models.PlatMenu{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		err = base_ar.DelMenu(menuDto.Id, &models.MchntMenu{})
 	}
 	return
@@ -148,9 +151,9 @@ func (s *MenuService) checkMenuDto(menuDto *menu_dto.MenuDto, platformType strin
 func (s *MenuService) checkMenuRepeat(id, unitId, title string, platformType string) (err error) {
 	menuList := make([]base_model.UnitMenu, 0)
 	switch platformType {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		menuList, err = base_ar.GetMenuListByTitle(title, &models.PlatMenu{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		menuList, err = base_ar.GetMenuListByTitle(title, &models.MchntMenu{})
 	}
 	addExists := (len(menuList) > 0 && id == "")
@@ -170,9 +173,9 @@ func (s *MenuService) getAllUnitIds(baseParamDto dto.BaseParamDto, menuDto menu_
 	fields := "id, pid, name"
 	tmpUnitList := make([]base_model.Unit, 0)
 	switch platformType {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		tmpUnitList, err = base_ar.GetAllUnit(&models.Plat{}, fields)
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		tmpUnitList, err = base_ar.GetAllUnit(&models.Mchnt{}, fields)
 	}
 	if err != nil {

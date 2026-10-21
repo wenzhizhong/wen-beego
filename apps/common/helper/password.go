@@ -11,10 +11,10 @@ import (
 )
 
 var minPwdLen = 8
-var maxPwdLen = 20
+var maxPwdLen = 64
 
 func GetSpecialCharacters() string {
-	return "!@#$%^&*()_+-=[]{};:,./<>?"
+	return "!@#$%^&*()_+-=[]{};:,./<>?~|'\"`"
 }
 
 // 获取随机密码
@@ -67,8 +67,9 @@ func CheckPasswordRule(password string) error {
 		return errors.New("密码长度不能大于" + strconv.Itoa(maxPwdLen))
 	}
 	// 检查是否包含非法字符（除了字母、数字、指定特殊字符之外的字符）
-	specialChars := regexp.QuoteMeta(GetSpecialCharacters())
-	errMsg := "密码只能包含字母、数字和指定特殊字符“" + specialChars + "”"
+	tmpSpecialChars := GetSpecialCharacters()
+	specialChars := regexp.QuoteMeta(tmpSpecialChars)
+	errMsg := "密码只能包含字母、数字和指定特殊字符“" + tmpSpecialChars + "”"
 	if match, _ := regexp.MatchString("[^a-zA-Z0-9"+specialChars+"]", password); match {
 		// if match, _ := regexp.MatchString(`[^a-zA-Z0-9!@#$%^&*()_+-=[]{};:,./<>?]`, password); match {
 		return errors.New(errMsg + ".")

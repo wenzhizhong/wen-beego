@@ -13,7 +13,7 @@ import (
 )
 
 func GetMenuListByTitle[UnitMenuModel itf.MenuItf](title string, unitMenuModel UnitMenuModel) (data []base_model.UnitMenu, err error) {
-	// data = make([]base_model.UnitMenu, 0)
+	data = make([]base_model.UnitMenu, 0)
 	err = global.GetWriteDb().
 		Model(unitMenuModel).
 		Select("id, title").
@@ -56,26 +56,62 @@ func GetPageMenuList[UnitMenuModel itf.MenuItf, UnitMenuMapModel itf.MenuMapItf]
 
 // Save
 func SaveMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, menuDto *menu_dto.MenuDto, unitMenuModel UnitMenuModel) (err error) {
+	unitMenuModel.SetId(menuDto.Id)
+	unitMenuModel.SetParentId(menuDto.ParentId)
+	unitMenuModel.SetUnitId(menuDto.UnitId)
+	unitMenuModel.SetMenuType(menuDto.MenuType)
+	unitMenuModel.SetTitle(menuDto.Title)
+	unitMenuModel.SetName(menuDto.Name)
+	unitMenuModel.SetPath(menuDto.Path)
+	unitMenuModel.SetComponent(menuDto.Component)
+	unitMenuModel.SetRank(menuDto.Rank)
+	unitMenuModel.SetRedirect(menuDto.Redirect)
+	unitMenuModel.SetIcon(menuDto.Icon)
+	unitMenuModel.SetExtraIcon(menuDto.ExtraIcon)
+	unitMenuModel.SetEnterTransition(menuDto.EnterTransition)
+	unitMenuModel.SetLeaveTransition(menuDto.LeaveTransition)
+	unitMenuModel.SetActivePath(menuDto.ActivePath)
+	unitMenuModel.SetAuths(menuDto.Auths)
+	unitMenuModel.SetFrameSrc(menuDto.FrameSrc)
+	unitMenuModel.SetFrameLoading(menuDto.FrameLoading)
+	unitMenuModel.SetKeepAlive(menuDto.KeepAlive)
+	unitMenuModel.SetHiddenTag(menuDto.HiddenTag)
+	unitMenuModel.SetFixedTag(menuDto.FixedTag)
+	unitMenuModel.SetShowLink(menuDto.ShowLink)
+	unitMenuModel.SetShowParent(menuDto.ShowParent)
+	unitMenuModel.SetCreatedAt(menuDto.CreatedAt)
+	unitMenuModel.SetUpdatedAt(menuDto.UpdatedAt)
+	unitMenuModel.SetDeleted(menuDto.Deleted)
+	unitMenuModel.SetClone(menuDto.Clone)
+	unitMenuModel.SetMenuFrom(menuDto.MenuFrom)
+
 	if menuDto.Id != "" {
-		return EditMenu(tx, menuDto, unitMenuModel)
+		return EditMenu(tx, unitMenuModel)
 	} else {
-		return AddMenu(tx, menuDto, unitMenuModel)
-	}
-}
-func AddMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, menuDto *menu_dto.MenuDto, unitMenuModel UnitMenuModel) (err error) {
-	menuDto.Id, err = helper.GetUuid()
-	if err != nil {
+		menuId, err1 := AddMenu(tx, unitMenuModel)
+		if err1 != nil {
+			err = err1
+		}
+		menuDto.Id = menuId
+		unitMenuModel.SetId(menuId)
 		return
 	}
-	err = tx.Model(unitMenuModel).Select("*").Create(&menuDto).Error
+}
+func AddMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, unitMenuModel UnitMenuModel) (menuId string, err error) {
+	menuId, err1 := helper.GetUuid()
+	if err1 != nil {
+		return "", err1
+	}
+	unitMenuModel.SetId(menuId)
+	err = tx.Model(unitMenuModel).Select("*").Create(&unitMenuModel).Error
 	return
 }
-func EditMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, menuDto *menu_dto.MenuDto, unitMenuModel UnitMenuModel) (err error) {
+func EditMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, unitMenuModel UnitMenuModel) (err error) {
 	err = tx.Model(unitMenuModel).
 		Select("*").
 		Omit("deleted", "remark", "clone", "created_at", "created_by").
-		Where("id = ?", menuDto.Id).
-		Updates(&menuDto).Error
+		Where("id = ?", unitMenuModel.GetId()).
+		Updates(&unitMenuModel).Error
 	return
 }
 

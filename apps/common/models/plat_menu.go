@@ -98,3 +98,91 @@ func (m *PlatMenu) GetDeleted() int {
 func (m *PlatMenu) GetClone() int {
 	return m.Clone
 }
+func (m *PlatMenu) GetMenuFrom() string {
+	return m.MenuFrom
+}
+
+func (m *PlatMenu) SetId(id string) {
+	m.Id = id
+}
+func (m *PlatMenu) SetParentId(parentId string) {
+	m.ParentId = parentId
+}
+func (m *PlatMenu) SetUnitId(unitId string) {
+	m.UnitId = unitId
+}
+func (m *PlatMenu) SetMenuType(menuType int) {
+	m.MenuType = menuType
+}
+func (m *PlatMenu) SetTitle(title string) {
+	m.Title = title
+}
+func (m *PlatMenu) SetName(name string) {
+	m.Name = name
+}
+func (m *PlatMenu) SetPath(path string) {
+	m.Path = path
+}
+func (m *PlatMenu) SetComponent(component string) {
+	m.Component = component
+}
+func (m *PlatMenu) SetRank(rank *int) {
+	m.Rank = rank
+}
+func (m *PlatMenu) SetRedirect(redirect string) {
+	m.Redirect = redirect
+}
+func (m *PlatMenu) SetIcon(icon string) {
+	m.Icon = icon
+}
+func (m *PlatMenu) SetExtraIcon(extraIcon string) {
+	m.ExtraIcon = extraIcon
+}
+func (m *PlatMenu) SetEnterTransition(enterTransition string) {
+	m.EnterTransition = enterTransition
+}
+func (m *PlatMenu) SetLeaveTransition(leaveTransition string) {
+	m.LeaveTransition = leaveTransition
+}
+func (m *PlatMenu) SetActivePath(activePath string) {
+	m.ActivePath = activePath
+}
+func (m *PlatMenu) SetAuths(auths string) {
+	m.Auths = auths
+}
+func (m *PlatMenu) SetFrameSrc(frameSrc string) {
+	m.FrameSrc = frameSrc
+}
+func (m *PlatMenu) SetFrameLoading(frameLoading bool) {
+	m.FrameLoading = frameLoading
+}
+func (m *PlatMenu) SetKeepAlive(keepAlive bool) {
+	m.KeepAlive = keepAlive
+}
+func (m *PlatMenu) SetHiddenTag(hiddenTag bool) {
+	m.HiddenTag = hiddenTag
+}
+func (m *PlatMenu) SetFixedTag(fixedTag bool) {
+	m.FixedTag = fixedTag
+}
+func (m *PlatMenu) SetShowLink(showLink bool) {
+	m.ShowLink = showLink
+}
+func (m *PlatMenu) SetShowParent(showParent bool) {
+	m.ShowParent = showParent
+}
+func (m *PlatMenu) SetCreatedAt(createdAt time.Time) {
+	m.CreatedAt = createdAt
+}
+func (m *PlatMenu) SetUpdatedAt(updatedAt time.Time) {
+	m.UpdatedAt = updatedAt
+}
+func (m *PlatMenu) SetDeleted(deleted int) {
+	m.Deleted = deleted
+}
+func (m *PlatMenu) SetClone(clone int) {
+	m.Clone = clone
+}
+func (m *PlatMenu) SetMenuFrom(menuFrom string) {
+	m.MenuFrom = menuFrom
+}

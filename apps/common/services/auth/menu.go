@@ -3,6 +3,7 @@ package auth
 import (
 	"WenBeego/apps/common/dto_vo/auth_vo"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
@@ -31,7 +32,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId
 	var permissions []base_model.UnitMenu
 	var roleClassifies []base_model.UnitRoleClassify
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, unitUserId, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleMenu{}, &models.PlatUserRole{}, &models.PlatRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return
@@ -41,7 +42,7 @@ func (s *CommonMenu) GetAsyncRoutes(moduleName string, unitId string, unitUserId
 			return
 		}
 		roleClassifies, err = base_ar.GetUserRoleClassifies(unitId, unitUserId, &models.Plat{}, &models.PlatRole{}, &models.PlatRoleClassify{}, &models.PlatUserRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		menuAuthList, err = base_ar.GetUserMenu(moduleName, unitId, unitUserId, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleMenu{}, &models.MchntUserRole{}, &models.MchntRole{})
 		if err != nil && !helper.DbNotFound(err) {
 			return

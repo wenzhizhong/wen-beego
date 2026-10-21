@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/dto_vo/unit_dto"
 	"WenBeego/apps/common/dto_vo/unit_vo"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
@@ -27,9 +28,9 @@ func (s *Unit) GetUnitList(unitDto page_dto.SystemUnitListReqDto) (resultDto dto
 	var count int64 = 0
 
 	switch unitDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Plat{}, &models.PlatUser{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, count, err = base_ar.GetUnitListByUserId(unitDto, &models.Mchnt{}, &models.MchntUser{})
 	default:
 		err = errors.New("GetUnitList:模块名称错误")
@@ -85,9 +86,9 @@ func (s *Unit) Save(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (re
 	}
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Plat{}, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatRole{}, &models.PlatUserRole{}, &models.PlatMenu{}, &models.PlatMenuMap{}, &models.PlatRoleClassify{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		newUnitId, err = doSave(isAdd, baseParamDto, unitDto, &models.Mchnt{}, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntRole{}, &models.MchntUserRole{}, &models.MchntMenu{}, &models.MchntMenuMap{}, &models.MchntRoleClassify{})
 	default:
 		err = errors.New("unit Save：模块名称错误")
@@ -112,9 +113,9 @@ func (s *Unit) SaveForAdminPlat(baseParamDto dto.BaseParamDto, unitDto unit_dto.
 }
 func (s *Unit) Del(baseParamDto dto.BaseParamDto, unitDto unit_dto.UnitDto) (err error) {
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Plat{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		err = base_ar.DelUnit(unitDto.Id, baseParamDto.UnitUserId, &models.Mchnt{})
 	default:
 		err = errors.New("Unit Del:模块名称错误")
@@ -160,7 +161,7 @@ func (s *Unit) ChangeStatus(baseParamDto dto.BaseParamDto, unitDto unit_dto.Unit
 	}
 
 	switch baseParamDto.ModuleName {
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		var curUnit models.Mchnt
 		if err = global.GetReadDb().Model(&models.Mchnt{}).Where("id = ?", unitDto.Id).Take(&curUnit).Error; err != nil {
 			return err
@@ -173,7 +174,7 @@ func (s *Unit) ChangeStatus(baseParamDto dto.BaseParamDto, unitDto unit_dto.Unit
 			return errors.New("平台已审核不通过，无法改为审核通过")
 		}
 		return updateUnitStatus(&models.Mchnt{}, unitDto.Id, unitDto.Status, baseParamDto.UnitUserId)
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		// platform org: sync both plat_status and status
 		return updateUnitPlatStatus(&models.Plat{}, unitDto.Id, unitDto.Status, baseParamDto.UnitUserId)
 	default:

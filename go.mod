@@ -16,7 +16,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hako/branca v0.0.0-20200807062402-6052ac720505
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lib/pq v1.10.9
 	github.com/mojocn/base64Captcha v1.3.8
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1

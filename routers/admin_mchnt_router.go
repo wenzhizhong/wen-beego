@@ -99,6 +99,7 @@ func commonSlices(gotoModuleName string) []beego.LinkNamespace {
 		beego.NSCtrlPost("/system-user/edit", (*adminSystem.UserController).Edit),
 		beego.NSCtrlPost("/system-user/del", (*adminSystem.UserController).Del),
 		beego.NSCtrlGet("/system-user/get-role-tree", (*adminSystem.UserController).GetRoleTree),
+		beego.NSCtrlPost("/system-user/reset-password", (*adminSystem.UserController).ResetPassword),
 	}
 	if gotoModuleName == constant.ADMIN_PLAT {
 		user = []beego.LinkNamespace{

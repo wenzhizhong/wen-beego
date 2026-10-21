@@ -46,7 +46,7 @@ func (c *MenuMchntController) Get() {
 	pageDto.Title = c.GetString("title")
 	pageDto.SelectUnitIds = helper.Ternary(c.GetString("selectUnitIds") != "", []string{c.GetString("selectUnitIds")}, []string{})
 
-	data, err := c.menuService.GetMenuList(pageDto, "admin_mchnt")
+	data, err := c.menuService.GetMenuList(pageDto, constant.ADMIN_MCHNT)
 	if err != nil {
 		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
@@ -85,7 +85,7 @@ func (c *MenuMchntController) save(optType string) {
 		return
 	}
 
-	data, err := c.menuService.Save(baseParamDto, menuDto, "admin_mchnt")
+	data, err := c.menuService.Save(baseParamDto, menuDto, constant.ADMIN_MCHNT)
 	if err != nil {
 		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)
@@ -147,7 +147,7 @@ func (c *MenuMchntController) Del() {
 		c.ServeJSON()
 		return
 	}
-	err := c.menuService.Del(baseParamDto, menuDto, "admin_mchnt")
+	err := c.menuService.Del(baseParamDto, menuDto, constant.ADMIN_MCHNT)
 	if err != nil {
 		c.Ctx.Input.SetData(constant.CTX_ERROR_KEY, err)
 		c.Data["json"] = helper.Response(500, err.Error(), nil)

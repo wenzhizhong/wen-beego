@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/dto_vo/generate_code_dto"
 	"WenBeego/apps/common/dto_vo/page_dto"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/models"
 	"archive/zip"
@@ -547,7 +548,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		td.ViewPath = "/" + baseViewPath + "/index"
 
 		if contains(codeTypes, CODE_TYPE_VIEW) && viewType == VIEW_TYPE_ELEMENT_PLUS {
-			if !(appModule == "admin_plat" || appModule == "admin_mchnt") {
+			if !(appModule == "admin_plat" || appModule == constant.ADMIN_MCHNT) {
 				continue
 			}
 			// frontend code project-name
@@ -768,9 +769,9 @@ func (s *GenerateCodeService) getTableForApp(isMultiTenant bool, appModule, tabl
 		return tableName
 	}
 	switch appModule {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		return platTableName
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		return mchntTableName
 	default:
 		return tableName

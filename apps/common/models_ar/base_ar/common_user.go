@@ -20,6 +20,11 @@ func SaveUser(tx *gorm.DB, userDto user_dto.UserDto) (err error) {
 	return
 }
 
+func ResetPassword(id, password string) (err error) {
+	userModel := models.User{}
+	err = global.GetWriteDb().Model(userModel).Where("id = ?", id).Update("password", password).Error
+	return
+}
 func GetUserByIdOrPhone(id, phone string) (data []user_dto.UserAllDataDto, err error) {
 	if id == "" && phone == "" {
 		err = errors.New("GetUserByIdOrPhone(): 参数id，phone不能均为空")

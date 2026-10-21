@@ -7,6 +7,7 @@ import (
 	"WenBeego/apps/common/dto_vo/user_dto"
 	"WenBeego/apps/common/dto_vo/user_vo"
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/helper"
 	"WenBeego/apps/common/middleware/business_store"
 	"WenBeego/apps/common/models"
@@ -34,9 +35,9 @@ func (s *User) GetUserList(reqDto page_dto.SystemUserListReqDto) (resultDto dto.
 	}
 
 	switch reqDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		data, count, err = base_ar.GetUserListOfUnitById(reqDto, &models.PlatUser{}, &models.PlatUserProfile{}, &models.PlatDept{}, &models.PlattUserDept{}, &models.PlatRole{}, &models.PlatUserRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		data, count, err = base_ar.GetUserListOfUnitById(reqDto, &models.MchntUser{}, &models.MchntUserProfile{}, &models.MchntDept{}, &models.MchntUserDept{}, &models.MchntRole{}, &models.MchntUserRole{})
 	default:
 		err = errors.New("GetUserList：模块名称错误")
@@ -91,9 +92,9 @@ func (s *User) GetUnitRoleTree(baseParamDto dto.BaseParamDto, selectUnitIds []st
 	}
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		dataList, err = base_ar.GetUnitRoleTree(selectUnitIds, &models.PlatRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		dataList, err = base_ar.GetUnitRoleTree(selectUnitIds, &models.MchntRole{})
 	default:
 		err = errors.New("GetUnitRoleTree:模块名称错误")
@@ -140,14 +141,14 @@ func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto
 	var unitUserRoleModel itf.UserRoleItf
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		unitUserModel = &models.PlatUser{}
 		unitUserProfileModel = &models.PlatUserProfile{}
 		unitDeptModel = &models.PlatDept{}
 		unitRoleModel = &models.PlatRole{}
 		unitUserDeptModel = &models.PlattUserDept{}
 		unitUserRoleModel = &models.PlatUserRole{}
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		unitUserModel = &models.MchntUser{}
 		unitUserProfileModel = &models.MchntUserProfile{}
 		unitDeptModel = &models.MchntDept{}
@@ -589,9 +590,9 @@ func (s *User) generateUserRoleData(unitUserId string, roleIds []string) (data [
 func (s *User) DelUnitUser(baseParamDto dto.BaseParamDto, ids []string) error {
 
 	switch baseParamDto.ModuleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		return base_ar.DelUnitUser(ids, &models.PlatUser{}, &models.PlatUserProfile{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		return base_ar.DelUnitUser(ids, &models.MchntUser{}, &models.MchntUserProfile{})
 	default:
 		return errors.New("DelUnitUser:模块名称错误")
@@ -603,4 +604,12 @@ func (s *User) DelUnitUserForAdminPlat(baseParamDto dto.BaseParamDto, ids []stri
 		return errors.New("平台没有操作权限")
 	}
 	return nil
+}
+
+func (s *User) ResetPassword(baseParamDto dto.BaseParamDto, id, password string) error {
+	passwordHash, err := helper.GenerateCryptPassword(password)
+	if err != nil {
+		return err
+	}
+	return base_ar.ResetPassword(id, passwordHash)
 }

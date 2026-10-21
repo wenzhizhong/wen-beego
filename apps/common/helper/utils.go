@@ -2,6 +2,7 @@ package helper
 
 import (
 	"WenBeego/apps/common/global"
+	"WenBeego/apps/common/global/constant"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
@@ -88,7 +89,7 @@ func ParseStringTpl(tpl string, data any) (str string, err error) {
 // 判断是否是官方平台id
 func IsOfficial(moduleName, unitId string) (bool, error) {
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		platModel := models.Plat{}
 		err := global.GetReadDb().Where("id = ?", unitId).Take(&platModel).Error
 		if err == nil {
@@ -106,9 +107,9 @@ func IsOfficial(moduleName, unitId string) (bool, error) {
 // 判断是否是管理员
 func IsAdmin(moduleName string, unitUserId string) (bool, error) {
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		return getAdminData(unitUserId, &models.PlatRoleClassify{}, &models.PlatRole{}, &models.PlatUserRole{})
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		return getAdminData(unitUserId, &models.MchntRoleClassify{}, &models.MchntRole{}, &models.MchntUserRole{})
 	default:
 		return false, errors.New("IsAdmin():模块名称错误")
@@ -126,10 +127,10 @@ func CheckUserHasUnit(moduleName, userId string, requiredUnitIds []string) (bool
 	dataList := make([]base_model.Unit, 0)
 
 	switch moduleName {
-	case "admin_plat":
+	case constant.ADMIN_PLAT:
 		unitModel = &models.Plat{}
 		unitUserModel = &models.PlatUser{}
-	case "admin_mchnt":
+	case constant.ADMIN_MCHNT:
 		unitModel = &models.Mchnt{}
 		unitUserModel = &models.MchntUser{}
 	default:

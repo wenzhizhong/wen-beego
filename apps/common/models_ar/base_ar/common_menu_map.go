@@ -6,6 +6,7 @@ import (
 	"WenBeego/apps/common/models/base_model"
 	"WenBeego/apps/common/models/itf"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -100,6 +101,12 @@ func generateMenuMapItem(unitId string, menuId string) (base_model.UnitMenuMap, 
 	newMenuMapId, err := helper.GetUuid()
 	if err != nil {
 		return newInsertItem, err
+	}
+	if unitId == "" {
+		return newInsertItem, fmt.Errorf("%s", "添加菜单映射失败：组织单位id不能为空")
+	}
+	if menuId == "" {
+		return newInsertItem, fmt.Errorf("%s", "添加菜单映射失败：菜id不能为空")
 	}
 
 	newInsertItem.Id = newMenuMapId
