@@ -201,6 +201,13 @@ func GetUuid() (string, error) {
 	}
 	return uuid.String(), nil
 }
+func StringIsUuid(str string) bool {
+	if str == "" {
+		return false
+	}
+	uuidRegexp := regexp.MustCompile("[\\d\\w]{8}-[\\d\\w]{4}-[\\d\\w]{4}-[\\d\\w]{4}-[\\d\\w]{12}")
+	return uuidRegexp.Match([]byte(str))
+}
 
 // 获取md5值
 func Md5(str string) string {

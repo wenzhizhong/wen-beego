@@ -24,6 +24,9 @@ type GenCodeRunDto struct {
 	BizModule           string   `json:"bizModule"`
 	CodeType            []string `json:"codeType"`
 	ViewType            string   `json:"viewType"`
+
+	PlatParentId  string `json:"platParentId"`
+	MchntParentId string `json:"mchntParentId"`
 }
 
 type DownloadCodeDto struct {
@@ -35,7 +38,8 @@ type DelFormDetailDto struct {
 }
 
 type GenCodeParamDto struct {
-	ViewTypes         map[string]string `json:"viewTypes"`
-	GenerateCodeTypes map[string]string `json:"generateCodeTypes"`
-	MenuName          string            `json:"menuName"`
+	ViewTypes           map[string]string `json:"viewTypes"`
+	GenerateCodeTypes   map[string]string `json:"generateCodeTypes"`
+	FirstLevelPlatMenu  any               `json:"firstLevelPlatMenu"`
+	FirstLevelMchntMenu any               `json:"firstLevelMchntMenu"`
 }

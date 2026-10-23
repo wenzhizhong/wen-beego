@@ -54,6 +54,25 @@ func GetPageMenuList[UnitMenuModel itf.MenuItf, UnitMenuMapModel itf.MenuMapItf]
 
 }
 
+// 平台-系统工具-生成代码获取菜单列表
+func GetGenerateCodeParamMenuList[UnitMenuModel itf.MenuItf, UnitMenuMapModel itf.MenuMapItf](pageDto page_dto.SystemMenuListReqDto, unitMenuModel UnitMenuModel, unitMenuMapModel UnitMenuMapModel) (list []base_model.UnitMenu, count int64, err error) {
+	list = make([]base_model.UnitMenu, 0)
+
+	tableMenuName := unitMenuModel.TableName()
+
+	query := global.GetReadDb().Model(unitMenuModel).
+		Where(tableMenuName+".deleted = ?", 0)
+
+	query = query.Where(tableMenuName + ".parent_id = ''")
+	query = query.Where(tableMenuName + ".menu_type = 0")
+
+	err = query.
+		Select("id, parent_id, title").
+		Find(&list).Error
+	return
+
+}
+
 // Save
 func SaveMenu[UnitMenuModel itf.MenuItf](tx *gorm.DB, menuDto *menu_dto.MenuDto, unitMenuModel UnitMenuModel) (err error) {
 	unitMenuModel.SetId(menuDto.Id)

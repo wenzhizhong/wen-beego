@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"WenBeego/apps/common/helper"
 	"fmt"
 	"testing"
 	"time"
@@ -38,4 +39,12 @@ func TestGoogleUuid(t *testing.T) {
 
 	}
 	fmt.Println(time.Now().UnixNano())
+}
+
+func TestStrIsUuid(t *testing.T) {
+	res := helper.StringIsUuid("")
+	res1 := helper.StringIsUuid("01a0533f-c0c0-77ba")
+	res2 := helper.StringIsUuid("01a0533f-c0c0-77ba-a3af-62db7e33152e")
+	fmt.Println(res, res1, res2)
+	fmt.Println("==============")
 }
