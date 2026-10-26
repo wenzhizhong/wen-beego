@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -195,21 +196,22 @@ func (s *GenerateCodeService) DownloadCode(zipPath string) (string, error) {
 }
 
 type ColumnConfig struct {
-	Name         string      `json:"name"`
-	Type         string      `json:"type"`
-	Required     bool        `json:"required"`
-	DefVal       interface{} `json:"defVal"`
-	FormType     string      `json:"formType"`
-	FormParam    string      `json:"formParam"`
-	FormParamVue string      `json:"-"`
-	FormParamTs  string      `json:"-"`
-	Comment      string      `json:"comment"`
-	GoFieldName  string      `json:"-"`
-	GoType       string      `json:"-"`
-	PgType       string      `json:"-"`
-	JsonName     string      `json:"-"`
-	TsType       string      `json:"-"`
-	SkipForm     bool        `json:"-"`
+	Name                 string      `json:"name"`
+	Type                 string      `json:"type"`
+	Required             bool        `json:"required"`
+	DefVal               interface{} `json:"defVal"`
+	DefValForGoStructTag interface{} `json:"-"`
+	FormType             string      `json:"formType"`
+	FormParam            string      `json:"formParam"`
+	FormParamVue         string      `json:"-"`
+	FormParamTs          string      `json:"-"`
+	Comment              string      `json:"comment"`
+	GoFieldName          string      `json:"-"`
+	GoType               string      `json:"-"`
+	PgType               string      `json:"-"`
+	JsonName             string      `json:"-"`
+	TsType               string      `json:"-"`
+	SkipForm             bool        `json:"-"`
 }
 
 type TemplateData struct {
@@ -301,7 +303,7 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 
 		if goType == "time.Time" && contains(updateTimeFields, columnConfigs[i].Name) {
 			goType = "*time.Time"
-		} else if goType == "int" || (contains(createTimeFields, columnConfigs[i].Name) || contains(updateTimeFields, columnConfigs[i].Name) || contains(deletedTimeFields, columnConfigs[i].Name)) {
+		} else if goType == "int" && (contains(createTimeFields, columnConfigs[i].Name) || contains(updateTimeFields, columnConfigs[i].Name) || contains(deletedTimeFields, columnConfigs[i].Name)) {
 			goType = "int64"
 		}
 		columnConfigs[i].GoType = goType
@@ -335,6 +337,15 @@ func (s *GenerateCodeService) GenerateCode(reqDto generate_code_dto.GenCodeRunDt
 		createUserIdField = helper.Ternary(tmpCreateUserIdField != "", tmpCreateUserIdField, createUserIdField)
 		updateUserIdField = helper.Ternary(tmpUpdateUserIdField != "", tmpUpdateUserIdField, updateUserIdField)
 
+		if columnConfigs[i].DefVal == nil {
+			columnConfigs[i].DefVal = "null"
+		} else {
+			switch columnConfigs[i].DefVal.(type) {
+			case string:
+				columnConfigs[i].DefVal = strconv.Quote(columnConfigs[i].DefVal.(string))
+				columnConfigs[i].DefValForGoStructTag = `''`
+			}
+		}
 	}
 
 	// parse FormParam JSON to extract vue component attrs and ts variable declarations
@@ -836,10 +847,17 @@ func (s *GenerateCodeService) getAuthDetail(appModule, menuModule, modelNameLowe
 }
 
 func (s *GenerateCodeService) getApiUrlPrefix(appModule, menuModule, tableName string) string {
-	return "/" + appModule + "/" + menuModule + "-" + strings.ReplaceAll(tableName, "_", "-")
+	tmpTableName := strings.ReplaceAll(tableName, "_", "-")
+	tmpTableName = helper.StringTernary(tmpTableName != menuModule, "-"+tmpTableName, "")
+
+	return "/" + appModule + "/" + menuModule + tmpTableName
 }
 func (s *GenerateCodeService) getApiNamePrefix(menuModule, tableName string) string {
-	return strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+	tmpTableName := strings.ReplaceAll(tableName, "_", "-")
+	tmpTableName = helper.StringTernary(tmpTableName != menuModule, "_"+strings.ToUpper(tmpTableName), "")
+
+	// return strings.ToUpper(menuModule) + "_" + strings.ToUpper(strings.ReplaceAll(tableName, "_", "_"))
+	return strings.ToUpper(menuModule) + tmpTableName
 }
 func (s *GenerateCodeService) getTableForApp(isMultiTenant bool, appModule, tableName, platTableName, mchntTableName string) string {
 	if !isMultiTenant {

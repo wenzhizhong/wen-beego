@@ -38,7 +38,7 @@ export function use{{.ModelName}}(formRef: any) {
   const selectedNum = ref(0);
 
   const searchForm = reactive({
-{{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}    {{.Name}}: {{if isMultipleCompt .FormType}}[]{{else}}""{{end}},
+{{range .Columns}}{{if not (eq .Name "id")}}{{if not (isHasDeletedFields .Name)}}{{if not (eq .FormType "editor")}}{{if not (eq .FormType "imageUpload")}}{{if not (eq .FormType "fileUpload")}}    {{.Name}}: {{if isMultipleCompt .FormType}}          {{- if and (eq .FormType "select") (not (hasMultipleProp .FormParam)) -}} {{.DefVal}} {{- else -}} [] {{- end -}}          {{else}}{{.DefVal}}{{end}},
 {{end}}{{end}}{{end}}{{end}}{{end}}{{end}}  
     {{if .HasUnitId}}selectUnitIds:"",{{end}} });
 

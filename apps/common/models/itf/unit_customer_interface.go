@@ -9,8 +9,8 @@ type UnitCustomerItf interface {
 	GetUnitId() string
 	SetUnitId(string)
 
-	GetCustomerId() string
-	SetCustomerId(string)
+	GetUserId() string
+	SetUserId(string)
 
 	GetStatus() int
 	SetStatus(int)

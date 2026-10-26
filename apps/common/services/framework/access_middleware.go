@@ -9,6 +9,7 @@ import (
 	"WenBeego/apps/common/helper/goJose"
 	"WenBeego/apps/common/models"
 	"WenBeego/apps/common/models_ar"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -149,7 +150,13 @@ func (s *AccessMiddleware) verifyBodySign(ctx *beecontext.Context, configModel m
 	}
 
 	bodyMap := make(map[string]interface{})
-	json.Unmarshal(ctx.Input.RequestBody, &bodyMap)
+	// json.Unmarshal(ctx.Input.RequestBody, &bodyMap)
+	dec := json.NewDecoder(bytes.NewReader(ctx.Input.RequestBody))
+	dec.UseNumber()
+	if err := dec.Decode(&bodyMap); err != nil {
+		logErrStr := fmt.Sprintf("RequestBody解析失败：%s\nRequestBody=%s", err.Error(), ctx.Input.RequestBody)
+		return errors.New(logErrStr)
+	}
 	payload := goJose.SerializeForPayload(bodyMap)
 
 	err = goJose.JwsSignVerify([]byte(payload), signatureStr, publicKey, jose.RS512)

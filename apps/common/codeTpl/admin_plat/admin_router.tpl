@@ -10,7 +10,6 @@ import admin{{.MenuModule | snakeToPascal}} "WenBeego/apps/{{.AppModule}}/contro
 {{$routerFuncName := printf "%s%sSlices()" $appModelLower $menuModule}}
 func {{$routerFuncName}} []beego.LinkNamespace {
     return []beego.LinkNamespace{
-        // 测试路由
         {{$old := printf "/%s" .AppModule -}}
         {{$new := "" -}}
         {{$pathRead := printf "%s/get" .ApiUrlPrefix -}}

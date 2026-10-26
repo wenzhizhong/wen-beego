@@ -42,7 +42,8 @@ func GetRandomPassword(length int) (string, error) {
 		j++
 		str[j] = specialArr[rand.Intn(specialArrLen)]
 		j++
-		str[j] = strings.ToUpper(letterArr[rand.Intn(specialArrLen)])
+		// str[j] = strings.ToUpper(letterArr[rand.Intn(specialArrLen)])
+		str[j] = strings.ToUpper(letterArr[rand.Intn(letterArrLen)])
 		j++
 	}
 	for i := 0; i < numPartLen; i++ {

@@ -52,7 +52,7 @@ func GetUserByIdOrPhone(id, phone string) (data []user_dto.UserAllDataDto, err e
 	return
 }
 
-func GetUserById(id string) (data []user_dto.UserAllDataDto, err error) {
+func GetUserById(id string) (data user_dto.UserAllDataDto, err error) {
 	tableUser := (&models.User{}).TableName()
 	tableUserProfile := (&models.UserProfile{}).TableName()
 
@@ -62,6 +62,6 @@ func GetUserById(id string) (data []user_dto.UserAllDataDto, err error) {
 		Joins("INNER JOIN "+tableUserProfile+" ON "+tableUserProfile+".id = \""+tableUser+"\".id").
 		Where("\""+tableUser+"\".id = ?", id).
 		Where(tableUserProfile+".deleted = ?", 0).
-		Find(&data).Error
+		Take(&data).Error
 	return
 }

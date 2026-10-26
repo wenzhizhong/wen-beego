@@ -132,7 +132,7 @@ func (s *User) GetUnitRoleTreeForAdminPlat(baseParamDto dto.BaseParamDto, select
 }
 
 // 保存用户
-func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto.UnitUserSaveDto) (data interface{}, err error) {
+func (s *User) SaveUnitUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto.UnitUserSaveDto) (data interface{}, err error) {
 	var unitUserModel itf.UnitUserItf
 	var unitUserProfileModel itf.UserProfileItf
 	var unitDeptModel itf.DeptItf
@@ -182,7 +182,7 @@ func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto
 
 	unitUserId := ""
 	err = global.WriteDb.Transaction(func(tx *gorm.DB) (err error) {
-		unitUserId, err = s.doSaveUser(tx, isAddUnitUser, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
+		unitUserId, err = s.doSaveUnitUser(tx, isAddUnitUser, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
 		return
 	})
 
@@ -196,14 +196,18 @@ func (s *User) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto
 	}
 	return
 }
-func (s *User) SaveUserForAdminPlat(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto.UnitUserSaveDto) (data interface{}, err error) {
+func (s *User) SaveMchntUserForAdminPlat(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto.UnitUserSaveDto) (data interface{}, err error) {
 	if true {
 		return data, errors.New("平台没有操作权限")
 	}
 	return
 }
 
-func (s *User) doSaveUser(
+func (s *User) SaveCustomerForAdminPlat(tx *gorm.DB, baseParamDto dto.BaseParamDto, userDto user_dto.UserDto, userProfileDto user_dto.UserProfileDto) (err error) {
+	return s.doSaveCustomerForAdminPlat(tx, baseParamDto, userDto, userProfileDto)
+}
+
+func (s *User) doSaveUnitUser(
 	tx *gorm.DB,
 	isAddUnitUser bool,
 	baseParamDto dto.BaseParamDto,
@@ -218,9 +222,14 @@ func (s *User) doSaveUser(
 	unitUserRoleModel itf.UserRoleItf,
 ) (unitUserId string, err error) {
 	if isAddUnitUser {
-		unitUserId, err = s.doInsertUser(tx, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
+		unitUserId, err = s.doInsertUser(tx, unitUserSaveDto)
+		if err != nil {
+			return
+		}
+		unitUserId, err = s.doInsertUnitUser(tx, unitUserSaveDto, unitUserModel, unitUserProfileModel)
 	} else {
-		unitUserId, err = s.doEditUser(tx, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
+		// unitUserId, err = s.doEditUser(tx, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
+		unitUserId, err = s.doEditUnitUser(tx, baseParamDto, unitUserSaveDto, userData, unitUserData, unitUserModel, unitUserProfileModel, unitDeptModel, unitUserDeptModel, unitRoleModel, unitUserRoleModel)
 	}
 	if err != nil {
 		return
@@ -241,27 +250,27 @@ func (s *User) doSaveUser(
 // 系统录入-新增用户
 func (s *User) doInsertUser(
 	tx *gorm.DB,
-	baseParamDto dto.BaseParamDto,
-	unitUserSaveDto *user_dto.UnitUserSaveDto,
-	userData user_dto.UserAllDataDto,
-	unitUserData unit_dto.UnitUserAllDataDto,
-	unitUserModel itf.UnitUserItf,
-	unitUserProfileModel itf.UserProfileItf,
-	unitDeptModel itf.DeptItf,
-	unitUserDeptModel itf.UserDeptItf,
-	unitRoleModel itf.RoleItf,
-	unitUserRoleModel itf.UserRoleItf,
+	userSaveDto *user_dto.UnitUserSaveDto,
 ) (unitUserId string, err error) {
 	// user表
-	err = base_ar.SaveUser(tx, unitUserSaveDto.UserDto)
+	err = base_ar.SaveUser(tx, userSaveDto.UserDto)
 	if err != nil {
 		return
 	}
 	// user_profile 表
-	err = base_ar.SaveUserProfile(tx, unitUserSaveDto.UserProfileDto)
+	err = base_ar.SaveUserProfile(tx, userSaveDto.UserProfileDto)
 	if err != nil {
 		return
 	}
+
+	return
+}
+func (s *User) doInsertUnitUser(
+	tx *gorm.DB,
+	unitUserSaveDto *user_dto.UnitUserSaveDto,
+	unitUserModel itf.UnitUserItf,
+	unitUserProfileModel itf.UserProfileItf,
+) (unitUserId string, err error) {
 	// unit user表
 	unitUserId, err = base_ar.UpsertUnitUser(tx, unitUserSaveDto.UnitUserDto.UnitUser, unitUserModel)
 	if err != nil {
@@ -278,6 +287,24 @@ func (s *User) doInsertUser(
 	return
 }
 func (s *User) doEditUser(
+	tx *gorm.DB,
+	baseParamDto dto.BaseParamDto,
+	unitUserSaveDto *user_dto.UnitUserSaveDto,
+	userData user_dto.UserAllDataDto,
+	unitUserData unit_dto.UnitUserAllDataDto,
+	unitUserModel itf.UnitUserItf,
+	unitUserProfileModel itf.UserProfileItf,
+	unitDeptModel itf.DeptItf,
+	unitUserDeptModel itf.UserDeptItf,
+	unitRoleModel itf.RoleItf,
+	unitUserRoleModel itf.UserRoleItf,
+) (unitUserId string, err error) {
+	// user表、user_profile表，
+	// 主体用户由用户自己去负责更新
+
+	return
+}
+func (s *User) doEditUnitUser(
 	tx *gorm.DB,
 	baseParamDto dto.BaseParamDto,
 	unitUserSaveDto *user_dto.UnitUserSaveDto,
@@ -612,4 +639,15 @@ func (s *User) ResetPassword(baseParamDto dto.BaseParamDto, id, password string)
 		return err
 	}
 	return base_ar.ResetPassword(id, passwordHash)
+}
+
+func (s *User) doSaveCustomerForAdminPlat(tx *gorm.DB, baseParamDto dto.BaseParamDto, userDto user_dto.UserDto, userProfileDto user_dto.UserProfileDto) (err error) {
+	// user表
+	err = base_ar.SaveUser(tx, userDto)
+	if err != nil {
+		return
+	}
+	// user_profile 表
+	err = base_ar.SaveUserProfile(tx, userProfileDto)
+	return
 }

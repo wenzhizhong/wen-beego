@@ -27,11 +27,11 @@ func (m *MchntCustomer) GetUnitId() string {
 func (m *MchntCustomer) SetUnitId(unitId string) {
 	m.UnitId = unitId
 }
-func (m *MchntCustomer) GetCustomerId() string {
-	return m.CustomerId
+func (m *MchntCustomer) GetUserId() string {
+	return m.UserId
 }
-func (m *MchntCustomer) SetCustomerId(customerId string) {
-	m.CustomerId = customerId
+func (m *MchntCustomer) SetUserId(customerId string) {
+	m.UserId = customerId
 }
 func (m *MchntCustomer) GetStatus() int {
 	return m.Status

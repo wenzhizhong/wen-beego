@@ -132,14 +132,14 @@ const form = reactive({
 {{range .Columns}}{{if not .SkipForm}}
     {{- if isMultipleCompt .FormType -}}
       {{- if and (eq .FormType "select") (not (hasMultipleProp .FormParam)) -}}
-        {{.Name}}: {{if .DefVal}}{{.DefVal}}{{else}}""{{end}},
+        {{.Name}}: {{.DefVal}},
       {{- else -}}
         {{.Name}}: [],
       {{- end -}}
     {{- else if eq .FormType "switch" -}}
-      {{.Name}}: {{if .DefVal}}{{.DefVal}}{{else}}0{{end}},
+      {{.Name}}: {{.DefVal}},
     {{- else -}}
-      {{.Name}}: {{if .DefVal}}{{.DefVal}}{{else}}""{{end}},
+      {{.Name}}: {{.DefVal}},
     {{- end}}
 {{end}}{{end}}
 });
@@ -208,11 +208,11 @@ async function handleSubmit() {
     }
     if (result && result.code === 200) {
       message(editId.value ? "修改成功" : "新增成功", { type: "success" });
+      emit("refresh");
+      handleClose();
     } else {
       message(result?.message || "操作失败", { type: "error" });
     }
-    emit("refresh");
-    handleClose();
   } catch (error: any) {
     message(error?.message || "操作失败", { type: "error" });
   } finally {
@@ -251,7 +251,10 @@ const doGetLinkById = async (key: string) => {
 {{if .HasUnitId -}}
 function handelSelectUserUnit(e){
   if (e && e[0]){
+    form.unit_id = e[0]
     console.log( e[e.length-1])
+  }else{
+    form.unit_id = ""
   }
 }
 {{end -}}

@@ -9,6 +9,6 @@ package base_model
 {{if $isTimeField}} import "time"{{end}}
 
 type {{.ModelName}} struct {
-{{range .Columns}}	{{.GoFieldName}} {{.GoType}} `gorm:"column:{{.Name}};type:{{.PgType}}{{if .Required}};not null{{end}}{{if .DefVal}};default:{{.DefVal}}{{end}};comment:{{.Comment}}" json:"{{.JsonName}}"`
+{{range .Columns}}	{{.GoFieldName}} {{.GoType}} `gorm:"column:{{.Name}};type:{{.PgType}}{{if .Required}};not null{{end}}{{if .DefValForGoStructTag}};default:{{.DefValForGoStructTag}}{{end}};comment:{{.Comment}}" json:"{{.JsonName}}"`
 {{end}}	
 }

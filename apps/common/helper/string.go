@@ -29,3 +29,11 @@ func SubStr(s string, start, length int) string {
 	// 2. 按字符截取，再转回字符串
 	return string(r[start:end])
 }
+
+func StringIsNumber(str string) bool {
+	if str == "" {
+		return false
+	}
+	reg := regexp.MustCompile(`^\d+$`)
+	return reg.MatchString(str)
+}

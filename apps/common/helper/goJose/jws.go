@@ -2,9 +2,11 @@ package goJose
 
 // go-jose 封装
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/go-jose/go-jose/v4"
@@ -85,8 +87,32 @@ func SerializeForPayload(v interface{}) string {
 			return "true"
 		}
 		return "false"
-	case float64, float32, int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
-		return fmt.Sprint(val) // 数字转为十进制字符串
+	// case float64, float32, int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
+	// 		return fmt.Sprint(val) // 数字转为十进制字符串
+	case float64:
+		return strconv.FormatFloat(val, 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(val), 'f', -1, 32)
+	case int:
+		return strconv.FormatInt(int64(val), 10)
+	case int64:
+		return strconv.FormatInt(val, 10)
+	case int32:
+		return strconv.FormatInt(int64(val), 10)
+	case int16:
+		return strconv.FormatInt(int64(val), 10)
+	case int8:
+		return strconv.FormatInt(int64(val), 10)
+	case uint:
+		return strconv.FormatUint(uint64(val), 10)
+	case uint64:
+		return strconv.FormatUint(val, 10)
+	case uint32:
+		return strconv.FormatUint(uint64(val), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(val), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(val), 10)
 	case []interface{}:
 		elems := make([]string, len(val))
 		for i, e := range val {
@@ -104,6 +130,10 @@ func SerializeForPayload(v interface{}) string {
 			parts = append(parts, k+SerializeForPayload(val[k]))
 		}
 		return strings.Join(parts, "")
+	case json.Number:
+		return val.String()
+	case json.RawMessage:
+		return string(val)
 	default:
 		// 其他类型（如通过反射处理复杂结构），可根据实际扩展
 		panic(fmt.Sprintf("unsupported type: %T", v))

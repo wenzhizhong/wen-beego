@@ -186,7 +186,7 @@ func RsaPemToPublicKey(pemString string) (*rsa.PublicKey, error) {
 //   - 2048 位密钥 ≈ 190 字节
 //   - 4096 位密钥 ≈ 446 字节
 //
-// 超长明文请使用混合加密（RSA + AES）。
+// 超长明文请使用混合加密（RSA + AES）: helper.HybridEncrypt(......)。
 func RsaEncrypt(publicKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
 	if publicKey == nil {
 		return nil, errors.New("public key is nil")

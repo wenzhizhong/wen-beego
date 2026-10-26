@@ -23,7 +23,7 @@ func (s *UserService) GetUnitRoleTree(baseParamDto dto.BaseParamDto, selectUnitI
 
 // SaveUser
 func (s *UserService) SaveUser(baseParamDto dto.BaseParamDto, unitUserSaveDto *user_dto.UnitUserSaveDto) (interface{}, error) {
-	return s.commonSystemUser.SaveUser(baseParamDto, unitUserSaveDto)
+	return s.commonSystemUser.SaveUnitUser(baseParamDto, unitUserSaveDto)
 }
 
 func (s *UserService) DelUnitUser(baseParamDto dto.BaseParamDto, ids []string) error {
