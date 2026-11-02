@@ -103,3 +103,13 @@ func TestGenerateCryptPassword(t *testing.T) {
 	password, err := helper.GenerateCryptPassword("123456")
 	fmt.Println(password, err)
 }
+
+func TestStringIsNumber(t *testing.T) {
+	fmt.Println("", helper.StringIsNumber(""))
+	fmt.Println(" 0", helper.StringIsNumber(" 0"))
+	fmt.Println("0 ", helper.StringIsNumber("0 "))
+	fmt.Println("a", helper.StringIsNumber("a"))
+	fmt.Println("0", helper.StringIsNumber("0"))
+	fmt.Println("01", helper.StringIsNumber("01"))
+	fmt.Println("==============")
+}

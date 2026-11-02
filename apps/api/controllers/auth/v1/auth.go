@@ -12,7 +12,7 @@ import (
 
 type AuthController struct {
 	// beego.Controller
-	commonControllers.AdminBaseController
+	commonControllers.BaseController
 	AuthServiceV1 authServiceV1.Auth
 }
 

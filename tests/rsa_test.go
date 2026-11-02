@@ -105,7 +105,7 @@ func TestRsaKeyToString2(t *testing.T) {
 
 	// 验证恢复的密钥是否匹配
 	// if restoredPrivateKey.N.Cmp(privateKey.N) != 0 { // PKCS1
-	// 	t.Error("Restored private key does not match original")
+	//     t.Error("Restored private key does not match original")
 	// }
 
 	if restoredPublicKey.N.Cmp(publicKey.N) != 0 {
