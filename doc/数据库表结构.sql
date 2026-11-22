@@ -1287,3 +1287,28 @@ COMMENT ON COLUMN public.generate_code.table_name IS '表名';
 COMMENT ON COLUMN public.generate_code.data IS '数据';
 COMMENT ON COLUMN public.generate_code.create_time IS '创建时间';
 COMMENT ON COLUMN public.generate_code.deleted IS '是否删除';
+-- ----------------------------
+-- SQLite DMS 数据源配置表
+-- ----------------------------
+DROP TABLE IF EXISTS public.tools_sqlite_data_source;
+CREATE TABLE public.tools_sqlite_data_source (
+    id bpchar(36) NOT NULL,
+    name varchar(100) NOT NULL,
+    file_path varchar(500) NOT NULL,
+    password varchar(500),
+    description varchar(500),
+    create_time timestamptz(6),
+    update_time timestamptz(6),
+    deleted int2 DEFAULT 0,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.tools_sqlite_data_source IS 'SQLite DMS 数据源配置表';
+COMMENT ON COLUMN public.tools_sqlite_data_source.id IS 'ID';
+COMMENT ON COLUMN public.tools_sqlite_data_source.name IS '数据源名称';
+COMMENT ON COLUMN public.tools_sqlite_data_source.file_path IS '数据文件路径';
+COMMENT ON COLUMN public.tools_sqlite_data_source.password IS '加密后的连接密码';
+COMMENT ON COLUMN public.tools_sqlite_data_source.description IS '描述';
+COMMENT ON COLUMN public.tools_sqlite_data_source.create_time IS '创建时间';
+COMMENT ON COLUMN public.tools_sqlite_data_source.update_time IS '更新时间';
+COMMENT ON COLUMN public.tools_sqlite_data_source.deleted IS '是否删除';

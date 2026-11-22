@@ -116,6 +116,16 @@ func platSystemSlices() []beego.LinkNamespace {
 		beego.NSCtrlGet("/system-tools/generate-code/get-gen-params", (*adminSystemTools.GenerateCodeController).GetGenParams),
 		beego.NSCtrlPost("/system-tools/generate-code/run", (*adminSystemTools.GenerateCodeController).Run),
 		beego.NSCtrlPost("/system-tools/generate-code/download", (*adminSystemTools.GenerateCodeController).Download),
+
+		beego.NSCtrlGet("/system-tools/sqlite-dms/data-source/list", (*adminSystemTools.SqliteDmsController).GetDataSourceList),
+		beego.NSCtrlGet("/system-tools/sqlite-dms/data-source/all", (*adminSystemTools.SqliteDmsController).GetAllDataSources),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/data-source/test", (*adminSystemTools.SqliteDmsController).TestConnection),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/data-source/save", (*adminSystemTools.SqliteDmsController).SaveDataSource),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/data-source/del", (*adminSystemTools.SqliteDmsController).DeleteDataSource),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/table/list", (*adminSystemTools.SqliteDmsController).GetTables),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/table/schema", (*adminSystemTools.SqliteDmsController).GetTableSchema),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/table/data", (*adminSystemTools.SqliteDmsController).GetTableData),
+		beego.NSCtrlPost("/system-tools/sqlite-dms/execute", (*adminSystemTools.SqliteDmsController).ExecuteSql),
 		// system-tools end
 	}
 }
